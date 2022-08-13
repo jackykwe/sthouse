@@ -10,9 +10,18 @@ actix-web = "4.1.0"
 serde = { version = "1.0.140", features = ["derive"] }
 log = "0.4.17"  # logging
 env_logger = "0.9.0"  # logging
-dotenv = "0.15.0"  # for handling environment variables
+dotenvy = "0.15.1"  # for handling environment variables
 envy = "0.4.2"  # for handling environment variables
 chrono = "0.4.19"  # library for working with date & time
-r2d2 = "0.8.10"  # for SQLite support
-r2d2_sqlite = "0.21.0"  # for SQLite support
-rusqlite = "0.28.0"  # for SQLite support
+# r2d2 = "0.8.10"  # for SQLite support
+# r2d2_sqlite = "0.21.0"  # for SQLite support
+# rusqlite = "0.28.0"  # for SQLite support
+eyre = "0.6.8"
+color-eyre = "0.6.2"
+sqlx = { version = "0.6.1", features = ["runtime-actix-rustls", "sqlite", "offline", "chrono"] }
+
+[profile.dev.package.backtrace]
+opt-level = 3
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3
