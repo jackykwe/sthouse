@@ -1,6 +1,7 @@
 mod api;
 mod app_env_config;
 mod db;
+mod middlewares;
 mod types;
 
 use std::str::FromStr;
@@ -39,6 +40,7 @@ async fn main() -> CEResult<()> {
         App::new()
             .app_data(web::Data::new(pool.clone())) // store db pool as Data object
             .wrap(middleware::Logger::default())
+            .wrap(middlewares::cors(&aec.client_origin_url))
             .service(api::routes::routes())
             .default_service(web::to(HttpResponse::NotFound))
     })
