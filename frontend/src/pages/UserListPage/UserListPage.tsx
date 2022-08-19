@@ -1,21 +1,32 @@
-import { useEffect, useState } from "react";
-import { UserReadDTO } from "services/users";
+import _ from "lodash";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useUserServerSlice } from "./store";
 
 export const UserListPage = () => {
-  const [userList, setUserList] = useState<UserReadDTO[]>([]);
-  useEffect(() => {
-    setUserList([
-      { id: 14, display_name: "Alice", email: "alice@example.com" },
-      { id: 15, display_name: "Bob", email: "bob@example.com" },
-    ]);
-  }, []);
-  // useEffect(() => {
-  //   const getUserList = async () => {
-  //     const newUserList = await axiosGetAllUsers();
-  //     setUserList(newUserList);
-  //   };
-  //   getUserList();
-  // }, []);
+  const dispatch = useDispatch();
+  const {
+    actions: { getUserListRequest },
+    selectors: { selectGetUserListData },
+  } = useUserServerSlice();
+  const userList = useSelector(selectGetUserListData);
 
-  return <span>USERS LOL: {JSON.stringify(userList)}</span>;
+  const debouncedGetUserList = _.debounce(() => {
+    dispatch(getUserListRequest());
+  }, 300);
+
+  useEffect(() => {
+    debouncedGetUserList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      {userList?.map(
+        (dto) => `[${dto.id}] ${dto.display_name} (${dto.email}) `
+      ) ?? "No data"}
+    </>
+  );
 };
+
+export default UserListPage;

@@ -1,50 +1,51 @@
 import {
-  CallbackPage,
-  ElectricityReadingCreatePage,
-  ElectricityReadingGraphPage,
-  HomePage,
-  NotFoundPage,
-  UserListPage,
+  ElectricityReadingCreatePageLazy,
+  ElectricityReadingGraphPageLazy,
+  HomePageLazy,
+  UserListPageLazy,
 } from "pages";
+import { CallbackPageLazy } from "pages/CallbackPage/CallbackPageLazy";
+import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
+import { LazyExoticComponent } from "react";
 
 interface RouteEnumItem {
   appBarName?: string;
   path: string;
-  element: () => JSX.Element;
+  element: LazyExoticComponent<() => JSX.Element>;
 }
 
 interface AppBarRouteEnumItem {
   appBarName: string;
   path: string;
-  element: () => JSX.Element;
+  element: LazyExoticComponent<() => JSX.Element>;
 }
 
 export const routeEnum = {
   HomePage: {
     path: "/",
-    element: HomePage,
+    element: HomePageLazy,
   },
   ElectricityGraph: {
     appBarName: "Electricity Readings",
     path: "/electricity-readings",
-    element: ElectricityReadingGraphPage,
+    element: ElectricityReadingGraphPageLazy,
   },
   ElectricityUpload: {
     path: "/electricity-readings/upload",
-    element: ElectricityReadingCreatePage,
+    element: ElectricityReadingCreatePageLazy,
   },
   UserList: {
     appBarName: "Users (Debug)",
     path: "/users",
-    element: UserListPage,
+    element: UserListPageLazy,
   },
   Auth0Callback: {
     path: "/callback",
-    element: CallbackPage,
+    element: CallbackPageLazy,
   },
   Default: {
     path: "*",
-    element: NotFoundPage,
+    element: NotFoundPageLazy,
   },
 };
 

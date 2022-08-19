@@ -1,6 +1,12 @@
-export { CallbackPage } from "./CallbackPage";
+export { CallbackPage } from "./CallbackPage/CallbackPage";
+export { CallbackPageLazy } from "./CallbackPage/CallbackPageLazy";
 export { ElectricityReadingCreatePage } from "./ElectricityReadingCreatePage/ElectricityReadingCreatePage";
-export { ElectricityReadingGraphPage } from "./ElectricityReadingGraphPage/ElectricityReadingsGraphPage";
+export { ElectricityReadingCreatePageLazy } from "./ElectricityReadingCreatePage/ElectricityReadingCreatePageLazy";
+export { ElectricityReadingGraphPage } from "./ElectricityReadingGraphPage/ElectricityReadingGraphPage";
+export { ElectricityReadingGraphPageLazy } from "./ElectricityReadingGraphPage/ElectricityReadingGraphPageLazy";
 export { HomePage } from "./HomePage/HomePage";
-export { NotFoundPage } from "./NotFoundPage";
+export { HomePageLazy } from "./HomePage/HomePageLazy";
+export { NotFoundPage } from "./NotFoundPage/NotFoundPage";
+export { NotFoundPageLazy } from "./NotFoundPage/NotFoundPageLazy";
 export { UserListPage } from "./UserListPage/UserListPage";
+export { UserListPageLazy } from "./UserListPage/UserListPageLazy";
