@@ -8,7 +8,9 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import { createContext, useMemo, useState } from "react";
+import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import { configureAppStore } from "store/configureStore";
 import { appThemeOptions } from "theme/theme";
 import "./App.css";
 import { MyAppBar } from "./components/AppBar";
@@ -22,8 +24,6 @@ import { AppRoutes } from "./routes/AppRoutes";
 //   };
 //   return config;
 // });
-
-// const store = configureAppStore();
 
 export const ColourModeContext = createContext({ toggleColourMode: () => {} });
 
@@ -49,18 +49,31 @@ export const App = () => {
     [mode]
   );
 
-  // {/* <Provider store={store}> */}
-  //   {/* </Provider> */}
+  const store = configureAppStore();
   return (
     <ColourModeContext.Provider value={colourMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline enableColorScheme />
-        <BrowserRouter>
-          <MyAppBar />
-          <Box sx={{ padding: (theme) => theme.spacing(2) }}>
-            <AppRoutes />
-          </Box>
-        </BrowserRouter>
+        <Provider store={store}>
+          <BrowserRouter>
+            <Box
+              sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+            >
+              <MyAppBar />
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflow: "auto",
+                  padding: (theme) => theme.spacing(2),
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <AppRoutes />
+              </Box>
+            </Box>
+          </BrowserRouter>
+        </Provider>
       </ThemeProvider>
     </ColourModeContext.Provider>
   );
