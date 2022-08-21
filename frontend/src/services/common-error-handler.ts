@@ -8,9 +8,12 @@ export const commonAxiosErrorHandler = (error: unknown) => {
   ) {
     return {
       requestErrorCode: error.response!.status,
-      requestErrorDescription: `${error.response!.status} ${
-        error.response!.statusText
-      } ${error.response!.data}`,
+      requestErrorDescription:
+        error.response!.status !== 0
+          ? `${error.response!.status} ${error.response!.statusText} ${
+              error.response!.data
+            }`
+          : "Unable to reach backend",
     } as RequestError;
   }
   return {
