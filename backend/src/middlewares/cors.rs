@@ -1,5 +1,4 @@
 use actix_cors::Cors;
-use actix_web::http::{header, Method};
 
 pub fn cors(client_origin_url: &str) -> Cors {
     Cors::default()

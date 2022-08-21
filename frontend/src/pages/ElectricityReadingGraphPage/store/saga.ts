@@ -1,7 +1,7 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import {
   axiosGetAllElectricityReadings,
-  ElectricityReadingReadDTO,
+  ElectricityReadingReadGraphDTO,
 } from "services/electricity_readings";
 import { isRequestError, RequestError } from "types";
 import { Payload } from "utils/sliceUtil";
@@ -11,9 +11,12 @@ import { GetElectricityReadingListRequestActionArg } from "./types";
 function* getElectricityReadingList({
   payload,
 }: Payload<GetElectricityReadingListRequestActionArg>) {
-  const responseData: ElectricityReadingReadDTO[] | RequestError = yield call(
-    axiosGetAllElectricityReadings
-  );
+  const responseData: ElectricityReadingReadGraphDTO[] | RequestError =
+    yield call(
+      axiosGetAllElectricityReadings,
+      payload.startUnixTsMillisInc,
+      payload.endUnixTsMillisInc
+    );
   if (isRequestError(responseData)) {
     yield put(
       electricityReadingServerActions.getElectricityReadingListFailure(

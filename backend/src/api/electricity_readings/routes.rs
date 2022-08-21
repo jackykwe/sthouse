@@ -1,7 +1,7 @@
 use actix_web::{web, Scope};
 use log::error;
 
-use super::handlers::{handler_create_electricity_reading, handler_get_all_electricity_readings};
+use super::handlers::{handler_create_electricity_reading, handler_get_electricity_readings};
 
 pub fn routes() -> Scope {
     web::scope("/electricity_readings")
@@ -9,6 +9,6 @@ pub fn routes() -> Scope {
             error!("{}", err);
             actix_web::error::ErrorBadRequest("")
         }))
-        .service(handler_get_all_electricity_readings)
+        .service(handler_get_electricity_readings)
         .service(handler_create_electricity_reading)
 }

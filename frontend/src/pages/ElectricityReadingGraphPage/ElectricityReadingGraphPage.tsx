@@ -1,6 +1,9 @@
 import { useTheme } from "@mui/material";
 import { blue, grey, red } from "@mui/material/colors";
-import { fromUnixTime } from "date-fns";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/system/Box";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import _ from "lodash";
 import { useEffect } from "react";
@@ -15,12 +18,49 @@ import {
   YAxis,
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
-import { ElectricityReadingReadDTO } from "services/electricity_readings";
-import { useElectricityReadingServerSlice } from "./store";
+import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
+import {
+  actualToSystemUtil,
+  fromUnixTimeMillisUtil,
+  getUnixTimeMillisUtil,
+  systemToActualUtil,
+} from "utils/dateUtils";
+import {
+  useElectricityReadingClientSlice,
+  useElectricityReadingServerSlice,
+} from "./store";
 
 export const ElectricityReadingGraphPage = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
+
+  const {
+    actions: {
+      setGraphStartUnixTsMillisActInc,
+      setGraphEndUnixTsMillisActInc,
+      resetGraphStartEndUnixTsMillisActInc,
+    },
+    selectors: {
+      selectGraphStartUnixTsMillisActInc,
+      selectGraphEndUnixTsMillisActInc,
+    },
+  } = useElectricityReadingClientSlice();
+  const graphStartUnixTsMillisInc = useSelector(
+    selectGraphStartUnixTsMillisActInc
+  );
+  const graphEndUnixTsMillisInc = useSelector(selectGraphEndUnixTsMillisActInc);
+  const graphStartDateSysInc =
+    graphStartUnixTsMillisInc === null
+      ? null
+      : actualToSystemUtil(
+          fromUnixTimeMillisUtil(graphStartUnixTsMillisInc),
+          "Europe/London"
+        ); // already -7h TS
+  const graphEndDateSysInc = actualToSystemUtil(
+    fromUnixTimeMillisUtil(graphEndUnixTsMillisInc),
+    "Europe/London"
+  ); // already -7h TS
+
   const {
     actions: { resetElectricityReadingList, getElectricityReadingListRequest },
     selectors: {
@@ -40,7 +80,12 @@ export const ElectricityReadingGraphPage = () => {
   );
 
   const debouncedGetElectricityReadingList = _.debounce(() => {
-    dispatch(getElectricityReadingListRequest());
+    dispatch(
+      getElectricityReadingListRequest({
+        startUnixTsMillisInc: graphStartUnixTsMillisInc ?? undefined,
+        endUnixTsMillisInc: graphEndUnixTsMillisInc ?? undefined,
+      })
+    );
   }, 300);
 
   useEffect(() => {
@@ -49,11 +94,12 @@ export const ElectricityReadingGraphPage = () => {
       dispatch(resetElectricityReadingList()); // to fix graph animation issue
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [graphStartUnixTsMillisInc, graphEndUnixTsMillisInc]);
 
   // y-axis domain calculations
   let lowDomain: AxisDomain = ["auto", "auto"];
   let normalDomain: AxisDomain = ["auto", "auto"];
+  let dateDomain: AxisDomain = ["auto", "auto"];
   if (electricityReadingList !== null && electricityReadingList.length >= 2) {
     const minLow = electricityReadingList
       .map((dto) => dto.low_kwh)
@@ -82,12 +128,21 @@ export const ElectricityReadingGraphPage = () => {
     const maxDiff = Math.max(maxLow - minLow, maxNormal - minNormal);
     lowDomain = [minLow, minLow + maxDiff];
     normalDomain = [minNormal, minNormal + maxDiff];
+
+    const minDate = fromUnixTimeMillisUtil(
+      electricityReadingList[0].unix_ts_millis
+    );
+    const maxDate = fromUnixTimeMillisUtil(
+      electricityReadingList[electricityReadingList.length - 1].unix_ts_millis
+    );
+    minDate.setHours(0, 0, 0, 0);
+    maxDate.setHours(0, 0, 0, 0);
   }
 
   // Best fit calculations
   let electricityReadingListAugmented:
     | (
-        | ElectricityReadingReadDTO
+        | ElectricityReadingReadGraphDTO
         | { low_kwh_best_fit: number; normal_kwh_best_fit: number }
       )[]
     | null = null;
@@ -114,7 +169,7 @@ export const ElectricityReadingGraphPage = () => {
     const normalRate = `${normalSign}${(normalDiff / daysDiff).toFixed(2)}`;
     electricityReadingListAugmented = (
       electricityReadingList as (
-        | ElectricityReadingReadDTO
+        | ElectricityReadingReadGraphDTO
         | {
             unix_ts_millis: number;
             low_kwh_best_fit: number;
@@ -146,6 +201,64 @@ export const ElectricityReadingGraphPage = () => {
   return (
     <>
       Yarr [best fits on/off] (best fit only applicable for current time window)
+      <Box sx={{ display: "flex" }}>
+        <DatePicker
+          label="From (inclusive)"
+          views={["year", "month"]}
+          minDate={new Date(2021, 8, 1)}
+          maxDate={new Date(2024, 7, 31)}
+          onChange={(newDateSys) =>
+            dispatch(
+              setGraphStartUnixTsMillisActInc(
+                getUnixTimeMillisUtil(
+                  systemToActualUtil(startOfMonth(newDateSys!), "Europe/London")
+                )
+              )
+            )
+          }
+          value={graphStartDateSysInc}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              helperText={
+                graphStartUnixTsMillisInc === null
+                  ? null
+                  : formatInTimeZone(
+                      graphStartUnixTsMillisInc,
+                      "Europe/London",
+                      "HH':'mm':'ss eee d MMM yyyy (O)"
+                    )
+              }
+            />
+          )}
+        />
+        <DatePicker
+          label="To (inclusive)"
+          views={["year", "month"]}
+          minDate={new Date(2021, 8, 1)}
+          maxDate={new Date(2024, 7, 31)}
+          onChange={(newDateSys) =>
+            dispatch(
+              setGraphEndUnixTsMillisActInc(
+                getUnixTimeMillisUtil(
+                  systemToActualUtil(endOfMonth(newDateSys!), "Europe/London")
+                )
+              )
+            )
+          }
+          value={graphEndDateSysInc}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              helperText={formatInTimeZone(
+                graphEndUnixTsMillisInc,
+                "Europe/London",
+                "HH':'mm':'ss eee d MMM yyyy (O)"
+              )}
+            />
+          )}
+        />
+      </Box>
       {electricityReadingListAugmented ? (
         <ResponsiveContainer>
           <LineChart
@@ -156,7 +269,7 @@ export const ElectricityReadingGraphPage = () => {
               dataKey="low_kwh"
               yAxisId="left"
               orientation="left"
-              tickCount={10} // excluding the 2 (preserveStartEnd)
+              tickCount={10} // doesn't really behave...
               domain={lowDomain}
               interval="preserveStartEnd"
               padding={{ top: 10, bottom: 10 }}
@@ -180,7 +293,7 @@ export const ElectricityReadingGraphPage = () => {
               dataKey="normal_kwh"
               yAxisId="right"
               orientation="right"
-              tickCount={10} // excluding the 2 (preserveStartEnd)
+              tickCount={10} // doesn't really behave...
               domain={normalDomain}
               interval="preserveStartEnd"
               padding={{ top: 10, bottom: 10 }}
@@ -206,14 +319,13 @@ export const ElectricityReadingGraphPage = () => {
               allowDecimals={false}
               // angle={45}
               tickCount={10}
-              domain={["auto", "auto"]}
+              domain={dateDomain}
               interval="preserveStartEnd"
               stroke={xAxisColour}
               tickLine={{ stroke: xAxisColour }}
               tickFormatter={(unix_ts_millis) =>
                 formatInTimeZone(
-                  // fromUnixTime expects unix_ts_seconds
-                  fromUnixTime(Math.round(unix_ts_millis / 1000)),
+                  fromUnixTimeMillisUtil(unix_ts_millis),
                   // timestamp saved into DB is unambiguous; this forces frontend to render
                   // that timestamp as a Date in GMT/BST
                   "Europe/London",
@@ -244,8 +356,7 @@ export const ElectricityReadingGraphPage = () => {
               cursor={{ stroke: xyGridColour, strokeWidth: 2 }}
               labelFormatter={(unix_ts_millis) =>
                 formatInTimeZone(
-                  // fromUnixTime expects unix_ts_seconds
-                  fromUnixTime(Math.round(unix_ts_millis / 1000)),
+                  fromUnixTimeMillisUtil(unix_ts_millis),
                   // timestamp saved into DB is unambiguous; this forces frontend to render
                   // that timestamp as a Date in GMT/BST
                   "Europe/London",

@@ -1,18 +1,29 @@
 import {
   ElectricityReadingCreateDTO,
-  ElectricityReadingReadDTO,
+  ElectricityReadingReadGraphDTO,
 } from "services/electricity_readings";
 import { AsyncState, OperationType } from "types";
 
+export interface ElectricityReadingClientState {
+  graphStartUnixTsMillisActInc: number | null;
+  graphEndUnixTsMillisActInc: number;
+}
+
 export interface ElectricityReadingServerState {
   [OperationType.Queries]: {
-    getElectricityReadingList: AsyncState<ElectricityReadingReadDTO[]>;
+    getElectricityReadingList: AsyncState<ElectricityReadingReadGraphDTO[]>;
   };
   [OperationType.Mutations]: {
-    createElectricityReading: AsyncState<ElectricityReadingReadDTO[]>;
+    createElectricityReading: AsyncState<ElectricityReadingReadGraphDTO[]>;
   };
 }
 
-export type GetElectricityReadingListRequestActionArg = undefined; // TODO: Pagination
+export type SetGraphStartActionArg = Date;
+export type SetGraphEndActionArg = Date;
+
+export type GetElectricityReadingListRequestActionArg = {
+  startUnixTsMillisInc?: number;
+  endUnixTsMillisInc?: number;
+};
 export type CreateElectricityReadingRequestActionArg =
   ElectricityReadingCreateDTO;

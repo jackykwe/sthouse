@@ -1,4 +1,4 @@
-import { ElectricityReadingReadDTO } from "services/electricity_readings";
+import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
 import { AsyncState, OperationType } from "types";
 import {
   asyncInitialState,
@@ -19,12 +19,12 @@ export const CREATE_ELECTRICITY_READING = "createElectricityReading";
 export const initialState: ElectricityReadingServerState = {
   [OperationType.Queries]: {
     [GET_ELECTRICITY_READING_LIST]: asyncInitialState as AsyncState<
-      ElectricityReadingReadDTO[]
+      ElectricityReadingReadGraphDTO[]
     >,
   },
   [OperationType.Mutations]: {
     [CREATE_ELECTRICITY_READING]: asyncInitialState as AsyncState<
-      ElectricityReadingReadDTO[]
+      ElectricityReadingReadGraphDTO[]
     >,
   },
 };
@@ -55,7 +55,7 @@ const serverSlice = createSliceUtil({
   reducers: {
     resetElectricityReadingList: (state) => {
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST] =
-        asyncInitialState as AsyncState<ElectricityReadingReadDTO[]>;
+        asyncInitialState as AsyncState<ElectricityReadingReadGraphDTO[]>;
     },
   },
   extraReducers: (builder) => {

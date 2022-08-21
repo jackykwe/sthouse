@@ -18,6 +18,8 @@ async fn run_pending_migrations(pool: &Pool<Sqlite>) -> CEResult<()> {
 }
 
 #[allow(dead_code)]
+#[allow(clippy::unreadable_literal)]
+#[allow(clippy::too_many_lines)]
 async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
     debug!("add_dummy_data() called");
     create_electricity_reading_raw(pool, 43518.2, 68008.3, 1641000383420, "Bob", "bob@bob.com")

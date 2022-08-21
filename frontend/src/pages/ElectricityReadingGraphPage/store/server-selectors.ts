@@ -1,4 +1,4 @@
-import { ElectricityReadingReadDTO } from "services/electricity_readings";
+import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
 import { OperationType } from "types";
 import { createAsyncSelectorUtil } from "utils/sliceUtil";
 import {
@@ -11,7 +11,7 @@ export const {
   selectLoading: selectGetElectricityReadingListLoading,
   selectError: selectGetElectricityReadingListError,
   selectData: selectGetElectricityReadingListData,
-} = createAsyncSelectorUtil<ElectricityReadingReadDTO[]>()(
+} = createAsyncSelectorUtil<ElectricityReadingReadGraphDTO[]>()(
   SLICE_NAME,
   OperationType.Queries,
   GET_ELECTRICITY_READING_LIST,

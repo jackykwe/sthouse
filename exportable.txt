@@ -1,0 +1,30 @@
+
+App structure:
+
+src
+> layout (global .tsxs)
+> services
+  > service
+    - index.ts
+      import axios from 'axios';
+      const origin = localhost:X
+      export const BACKEND_API_URL = `${origin}/api/`;
+
+      const instance = axios.create();
+      addInterceptor(..., instance, ...);  // method that calls instance.interceptors.request.use(...). Use this for OAuth?
+      export default instance;
+    > api-name
+      - axios.ts
+        import axios, { BACKEND_API_URL } from "..";
+        const BASE_URLS = `${BACKEND_API_URL}/api-name`;
+        const BASE_URL = (id) => `${BASE_URLS}/${id}`;
+
+        export const axiosGetSomething = async (argsSelfDefinedCanBeMoreThanOne: SomeT) => {  // errors are immediately thrown
+          const request = (function of BASE_URLS and BASE_URL)
+          const response = await axios.get<DTO>(request);
+          const response = await axios.post<DTO>(request, argsSelfDefinedCanBeMoreThanOne);
+          return response.data;
+        }
+> styles
+  - GlobalStyles.tsx
+    export const GlobalStyles = () => <CssBaseline />;  // from MUI, I guess acts as a bootstrap
