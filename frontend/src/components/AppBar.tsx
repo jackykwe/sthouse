@@ -35,10 +35,12 @@ export const MyAppBar = () => {
     navigate(path);
   };
 
+  const handleNavigateToHome = () => navigate(routeEnum["HomePage"].path);
+
   const brandText = (
     <Button
       disableRipple
-      onClick={() => navigate(routeEnum["HomePage"].path)}
+      onClick={handleNavigateToHome}
       sx={{
         textTransform: "none",
         "&:hover": { backgroundColor: "transparent" },
@@ -59,8 +61,16 @@ export const MyAppBar = () => {
             alignItems: "center",
           }}
         >
-          <ElectricalServicesIcon sx={{ marginLeft: 2, marginRight: -0.5 }} />
-          <OutletIcon sx={{ marginRight: 1 }} />
+          <IconButton
+            disableRipple
+            size="large"
+            onClick={handleNavigateToHome}
+            color="inherit"
+            sx={{ padding: 0 }}
+          >
+            <ElectricalServicesIcon sx={{ marginLeft: 2, marginRight: -0.5 }} />
+            <OutletIcon sx={{ marginRight: 1 }} />
+          </IconButton>
           {brandText}
           <Box
             sx={{
