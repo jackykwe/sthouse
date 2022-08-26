@@ -53,9 +53,8 @@ const serverSlice = createSliceUtil({
   name: SLICE_NAME,
   initialState,
   reducers: {
-    resetElectricityReadingList: (state) => {
-      state[OperationType.Queries][GET_ELECTRICITY_READING_LIST] =
-        asyncInitialState as AsyncState<ElectricityReadingReadGraphDTO[]>;
+    resetElectricityReadingListData: (state) => {
+      state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].data = null;
     },
   },
   extraReducers: (builder) => {
@@ -63,7 +62,7 @@ const serverSlice = createSliceUtil({
       builder,
       OperationType.Queries,
       GET_ELECTRICITY_READING_LIST,
-      getElectricityReadingListRequest,
+      undefined,
       getElectricityReadingListSuccess,
       getElectricityReadingListFailure
     );
@@ -75,6 +74,11 @@ const serverSlice = createSliceUtil({
       undefined,
       createElectricityReadingFailure
     );
+    builder.addCase(getElectricityReadingListRequest, (state, action) => {
+      state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].isLoading =
+        true;
+      state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].error = null;
+    });
     builder.addCase(createElectricityReadingSuccess, (state, action) => {
       state[OperationType.Mutations][CREATE_ELECTRICITY_READING].isLoading =
         false;

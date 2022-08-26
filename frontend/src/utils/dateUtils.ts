@@ -1,5 +1,22 @@
-import { endOfMonth, fromUnixTime, getUnixTime } from "date-fns";
-import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import {
+  endOfDay,
+  endOfMonth,
+  fromUnixTime,
+  getUnixTime,
+  Interval,
+  isValid,
+  isWithinInterval,
+  startOfDay,
+  startOfMonth,
+} from "date-fns";
+import { formatInTimeZone, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+
+export const DATE_PICKER_MIN_DATE = startOfDay(new Date(2021, 8, 1));
+export const DATE_PICKER_MAX_DATE = endOfDay(new Date(2024, 7, 31));
+export const DATE_PICKER_ALLOWED_INTERVAL: Interval = {
+  start: DATE_PICKER_MIN_DATE,
+  end: DATE_PICKER_MAX_DATE,
+};
 
 export const fromUnixTimeMillisUtil = (unixTsMillis: number) =>
   fromUnixTime(Math.floor(unixTsMillis / 1000));
@@ -14,7 +31,7 @@ export const getUnixTimeMillisUtil = (date: Date) =>
  *      +7h.
  * USAGE IS ONLY REQUIRED AT THE SURFACE BOUNDARY BETWEEN ACTUAL TIMESTAMP AND WACK DATE
  */
-export const systemToActualUtil = zonedTimeToUtc;
+export const systemReprToTsActualUtil = zonedTimeToUtc;
 /**
  * Tl;dr in Razor language: Correct (actual) to wack (system). Mutates the underlying timestamp.
  * See end of this file for extended explanation.
@@ -22,32 +39,63 @@ export const systemToActualUtil = zonedTimeToUtc;
  *      -7h.
  * USAGE IS ONLY REQUIRED AT THE SURFACE BOUNDARY BETWEEN ACTUAL TIMESTAMP AND WACK DATE
  */
-export const actualToSystemUtil = utcToZonedTime;
+export const tsActualToSystemReprUtil = utcToZonedTime;
+
+/**
+ * Returns the correct timestamp.
+ */
+export const startOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
+  getUnixTimeMillisUtil(
+    systemReprToTsActualUtil(
+      // startOfMonth returns first millisecond
+      startOfMonth(tsActualToSystemReprUtil(new Date(), timeZone)),
+      timeZone
+    )
+  );
 
 /**
  * Returns the correct timestamp.
  */
 export const endOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
   getUnixTimeMillisUtil(
-    systemToActualUtil(
+    systemReprToTsActualUtil(
       // endOfMonth returns last millisecond
-      endOfMonth(
-        // actualToSystemUtil() used in a special way here ... // TODO understand and document
-        actualToSystemUtil(new Date(), timeZone)
+      endOfMonth(tsActualToSystemReprUtil(new Date(), timeZone)),
+      timeZone
+    )
+  );
+
+export const getStartOfMonthTsFromTs = (ts: number, timeZone: string) =>
+  getUnixTimeMillisUtil(
+    systemReprToTsActualUtil(
+      // startOfMonth returns first millisecond
+      startOfMonth(
+        tsActualToSystemReprUtil(fromUnixTimeMillisUtil(ts), timeZone)
       ),
       timeZone
     )
   );
 
 /**
- * Returns a date with the correct timestamp.
- * Razor language: -7h TS if done in SG, endOfMonth(), then +7h TS if done in SG
+ * @param date Assumed to be valid.
  */
-export const endOfMonthInTzUtil = (sysDate: Date, timeZone: string) =>
-  systemToActualUtil(
-    endOfMonth(actualToSystemUtil(sysDate, timeZone)), // endOfMonth returns last millisecond
-    timeZone
-  );
+export const isWithinAllowedIntervalUtil = (date: Date) =>
+  isWithinInterval(date, {
+    start: DATE_PICKER_MIN_DATE,
+    end: DATE_PICKER_MAX_DATE,
+  });
+
+export const generateDatePickerHelperTextUtil = (date: Date | null) =>
+  date === null
+    ? " "
+    : !isValid(date)
+    ? 'Date is not of form "month yyyy"'
+    : !isWithinAllowedIntervalUtil(date)
+    ? "Date is outside of allowed range"
+    : " ";
+
+export const getCurrentTimeZoneString = (timeZone: string) =>
+  formatInTimeZone(getUnixTimeMillisUtil(new Date()), timeZone, "O");
 
 /*
 const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

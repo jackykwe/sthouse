@@ -7,6 +7,8 @@ import { AsyncState, OperationType } from "types";
 export interface ElectricityReadingClientState {
   graphStartUnixTsMillisActInc: number | null;
   graphEndUnixTsMillisActInc: number;
+  graphAbsorbCount: number;
+  graphShowBestFit: boolean;
 }
 
 export interface ElectricityReadingServerState {

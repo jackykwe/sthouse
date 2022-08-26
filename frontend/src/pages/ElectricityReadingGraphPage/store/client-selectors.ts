@@ -16,3 +16,13 @@ export const selectGraphEndUnixTsMillisActInc = createSelector(
   (electricityReadingClient) =>
     electricityReadingClient.graphEndUnixTsMillisActInc
 );
+
+export const selectGraphAbsorbCount = createSelector(
+  [selectElectricityReadingClient],
+  (electricityReadingClient) => electricityReadingClient.graphAbsorbCount
+);
+
+export const selectGraphShowBestFit = createSelector(
+  [selectElectricityReadingClient],
+  (electricityReadingClient) => electricityReadingClient.graphShowBestFit
+);
