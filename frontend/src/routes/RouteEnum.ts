@@ -5,8 +5,10 @@ import {
   UserListPageLazy,
 } from "pages";
 import { CallbackPageLazy } from "pages/CallbackPage/CallbackPageLazy";
+import { ElectricityReadingDetailPageLazy } from "pages/ElectricityReadingDetailPage/ElectricityReadingDetailPageLazy";
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
 import { LazyExoticComponent } from "react";
+import { generatePath } from "react-router-dom";
 
 interface RouteEnumItem {
   appBarName?: string;
@@ -29,6 +31,10 @@ export const routeEnum = {
     appBarName: "Electricity Readings",
     path: "/electricity-readings",
     element: ElectricityReadingGraphPageLazy,
+  },
+  ElectricityDetail: {
+    path: "/electricity-readings/:id",
+    element: ElectricityReadingDetailPageLazy,
   },
   ElectricityUpload: {
     path: "/electricity-readings/upload",
@@ -58,3 +64,6 @@ export const appBarRouteEnum: Record<
     acc[name as keyof typeof routeEnum] = item as AppBarRouteEnumItem;
     return acc;
   }, {} as Record<keyof typeof routeEnum, AppBarRouteEnumItem>);
+
+export const generateElectricityDetailPath = (id: number) =>
+  generatePath(routeEnum.ElectricityDetail.path, { id: id.toString() });

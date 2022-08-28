@@ -1,4 +1,5 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import blue from "@mui/material/colors/blue";
 import grey from "@mui/material/colors/grey";
@@ -6,6 +7,10 @@ import red from "@mui/material/colors/red";
 import Typography from "@mui/material/Typography";
 import { Theme } from "@mui/system";
 import { formatInTimeZone } from "date-fns-tz";
+import { PageError } from "pages/PageError/PageError";
+import { PageLoading } from "pages/PageLoading/PageLoading";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   Legend,
   Line,
@@ -16,16 +21,20 @@ import {
   YAxis,
 } from "recharts";
 import { AxisDomain } from "recharts/types/util/types";
+import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
 import {
   DEFAULT_TARGET_TIME_ZONE,
   fromUnixTimeMillisUtil,
 } from "utils/dateUtils";
+import {
+  useElectricityReadingClientSlice,
+  useElectricityReadingServerSlice,
+} from "./store";
 
 interface GraphAxisDomains {
   lowDomain: AxisDomain;
   normalDomain: AxisDomain;
-  dateDomain: AxisDomain;
 }
 
 /**
@@ -38,7 +47,6 @@ const calculateGraphAxisDomains = (
     return {
       lowDomain: ["auto", "auto"],
       normalDomain: ["auto", "auto"],
-      dateDomain: ["auto", "auto"],
     } as GraphAxisDomains;
   }
 
@@ -55,12 +63,12 @@ const calculateGraphAxisDomains = (
   const maxNormal = electricityReadingListData
     .map((dto) => dto.normal_kwh)
     .reduce((prevMax, val) => Math.max(prevMax, val), Number.MIN_SAFE_INTEGER);
+
   const maxDiff = Math.max(maxLow - minLow, maxNormal - minNormal);
 
   return {
     lowDomain: [minLow, minLow + maxDiff],
     normalDomain: [minNormal, minNormal + maxDiff],
-    dateDomain: ["auto", "auto"],
   } as GraphAxisDomains;
 };
 
@@ -152,15 +160,62 @@ const calculateGraphColours = (theme: Theme) => {
 };
 
 interface ElectricityReadingGraphProps {
-  electricityReadingListData: ElectricityReadingReadGraphDTO[];
-  graphShowBestFit: boolean;
-  theme: Theme;
+  // electricityReadingListData: ElectricityReadingReadGraphDTO[];
+  // graphShowBestFit: boolean;
+  // theme: Theme;
 }
 
 export const ElectricityReadingGraph = (
   props: ElectricityReadingGraphProps
 ) => {
-  const { electricityReadingListData, graphShowBestFit, theme } = props;
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  // Client redux state selectors
+  const {
+    selectors: {
+      selectGraphShowBestFit,
+      selectGraphStartUnixTsMillisActInc,
+      selectGraphEndUnixTsMillisActInc,
+    },
+  } = useElectricityReadingClientSlice();
+  const graphShowBestFit = useSelector(selectGraphShowBestFit);
+  const graphStartUnixTsMillisActInc = useSelector(
+    selectGraphStartUnixTsMillisActInc
+  );
+  const graphEndUnixTsMillisActInc = useSelector(
+    selectGraphEndUnixTsMillisActInc
+  );
+
+  // Server redux state selectors
+  const {
+    selectors: {
+      selectGetElectricityReadingListLoading,
+      selectGetElectricityReadingListData,
+      selectGetElectricityReadingListError,
+    },
+  } = useElectricityReadingServerSlice();
+  const electricityReadingListLoading = useSelector(
+    selectGetElectricityReadingListLoading
+  );
+  const electricityReadingListData = useSelector(
+    selectGetElectricityReadingListData
+  );
+  const electricityReadingListError = useSelector(
+    selectGetElectricityReadingListError
+  );
+
+  if (electricityReadingListLoading || electricityReadingListData === null) {
+    return <PageLoading />;
+  }
+  if (electricityReadingListError !== null) {
+    return (
+      <PageError
+        errorMessage={electricityReadingListError.requestErrorDescription}
+      />
+    );
+  }
+
   if (electricityReadingListData.length === 0) {
     return (
       <Box
@@ -182,7 +237,7 @@ export const ElectricityReadingGraph = (
     );
   }
 
-  const { lowDomain, normalDomain, dateDomain } = calculateGraphAxisDomains(
+  const { lowDomain, normalDomain } = calculateGraphAxisDomains(
     electricityReadingListData
   );
   const { data, lowBestFitLabel, normalBestFitLabel } =
@@ -250,7 +305,7 @@ export const ElectricityReadingGraph = (
           allowDecimals={false}
           // angle={45}
           tickCount={10}
-          domain={dateDomain}
+          domain={[graphStartUnixTsMillisActInc!, graphEndUnixTsMillisActInc]}
           interval="preserveStartEnd"
           stroke={xAxisColour}
           tickLine={{ stroke: xAxisColour }}
@@ -299,7 +354,7 @@ export const ElectricityReadingGraph = (
               ? [`${value.toFixed(1)} kWh (Linear interpolation)`, "Low"]
               : name === "normal_kwh_best_fit"
               ? [`${value.toFixed(1)} kWh (Linear interpolation)`, "Normal"]
-              : "ERROR PLEASE REPORT THIS BUG (bug ID: 3)"
+              : "ERROR PLEASE REPORT THIS BUG"
           }
         />
         <Line
@@ -331,7 +386,13 @@ export const ElectricityReadingGraph = (
             stroke: normalRed,
             strokeWidth: 4,
             r: 12,
-            onClick: () => console.log("helppppp"),
+            onClick: (data, index) =>
+              navigate(
+                generateElectricityDetailPath(
+                  // recharts messed up their interface
+                  (index as any).payload.id
+                )
+              ),
             cursor: "pointer",
           }}
           stroke={normalRed}

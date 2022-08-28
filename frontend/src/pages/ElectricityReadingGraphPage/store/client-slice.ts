@@ -41,12 +41,6 @@ const clientSlice = createSliceUtil({
     ) => {
       state.graphShowBestFit = action.payload;
     },
-    resetGraphStartEndUnixTsMillisActInc: (state) => {
-      state.graphStartUnixTsMillisActInc =
-        initialState.graphStartUnixTsMillisActInc;
-      state.graphEndUnixTsMillisActInc =
-        initialState.graphEndUnixTsMillisActInc;
-    },
   },
 });
 
