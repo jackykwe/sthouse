@@ -11,6 +11,9 @@ import {
 } from "date-fns";
 import { formatInTimeZone, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 
+export const DEFAULT_TARGET_TIME_ZONE = "Europe/London";
+export const DATE_FMTSTR_HMSDMY_TZ = "HH:mm:ss.SSS d LLL yyyy (O)";
+
 export const DATE_PICKER_MIN_DATE = startOfDay(new Date(2021, 8, 1));
 export const DATE_PICKER_MAX_DATE = endOfDay(new Date(2024, 7, 31));
 export const DATE_PICKER_ALLOWED_INTERVAL: Interval = {
@@ -18,8 +21,13 @@ export const DATE_PICKER_ALLOWED_INTERVAL: Interval = {
   end: DATE_PICKER_MAX_DATE,
 };
 
-export const fromUnixTimeMillisUtil = (unixTsMillis: number) =>
-  fromUnixTime(Math.floor(unixTsMillis / 1000));
+export const fromUnixTimeMillisUtil = (unixTsMillis: number) => {
+  const seconds = Math.floor(unixTsMillis / 1000);
+  const milliseconds = unixTsMillis % 1000;
+  const result = fromUnixTime(seconds);
+  result.setMilliseconds(milliseconds);
+  return result;
+};
 
 export const getUnixTimeMillisUtil = (date: Date) =>
   getUnixTime(date) * 1000 + date.getMilliseconds();
@@ -65,7 +73,7 @@ export const endOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
     )
   );
 
-export const getStartOfMonthTsFromTs = (ts: number, timeZone: string) =>
+export const getStartOfMonthTsFromTsUtil = (ts: number, timeZone: string) =>
   getUnixTimeMillisUtil(
     systemReprToTsActualUtil(
       // startOfMonth returns first millisecond
@@ -93,6 +101,30 @@ export const generateDatePickerHelperTextUtil = (date: Date | null) =>
     : !isWithinAllowedIntervalUtil(date)
     ? "Date is outside of allowed range"
     : " ";
+
+export const generateDatePickerHelperTextUtilDebug = (
+  date: Date | null,
+  unixTsMillisActInc: number | null,
+  timeZone: string
+) => {
+  const pickerString =
+    date === null
+      ? "null"
+      : !isValid(date)
+      ? 'Date is not of form "month yyyy"'
+      : !isWithinAllowedIntervalUtil(date)
+      ? "Date is outside of allowed range"
+      : formatInTimeZone(date, timeZone, DATE_FMTSTR_HMSDMY_TZ);
+  const reduxString =
+    unixTsMillisActInc === null
+      ? "null"
+      : formatInTimeZone(
+          fromUnixTimeMillisUtil(unixTsMillisActInc),
+          DEFAULT_TARGET_TIME_ZONE,
+          DATE_FMTSTR_HMSDMY_TZ
+        );
+  return `Picker: ${pickerString}; Redux: ${reduxString}`;
+};
 
 export const getCurrentTimeZoneString = (timeZone: string) =>
   formatInTimeZone(getUnixTimeMillisUtil(new Date()), timeZone, "O");

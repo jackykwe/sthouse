@@ -1,4 +1,7 @@
-import { endOfMonthMillisAsOfNowInTzUtil } from "utils/dateUtils";
+import {
+  DEFAULT_TARGET_TIME_ZONE,
+  endOfMonthMillisAsOfNowInTzUtil,
+} from "utils/dateUtils";
 import { createSliceUtil } from "utils/toolkit";
 import { ElectricityReadingClientState } from "./types";
 
@@ -6,7 +9,9 @@ export const SLICE_NAME = "electricityReadingClient";
 
 export const initialState: ElectricityReadingClientState = {
   graphStartUnixTsMillisActInc: null, // Act for actual (compared to Sys for system)
-  graphEndUnixTsMillisActInc: endOfMonthMillisAsOfNowInTzUtil("Europe/London"),
+  graphEndUnixTsMillisActInc: endOfMonthMillisAsOfNowInTzUtil(
+    DEFAULT_TARGET_TIME_ZONE
+  ),
   graphAbsorbCount: 2,
   graphShowBestFit: true,
 };
