@@ -1,5 +1,5 @@
 import { commonAxiosErrorHandler } from "services/common-error-handler";
-import appAxios, { BACKEND_API_URL } from "..";
+import { appAxios, BACKEND_API_URL } from "..";
 import { UserReadDTO } from "./types";
 
 const BASE_URLS = `${BACKEND_API_URL}/api/users`;
