@@ -1,7 +1,36 @@
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { axiosCreateElectricityReading } from "services/electricity_readings";
+
+/**
+ * Code courtesy of
+ * https://www.youtube.com/watch?v=2okUvC2qBWk
+ * https://www.youtube.com/watch?v=tF6L6IIo-yg
+ */
+const compressToURL = (image: File) => {
+  const abstractImg = document.createElement("img");
+  const abstractCanvas = document.createElement("canvas");
+  const ctx = abstractCanvas.getContext("2d");
+
+  if (ctx === null) {
+    alert("FUCK");
+    return "";
+  }
+
+  let result = "";
+  abstractImg.src = URL.createObjectURL(image);
+  abstractImg.onload = () => {
+    abstractCanvas.width = abstractImg.width;
+    abstractCanvas.height = abstractImg.height;
+    ctx.drawImage(abstractImg, 0, 0);
+
+    result = ctx.canvas.toDataURL("image/png", 1);
+  };
+  console.log("result is ", result);
+  return result;
+};
 
 /**
  * Image preview courtesy of
@@ -12,15 +41,15 @@ import { useEffect, useState } from "react";
  */
 export const ElectricityReadingCreatePage = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  useEffect(() => {
-    if (imageFile !== null) console.log(URL.createObjectURL(imageFile));
-  }, [imageFile]);
+  // useEffect(() => {
+  //   if (imageFile !== null) console.log(URL.createObjectURL(imageFile));
+  // }, [imageFile]);
 
   return (
     <>
       {imageFile !== null ? (
         <img
-          src={URL.createObjectURL(imageFile)}
+          src={compressToURL(imageFile)}
           alt="Preview of electricty reading"
           style={{
             minHeight: 0,
@@ -43,6 +72,21 @@ export const ElectricityReadingCreatePage = () => {
         </Button>
         <span>2</span>
         <span>3</span>
+        <Button
+          onClick={() => {
+            axiosCreateElectricityReading(
+              {
+                low_kwh: 88,
+                normal_kwh: 999.99,
+                creator_name: "Hello",
+                creator_email: "hi@example.com",
+              },
+              imageFile!
+            );
+          }}
+        >
+          SUBMIT
+        </Button>
       </Box>
     </>
   );

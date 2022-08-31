@@ -37,12 +37,10 @@ export const axiosCreateElectricityReading = async (
 ) => {
   try {
     const formData = new FormData();
-    console.log(formData);
     formData.append("electricityReadingCreateDTO", JSON.stringify(createDTO));
     formData.append("image", imageFile);
-    console.log(formData.values());
     const request = "https://httpbin.org/post";
-    const response = await appAxios.post(request, { data: formData });
+    const response = await appAxios.post(request, formData);
     return response.data;
   } catch (error) {
     return commonAxiosErrorHandler(error);
