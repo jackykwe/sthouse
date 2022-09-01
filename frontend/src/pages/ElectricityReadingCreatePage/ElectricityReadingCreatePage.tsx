@@ -1,36 +1,37 @@
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { compressAccurately } from "image-conversion";
 import { useState } from "react";
 import { axiosCreateElectricityReading } from "services/electricity_readings";
 
-/**
- * Code courtesy of
- * https://www.youtube.com/watch?v=2okUvC2qBWk
- * https://www.youtube.com/watch?v=tF6L6IIo-yg
- */
-const compressToURL = (image: File) => {
-  const abstractImg = document.createElement("img");
-  const abstractCanvas = document.createElement("canvas");
-  const ctx = abstractCanvas.getContext("2d");
+// /**
+//  * Code courtesy of
+//  * https://www.youtube.com/watch?v=2okUvC2qBWk
+//  * https://www.youtube.com/watch?v=tF6L6IIo-yg
+//  */
+// const compressToURL = (image: File) => {
+//   const abstractImg = document.createElement("img");
+//   const abstractCanvas = document.createElement("canvas");
+//   const ctx = abstractCanvas.getContext("2d");
 
-  if (ctx === null) {
-    alert("FUCK");
-    return "";
-  }
+//   if (ctx === null) {
+//     alert("FUCK");
+//     return "";
+//   }
 
-  let result = "";
-  abstractImg.src = URL.createObjectURL(image);
-  abstractImg.onload = () => {
-    abstractCanvas.width = abstractImg.width;
-    abstractCanvas.height = abstractImg.height;
-    ctx.drawImage(abstractImg, 0, 0);
+//   let result = "";
+//   abstractImg.src = URL.createObjectURL(image);
+//   abstractImg.onload = () => {
+//     abstractCanvas.width = abstractImg.width;
+//     abstractCanvas.height = abstractImg.height;
+//     ctx.drawImage(abstractImg, 0, 0);
 
-    result = ctx.canvas.toDataURL("image/png", 1);
-  };
-  console.log("result is ", result);
-  return result;
-};
+//     result = ctx.canvas.toDataURL("image/png", 1);
+//   };
+//   console.log("result is ", result);
+//   return result;
+// };
 
 /**
  * Image preview courtesy of
@@ -40,7 +41,10 @@ const compressToURL = (image: File) => {
  * https://stackoverflow.com/a/41775258
  */
 export const ElectricityReadingCreatePage = () => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<Blob | null>(null);
+  const [response, setResponse] = useState<string>("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   // useEffect(() => {
   //   if (imageFile !== null) console.log(URL.createObjectURL(imageFile));
   // }, [imageFile]);
@@ -49,7 +53,7 @@ export const ElectricityReadingCreatePage = () => {
     <>
       {imageFile !== null ? (
         <img
-          src={compressToURL(imageFile)}
+          src={URL.createObjectURL(imageFile)}
           alt="Preview of electricty reading"
           style={{
             minHeight: 0,
@@ -58,6 +62,8 @@ export const ElectricityReadingCreatePage = () => {
           }}
         />
       ) : null}
+      Progress: {uploadProgress} / {downloadProgress}<br />
+      Response: {response}
       <Box sx={{ display: "flex" }}>
         <Button endIcon={<PhotoCameraIcon />} component="label">
           Select Photo
@@ -65,24 +71,33 @@ export const ElectricityReadingCreatePage = () => {
             hidden
             accept="image/*"
             type="file"
-            onChange={(event) =>
-              setImageFile(event.target.files?.item(0) ?? null)
-            }
+            onChange={async (event) => {
+              // if (event.target.files === null || event.target.files.item(0) === null) {
+              //   setImageFile(null);
+                // return;
+              // }
+              // const compressed = await compressAccurately(event.target.files.item(0)!, {size: 200, width: 1080});
+              // setImageFile(compressed);
+              setImageFile(event.target.files?.item(0) ?? null);
+            }}
           />
         </Button>
         <span>2</span>
         <span>3</span>
         <Button
-          onClick={() => {
-            axiosCreateElectricityReading(
+          onClick={async () => {
+            const response = await axiosCreateElectricityReading(
               {
                 low_kwh: 88,
                 normal_kwh: 999.99,
                 creator_name: "Hello",
                 creator_email: "hi@example.com",
               },
-              imageFile!
+              imageFile!,
+              setUploadProgress,
+              setDownloadProgress,
             );
+            setResponse(JSON.stringify(response, undefined, 4).substring(0, 100));
           }}
         >
           SUBMIT

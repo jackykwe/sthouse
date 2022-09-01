@@ -33,14 +33,23 @@ export const axiosGetAllElectricityReadings = async (
 
 export const axiosCreateElectricityReading = async (
   createDTO: ElectricityReadingCreateDTO,
-  imageFile: File
+  imageFile: Blob,
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>,
+  setDownloadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
     const formData = new FormData();
     formData.append("electricityReadingCreateDTO", JSON.stringify(createDTO));
     formData.append("image", imageFile);
     const request = "https://httpbin.org/post";
-    const response = await appAxios.post(request, formData);
+    const response = await appAxios.post<object>(request, formData, {
+      onUploadProgress: (progressEvent: ProgressEvent) => {
+        setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
+      },
+      onDownloadProgress: (progressEvent: ProgressEvent) => {
+        setDownloadProgress((progressEvent.loaded / progressEvent.total) * 100);
+      },
+    });
     return response.data;
   } catch (error) {
     return commonAxiosErrorHandler(error);
