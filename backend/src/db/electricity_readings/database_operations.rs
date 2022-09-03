@@ -2,9 +2,7 @@ use chrono::Utc;
 use log::debug;
 use sqlx::{Pool, Sqlite};
 
-use crate::api::electricity_readings::{
-    ElectricityReadingCreateDTO, ElectricityReadingReadGraphDTO,
-};
+use crate::api::electricity_readings::ElectricityReadingReadGraphDTO;
 use crate::types::CEResult;
 
 pub async fn get_all_electricity_readings(
@@ -62,7 +60,10 @@ pub async fn get_electricity_readings_between(
 
 pub async fn create_electricity_reading(
     pool: &Pool<Sqlite>,
-    dto: ElectricityReadingCreateDTO,
+    low_kwh: f64,
+    normal_kwh: f64,
+    creator_name: String,
+    creator_email: String,
 ) -> CEResult<ElectricityReadingReadGraphDTO> {
     debug!("create_electricity_reading() called");
 
@@ -74,10 +75,10 @@ pub async fn create_electricity_reading(
         INSERT OR IGNORE INTO users (display_name, email) VALUES (?, ?); \
         SELECT id FROM users WHERE display_name = ? AND email = ?;\
         ",
-        dto.creator_name,
-        dto.creator_email,
-        dto.creator_name,
-        dto.creator_email
+        creator_name,
+        creator_email,
+        creator_name,
+        creator_email
     )
     .fetch_one(&mut transaction)
     .await?
@@ -88,8 +89,8 @@ pub async fn create_electricity_reading(
         INSERT INTO electricity_readings (low_kwh, normal_kwh, unix_ts_millis, creator_id) \
         VALUES (?, ?, ?, ?);\
         ",
-        dto.low_kwh,
-        dto.normal_kwh,
+        low_kwh,
+        normal_kwh,
         unix_ts_millis,
         creator_id,
     )
@@ -101,8 +102,8 @@ pub async fn create_electricity_reading(
 
     Ok(ElectricityReadingReadGraphDTO {
         id: electricity_reading_id,
-        low_kwh: dto.low_kwh,
-        normal_kwh: dto.normal_kwh,
+        low_kwh,
+        normal_kwh,
         unix_ts_millis,
     })
 }

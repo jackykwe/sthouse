@@ -1,11 +1,13 @@
+use actix_easy_multipart::{File, FromMultipart};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct ElectricityReadingCreateDTO {
+#[derive(FromMultipart)]
+pub struct ElectricityReadingCreateMultipartForm {
     pub low_kwh: f64,
     pub normal_kwh: f64,
     pub creator_name: String,
     pub creator_email: String,
+    pub image: File,
 }
 
 #[derive(Serialize, Deserialize)]
