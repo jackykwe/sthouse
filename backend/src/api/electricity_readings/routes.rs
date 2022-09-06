@@ -19,10 +19,7 @@ pub fn routes() -> Scope {
             // path.components().count() is for mount_path (first arg)
             |path, _| {
                 path.components().count() == 1
-                    && path
-                        .extension()
-                        .and_then(|ext| Some(ext.eq("jpg")))
-                        .is_some()
+                    && path.extension().map(|ext| ext.eq("jpg")).is_some()
             },
         ))
 }

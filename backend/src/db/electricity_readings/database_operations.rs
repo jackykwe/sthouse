@@ -64,7 +64,7 @@ pub async fn create_electricity_reading(
     normal_kwh: f64,
     creator_name: String,
     creator_email: String,
-) -> CEResult<ElectricityReadingReadGraphDTO> {
+) -> CEResult<i64> {
     debug!("create_electricity_reading() called");
 
     let unix_ts_millis = Utc::now().timestamp_millis();
@@ -100,12 +100,7 @@ pub async fn create_electricity_reading(
 
     transaction.commit().await?;
 
-    Ok(ElectricityReadingReadGraphDTO {
-        id: electricity_reading_id,
-        low_kwh,
-        normal_kwh,
-        unix_ts_millis,
-    })
+    Ok(electricity_reading_id)
 }
 
 pub async fn create_electricity_reading_raw(

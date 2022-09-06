@@ -122,7 +122,7 @@ pub async fn handler_create_electricity_reading(
     let img_path_in_original_temp = web::block(|| save_image(form.0.image)).await??;
 
     // Database access
-    let result = create_electricity_reading(
+    let new_reading_id = create_electricity_reading(
         &pool,
         form.0.low_kwh,
         form.0.normal_kwh,
@@ -133,11 +133,11 @@ pub async fn handler_create_electricity_reading(
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     // Rename image in ./images/original
-    let img_path_in_original = format!("./images/original/{}.{}", result.id, uploaded_img_ext);
+    let img_path_in_original = format!("./images/original/{}.{}", new_reading_id, uploaded_img_ext);
     std::fs::rename(img_path_in_original_temp, &img_path_in_original)?;
 
     // Compress (if needed) and save into ./images/compressed
-    web::block(move || compress_and_save(img_path_in_original, result.id)).await??;
+    web::block(move || compress_and_save(img_path_in_original, new_reading_id)).await??;
 
-    Ok(HttpResponse::Ok().json(result))
+    Ok(HttpResponse::Ok().json(new_reading_id))
 }
