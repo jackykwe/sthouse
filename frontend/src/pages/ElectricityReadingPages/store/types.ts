@@ -1,7 +1,4 @@
-import {
-  ElectricityReadingCreateDTO,
-  ElectricityReadingReadGraphDTO,
-} from "services/electricity_readings";
+import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
 import { AsyncState, OperationType } from "types";
 
 export interface ElectricityReadingClientState {
@@ -16,7 +13,7 @@ export interface ElectricityReadingServerState {
     getElectricityReadingList: AsyncState<ElectricityReadingReadGraphDTO[]>;
   };
   [OperationType.Mutations]: {
-    createElectricityReading: AsyncState<ElectricityReadingReadGraphDTO[]>;
+    createElectricityReading: AsyncState<number>;
   };
 }
 
@@ -27,5 +24,11 @@ export type GetElectricityReadingListRequestActionArg = {
   startUnixTsMillisInc?: number;
   endUnixTsMillisInc?: number;
 };
-export type CreateElectricityReadingRequestActionArg =
-  ElectricityReadingCreateDTO;
+export type CreateElectricityReadingRequestActionArg = {
+  low_kwh: number;
+  normal_kwh: number;
+  creator_name: string;
+  creator_email: string;
+  image: Blob;
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>;
+};

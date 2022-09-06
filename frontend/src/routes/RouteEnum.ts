@@ -27,6 +27,11 @@ export const routeEnum = {
     path: "/",
     element: HomePageLazy,
   },
+  ElectricityUpload: {
+    appBarName: "Submit Reading",
+    path: "/electricity-readings/upload",
+    element: ElectricityReadingCreatePageLazy,
+  },
   ElectricityGraph: {
     appBarName: "Electricity Readings",
     path: "/electricity-readings",
@@ -35,10 +40,6 @@ export const routeEnum = {
   ElectricityDetail: {
     path: "/electricity-readings/:id",
     element: ElectricityReadingDetailPageLazy,
-  },
-  ElectricityUpload: {
-    path: "/electricity-readings/upload",
-    element: ElectricityReadingCreatePageLazy,
   },
   UserList: {
     appBarName: "Users (Debug)",

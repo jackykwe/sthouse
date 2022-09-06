@@ -1,9 +1,6 @@
 import { commonAxiosErrorHandler } from "services/common-error-handler";
 import { appAxios, BACKEND_API_URL } from "..";
-import {
-  ElectricityReadingCreateDTO,
-  ElectricityReadingReadGraphDTO,
-} from "./types";
+import { ElectricityReadingReadGraphDTO } from "./types";
 
 const BASE_URLS = `${BACKEND_API_URL}/api/electricity_readings`;
 
@@ -32,24 +29,30 @@ export const axiosGetAllElectricityReadings = async (
 };
 
 export const axiosCreateElectricityReading = async (
-  createDTO: ElectricityReadingCreateDTO,
+  low_kwh: number,
+  normal_kwh: number,
+  creator_name: string,
+  creator_email: string,
   imageFile: Blob,
-  setUploadProgress: React.Dispatch<React.SetStateAction<number>>,
-  setDownloadProgress: React.Dispatch<React.SetStateAction<number>>
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
     const formData = new FormData();
-    formData.append("electricityReadingCreateDTO", JSON.stringify(createDTO));
+    formData.append("low_kwh", low_kwh.toString());
+    formData.append("normal_kwh", normal_kwh.toString());
+    formData.append("creator_name", creator_name);
+    formData.append("creator_email", creator_email);
     formData.append("image", imageFile);
-    const request = "https://httpbin.org/post";
-    const response = await appAxios.post<object>(request, formData, {
-      onUploadProgress: (progressEvent: ProgressEvent) => {
-        setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
-      },
-      onDownloadProgress: (progressEvent: ProgressEvent) => {
-        setDownloadProgress((progressEvent.loaded / progressEvent.total) * 100);
-      },
-    });
+    const request = BASE_URLS;
+    const response = await appAxios.post<ElectricityReadingReadGraphDTO>(
+      request,
+      formData,
+      {
+        onUploadProgress: (progressEvent: ProgressEvent) => {
+          setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     return commonAxiosErrorHandler(error);

@@ -1,10 +1,3 @@
-export interface ElectricityReadingCreateDTO {
-  low_kwh: number;
-  normal_kwh: number;
-  creator_name: string;
-  creator_email: string;
-}
-
 export interface ElectricityReadingReadGraphDTO {
   id: number;
   low_kwh: number;

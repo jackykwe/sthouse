@@ -23,9 +23,7 @@ export const initialState: ElectricityReadingServerState = {
     >,
   },
   [OperationType.Mutations]: {
-    [CREATE_ELECTRICITY_READING]: asyncInitialState as AsyncState<
-      ElectricityReadingReadGraphDTO[]
-    >,
+    [CREATE_ELECTRICITY_READING]: asyncInitialState as AsyncState<number>,
   },
 };
 
@@ -71,22 +69,13 @@ const serverSlice = createSliceUtil({
       OperationType.Mutations,
       CREATE_ELECTRICITY_READING,
       createElectricityReadingRequest,
-      undefined,
+      createElectricityReadingSuccess,
       createElectricityReadingFailure
     );
     builder.addCase(getElectricityReadingListRequest, (state, action) => {
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].isLoading =
         true;
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].error = null;
-    });
-    builder.addCase(createElectricityReadingSuccess, (state, action) => {
-      state[OperationType.Mutations][CREATE_ELECTRICITY_READING].isLoading =
-        false;
-      state[OperationType.Mutations][CREATE_ELECTRICITY_READING].data =
-        action.payload;
-      state[OperationType.Mutations][CREATE_ELECTRICITY_READING].error = null;
-      state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].data =
-        action.payload; // TODO: check
     });
   },
 });

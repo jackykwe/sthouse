@@ -1,7 +1,7 @@
 import {
   ElectricityReadingClientState,
   ElectricityReadingServerState,
-} from "pages/ElectricityReadingGraphPage/store/types";
+} from "pages/ElectricityReadingPages/store/types";
 import { UserServerState } from "pages/UserListPage/store/types";
 
 export interface RootState {
