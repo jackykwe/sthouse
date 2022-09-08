@@ -3,16 +3,20 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { FormHelperText } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { useElectricityReadingServerSlice } from "./store";
+
 interface ElectricityReadingCreatePageFormValues {
-  low_kwh: number;
-  normal_kwh: number;
-  image: Blob;
+  low_kwh: string;
+  normal_kwh: string;
+  image: string;
 }
 
 /**
@@ -23,9 +27,13 @@ interface ElectricityReadingCreatePageFormValues {
  * https://stackoverflow.com/a/41775258
  */
 export const ElectricityReadingCreatePage = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    actions: { createElectricityReadingRequest },
+    actions: {
+      createElectricityReadingRequest,
+      resetCreateElectricityReadingState,
+    },
     selectors: {
       selectCreateElectricityReadingLoading,
       selectCreateElectricityReadingData,
@@ -39,22 +47,36 @@ export const ElectricityReadingCreatePage = () => {
   );
 
   const [imageFile, setImageFile] = useState<Blob | null>(null);
+  const imageFilePreviewURLMemo = useMemo(
+    () => (imageFile !== null ? URL.createObjectURL(imageFile) : ""),
+    [imageFile]
+  );
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [response, setResponse] = useState<string>("");
 
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
+
+  useEffect(() => {
+    if (
+      !createElectricityReadingLoading &&
+      createElectricityReadingData !== null
+    ) {
+      dispatch(resetCreateElectricityReadingState());
+      navigate(generateElectricityDetailPath(createElectricityReadingData));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createElectricityReadingData, createElectricityReadingLoading]);
 
   const onSubmit: SubmitHandler<
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
     dispatch(
       createElectricityReadingRequest({
-        low_kwh: data.low_kwh,
-        normal_kwh: data.normal_kwh,
+        low_kwh: parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
+        normal_kwh: parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
         creator_name: "TODO IDENTITY",
         creator_email: "todoidentity@example.com",
-        image: data.image,
+        image: imageFile!, // assumed non-null, since react-hook-form validated
         setUploadProgress,
       })
     );
@@ -91,6 +113,7 @@ export const ElectricityReadingCreatePage = () => {
               }}
             />
           )}
+          defaultValue={""} // suppress controlled/uncontrolled warning
           rules={{ required: "Low Reading must not be empty" }}
         />
         <Controller
@@ -113,6 +136,7 @@ export const ElectricityReadingCreatePage = () => {
               }}
             />
           )}
+          defaultValue={""} // suppress controlled/uncontrolled warning
           rules={{ required: "Normal Reading must not be empty" }}
         />
         <Controller
@@ -134,13 +158,8 @@ export const ElectricityReadingCreatePage = () => {
                   accept="image/*"
                   type="file"
                   onChange={async (event) => {
-                    // if (event.target.files === null || event.target.files.item(0) === null) {
-                    //   setImageFile(null);
-                    // return;
-                    // }
-                    // const compressed = await compressAccurately(event.target.files.item(0)!, {size: 200, width: 1080});
-                    // setImageFile(compressed);
-                    setImageFile(event.target.files?.item(0) ?? null);
+                    const fileOptional = event.target.files?.item(0);
+                    setImageFile(fileOptional ?? null);
                     field.onChange(event);
                   }}
                   onBlur={field.onBlur}
@@ -151,10 +170,18 @@ export const ElectricityReadingCreatePage = () => {
               </FormHelperText>
             </Box>
           )}
+          defaultValue={""}
           rules={{ required: "Please select an image" }}
         />
         <LoadingButton
           loading={createElectricityReadingLoading}
+          loadingIndicator={
+            uploadProgress < 100 ? (
+              <CircularProgress variant="determinate" value={uploadProgress} />
+            ) : (
+              <CircularProgress />
+            )
+          }
           disableElevation
           onClick={handleSubmit(onSubmit)}
           variant="contained"
@@ -175,7 +202,7 @@ export const ElectricityReadingCreatePage = () => {
       >
         {imageFile !== null ? (
           <img
-            src={URL.createObjectURL(imageFile)}
+            src={imageFilePreviewURLMemo}
             alt="Preview of electricty reading"
             style={{ objectFit: "scale-down" }}
           />
@@ -183,9 +210,6 @@ export const ElectricityReadingCreatePage = () => {
           <span>No image selected</span>
         )}
       </Box>
-      Progress: {uploadProgress}
-      <br />
-      Response: {response}
     </>
   );
 };

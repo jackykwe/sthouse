@@ -39,25 +39,24 @@ function* getElectricityReadingList({
 function* createElectricityReading({
   payload,
 }: Payload<CreateElectricityReadingRequestActionArg>) {
-  const responseData: ElectricityReadingReadGraphDTO[] | RequestError =
-    yield call(
-      axiosCreateElectricityReading,
-      payload.low_kwh,
-      payload.normal_kwh,
-      payload.creator_name,
-      payload.creator_email,
-      payload.image,
-      payload.setUploadProgress // TODO? Change this to dispatch. May not need cos no prop drilling
-    );
+  const responseData: number | RequestError = yield call(
+    axiosCreateElectricityReading,
+    payload.low_kwh,
+    payload.normal_kwh,
+    payload.creator_name,
+    payload.creator_email,
+    payload.image,
+    payload.setUploadProgress // TODO? Change this to dispatch. May not need cos no prop drilling
+  );
   if (isRequestError(responseData)) {
     yield put(
-      electricityReadingServerActions.getElectricityReadingListFailure(
+      electricityReadingServerActions.createElectricityReadingFailure(
         responseData
       )
     );
   } else {
     yield put(
-      electricityReadingServerActions.getElectricityReadingListSuccess(
+      electricityReadingServerActions.createElectricityReadingSuccess(
         responseData
       )
     );

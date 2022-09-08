@@ -367,7 +367,13 @@ export const ElectricityReadingGraph = (
             stroke: lowBlue,
             strokeWidth: 4,
             r: 12,
-            onClick: () => console.log("helppppp"),
+            onClick: (data, index) =>
+              navigate(
+                generateElectricityDetailPath(
+                  // recharts messed up their interface
+                  (index as any).payload.id
+                )
+              ),
             cursor: "pointer",
           }}
           stroke={lowBlue}

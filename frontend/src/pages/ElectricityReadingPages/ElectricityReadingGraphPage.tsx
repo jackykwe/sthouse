@@ -118,17 +118,16 @@ export const ElectricityReadingGraphPage = () => {
   useEffect(() => {
     // console.log("STS/ETS DEP USEEFFECT RAN...");
     if (graphAbsorbCount > 0) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      console.log(
-        `sts or ets changed: graphAbsorbCount is decremented to ${
-          graphAbsorbCount - 1
-        }`
-      );
+      // console.log(
+      //   `sts or ets changed: graphAbsorbCount is decremented to ${
+      //     graphAbsorbCount - 1
+      //   }`
+      // );
       dispatch(setGraphAbsorbCount(graphAbsorbCount - 1));
     } else {
-      console.log(
-        `sts or ets changed: graphAbsorbCount is still ${graphAbsorbCount}, GET REQUEST list with ${graphStartUnixTsMillisActInc} ${graphEndUnixTsMillisActInc}`
-      );
+      // console.log(
+      //   `sts or ets changed: graphAbsorbCount is still ${graphAbsorbCount}, GET REQUEST list with ${graphStartUnixTsMillisActInc} ${graphEndUnixTsMillisActInc}`
+      // );
       dispatch(
         getElectricityReadingListRequest({
           startUnixTsMillisInc: graphStartUnixTsMillisActInc!,

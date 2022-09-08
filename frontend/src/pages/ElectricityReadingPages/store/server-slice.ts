@@ -54,6 +54,10 @@ const serverSlice = createSliceUtil({
     resetElectricityReadingListData: (state) => {
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].data = null;
     },
+    resetCreateElectricityReadingState: (state) => {
+      state[OperationType.Mutations][CREATE_ELECTRICITY_READING] =
+        asyncInitialState as AsyncState<number>;
+    },
   },
   extraReducers: (builder) => {
     createAsyncReducerBuilderUtil<GetElectricityReadingListRequestActionArg>()(
