@@ -1,17 +1,21 @@
+import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { FormHelperText } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
+import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { generateElectricityDetailPath } from "routes/RouteEnum";
-import { useElectricityReadingServerSlice } from "./store";
+import { axiosCreateElectricityReading } from "services/electricity_readings";
+import { isRequestError } from "types";
 
 interface ElectricityReadingCreatePageFormValues {
   low_kwh: string;
@@ -28,58 +32,47 @@ interface ElectricityReadingCreatePageFormValues {
  */
 export const ElectricityReadingCreatePage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const {
-    actions: {
-      createElectricityReadingRequest,
-      resetCreateElectricityReadingState,
-    },
-    selectors: {
-      selectCreateElectricityReadingLoading,
-      selectCreateElectricityReadingData,
-    },
-  } = useElectricityReadingServerSlice();
-  const createElectricityReadingLoading = useSelector(
-    selectCreateElectricityReadingLoading
-  );
-  const createElectricityReadingData = useSelector(
-    selectCreateElectricityReadingData
-  );
 
   const [imageFile, setImageFile] = useState<Blob | null>(null);
   const imageFilePreviewURLMemo = useMemo(
     () => (imageFile !== null ? URL.createObjectURL(imageFile) : ""),
     [imageFile]
   );
-  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
 
-  useEffect(() => {
-    if (
-      !createElectricityReadingLoading &&
-      createElectricityReadingData !== null
-    ) {
-      dispatch(resetCreateElectricityReadingState());
-      navigate(generateElectricityDetailPath(createElectricityReadingData));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createElectricityReadingData, createElectricityReadingLoading]);
+  //
 
   const onSubmit: SubmitHandler<
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
-    dispatch(
-      createElectricityReadingRequest({
-        low_kwh: parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
-        normal_kwh: parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
-        creator_name: "TODO IDENTITY",
-        creator_email: "todoidentity@example.com",
-        image: imageFile!, // assumed non-null, since react-hook-form validated
-        setUploadProgress,
-      })
+    setIsUploading(true);
+    setUploadProgress(0);
+    setErrorSnackbarOpen(false);
+    setErrorMessage("");
+    const responseData = await axiosCreateElectricityReading(
+      parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
+      parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
+      "TODO IDENTITY",
+      "todoidentity@example.com",
+      imageFile!, // assumed non-null, since react-hook-form validated
+      setUploadProgress
     );
+    if (isRequestError(responseData)) {
+      setErrorMessage(responseData.requestErrorDescription);
+      setErrorSnackbarOpen(true);
+    } else {
+      // responseData is the new ID of the newly created entry
+      navigate(generateElectricityDetailPath(responseData));
+    }
+    setIsUploading(false);
   };
 
   return (
@@ -174,7 +167,7 @@ export const ElectricityReadingCreatePage = () => {
           rules={{ required: "Please select an image" }}
         />
         <LoadingButton
-          loading={createElectricityReadingLoading}
+          loading={isUploading}
           loadingIndicator={
             uploadProgress < 100 ? (
               <CircularProgress variant="determinate" value={uploadProgress} />
@@ -210,6 +203,26 @@ export const ElectricityReadingCreatePage = () => {
           <span>No image selected</span>
         )}
       </Box>
+      <Snackbar
+        open={errorSnackbarOpen}
+        onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
+      >
+        <Alert
+          variant="filled"
+          severity="error"
+          action={
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => setErrorSnackbarOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          Submission failed: {errorMessage}. Please try again later.
+        </Alert>
+      </Snackbar>
     </>
   );
 };

@@ -44,15 +44,11 @@ export const axiosCreateElectricityReading = async (
     formData.append("creator_email", creator_email);
     formData.append("image", imageFile);
     const request = BASE_URLS;
-    const response = await appAxios.post<ElectricityReadingReadGraphDTO>(
-      request,
-      formData,
-      {
-        onUploadProgress: (progressEvent: ProgressEvent) => {
-          setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
-        },
-      }
-    );
+    const response = await appAxios.post<number>(request, formData, {
+      onUploadProgress: (progressEvent: ProgressEvent) => {
+        setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
+      },
+    });
     return response.data;
   } catch (error) {
     return commonAxiosErrorHandler(error);

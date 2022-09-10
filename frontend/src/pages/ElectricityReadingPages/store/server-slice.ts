@@ -7,7 +7,6 @@ import {
 } from "utils/sliceUtil";
 import { createSliceUtil } from "utils/toolkit";
 import {
-  CreateElectricityReadingRequestActionArg,
   ElectricityReadingServerState,
   GetElectricityReadingListRequestActionArg,
 } from "./types";
@@ -22,9 +21,6 @@ export const initialState: ElectricityReadingServerState = {
       ElectricityReadingReadGraphDTO[]
     >,
   },
-  [OperationType.Mutations]: {
-    [CREATE_ELECTRICITY_READING]: asyncInitialState as AsyncState<number>,
-  },
 };
 
 const {
@@ -37,26 +33,12 @@ const {
   GET_ELECTRICITY_READING_LIST
 );
 
-const {
-  requestAction: createElectricityReadingRequest,
-  successAction: createElectricityReadingSuccess,
-  failureAction: createElectricityReadingFailure,
-} = createAsyncActionUtil<CreateElectricityReadingRequestActionArg>()(
-  SLICE_NAME,
-  OperationType.Mutations,
-  CREATE_ELECTRICITY_READING
-);
-
 const serverSlice = createSliceUtil({
   name: SLICE_NAME,
   initialState,
   reducers: {
     resetElectricityReadingListData: (state) => {
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].data = null;
-    },
-    resetCreateElectricityReadingState: (state) => {
-      state[OperationType.Mutations][CREATE_ELECTRICITY_READING] =
-        asyncInitialState as AsyncState<number>;
     },
   },
   extraReducers: (builder) => {
@@ -67,14 +49,6 @@ const serverSlice = createSliceUtil({
       undefined,
       getElectricityReadingListSuccess,
       getElectricityReadingListFailure
-    );
-    createAsyncReducerBuilderUtil<CreateElectricityReadingRequestActionArg>()(
-      builder,
-      OperationType.Mutations,
-      CREATE_ELECTRICITY_READING,
-      createElectricityReadingRequest,
-      createElectricityReadingSuccess,
-      createElectricityReadingFailure
     );
     builder.addCase(getElectricityReadingListRequest, (state, action) => {
       state[OperationType.Queries][GET_ELECTRICITY_READING_LIST].isLoading =
@@ -94,7 +68,4 @@ export const electricityReadingServerActions = {
   getElectricityReadingListRequest,
   getElectricityReadingListSuccess,
   getElectricityReadingListFailure,
-  createElectricityReadingRequest,
-  createElectricityReadingSuccess,
-  createElectricityReadingFailure,
 };
