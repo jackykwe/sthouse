@@ -19,23 +19,17 @@ import {
   systemReprToTsActualUtil,
   tsActualToSystemReprUtil,
 } from "utils/dateUtils";
-import {
-  useElectricityReadingClientSlice,
-  useElectricityReadingServerSlice,
-} from "./store";
+import { useElectricityReadingClientSlice } from "./store";
 
 interface ElectricityReadingGraphHeaderProps {
-  // debouncedGetElectricityReadingList: _.DebouncedFunc<
-  //   (
-  //     startUnixTsMillisInc: number | undefined,
-  //     endUnixTsMillisInc: number | undefined
-  //   ) => void
-  // >;
+  hasData: boolean; // Controls when the header is shown, and reset button.
+  hasError: boolean; // Controls when the header is shown, and reset button.
 }
 
 export const ElectricityReadingGraphHeader = (
   props: ElectricityReadingGraphHeaderProps
 ) => {
+  const { hasData, hasError } = props;
   const dispatch = useDispatch();
 
   // Client redux state selectors
@@ -75,20 +69,6 @@ export const ElectricityReadingGraphHeader = (
     )
   ); // already -7h TS
 
-  // Server redux state selectors. Controls when the header is shown, and reset button.
-  const {
-    selectors: {
-      selectGetElectricityReadingListData,
-      selectGetElectricityReadingListError,
-    },
-  } = useElectricityReadingServerSlice();
-  const electricityReadingListData = useSelector(
-    selectGetElectricityReadingListData
-  );
-  const electricityReadingListError = useSelector(
-    selectGetElectricityReadingListError
-  );
-
   useEffect(() => {
     if (fromPickerDate === null && graphStartUnixTsMillisActInc !== null) {
       // console.log(
@@ -104,11 +84,7 @@ export const ElectricityReadingGraphHeader = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphStartUnixTsMillisActInc]);
 
-  if (
-    graphStartUnixTsMillisActInc === null ||
-    electricityReadingListData === null ||
-    electricityReadingListError !== null
-  ) {
+  if (graphStartUnixTsMillisActInc === null || !hasData || hasError) {
     return <></>;
   }
 

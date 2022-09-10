@@ -27,10 +27,7 @@ import {
   DEFAULT_TARGET_TIME_ZONE,
   fromUnixTimeMillisUtil,
 } from "utils/dateUtils";
-import {
-  useElectricityReadingClientSlice,
-  useElectricityReadingServerSlice,
-} from "./store";
+import { useElectricityReadingClientSlice } from "./store";
 
 interface GraphAxisDomains {
   lowDomain: AxisDomain;
@@ -160,14 +157,19 @@ const calculateGraphColours = (theme: Theme) => {
 };
 
 interface ElectricityReadingGraphProps {
-  // electricityReadingListData: ElectricityReadingReadGraphDTO[];
-  // graphShowBestFit: boolean;
-  // theme: Theme;
+  electricityReadingsLoading: boolean;
+  electricityReadingsData: ElectricityReadingReadGraphDTO[] | null;
+  electricityReadingsError: string | null;
 }
 
 export const ElectricityReadingGraph = (
   props: ElectricityReadingGraphProps
 ) => {
+  const {
+    electricityReadingsLoading,
+    electricityReadingsData,
+    electricityReadingsError,
+  } = props;
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -187,36 +189,14 @@ export const ElectricityReadingGraph = (
     selectGraphEndUnixTsMillisActInc
   );
 
-  // Server redux state selectors
-  const {
-    selectors: {
-      selectGetElectricityReadingListLoading,
-      selectGetElectricityReadingListData,
-      selectGetElectricityReadingListError,
-    },
-  } = useElectricityReadingServerSlice();
-  const electricityReadingListLoading = useSelector(
-    selectGetElectricityReadingListLoading
-  );
-  const electricityReadingListData = useSelector(
-    selectGetElectricityReadingListData
-  );
-  const electricityReadingListError = useSelector(
-    selectGetElectricityReadingListError
-  );
-
-  if (electricityReadingListLoading || electricityReadingListData === null) {
+  if (electricityReadingsLoading || electricityReadingsData === null) {
     return <PageLoading />;
   }
-  if (electricityReadingListError !== null) {
-    return (
-      <PageError
-        errorMessage={electricityReadingListError.requestErrorDescription}
-      />
-    );
+  if (electricityReadingsError !== null) {
+    return <PageError errorMessage={electricityReadingsError} />;
   }
 
-  if (electricityReadingListData.length === 0) {
+  if (electricityReadingsData.length === 0) {
     return (
       <Box
         sx={{
@@ -238,10 +218,10 @@ export const ElectricityReadingGraph = (
   }
 
   const { lowDomain, normalDomain } = calculateGraphAxisDomains(
-    electricityReadingListData
+    electricityReadingsData
   );
   const { data, lowBestFitLabel, normalBestFitLabel } =
-    calculateGraphDataAndLegendLabels(electricityReadingListData);
+    calculateGraphDataAndLegendLabels(electricityReadingsData);
   const { normalRed, lowBlue, xAxisColour, xyGridColour } =
     calculateGraphColours(theme);
 

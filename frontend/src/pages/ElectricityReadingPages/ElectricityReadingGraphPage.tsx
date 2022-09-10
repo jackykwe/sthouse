@@ -1,16 +1,18 @@
 import _ from "lodash";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  axiosGetAllElectricityReadings,
+  ElectricityReadingReadGraphDTO,
+} from "services/electricity_readings";
+import { isRequestError } from "types";
 import {
   DEFAULT_TARGET_TIME_ZONE,
   getStartOfMonthTsFromTsUtil,
 } from "utils/dateUtils";
 import { ElectricityReadingGraph } from "./ElectricityReadingGraph";
 import { ElectricityReadingGraphHeader } from "./ElectricityReadingGraphHeader";
-import {
-  useElectricityReadingClientSlice,
-  useElectricityReadingServerSlice,
-} from "./store";
+import { useElectricityReadingClientSlice } from "./store";
 
 export const ElectricityReadingGraphPage = () => {
   const dispatch = useDispatch();
@@ -32,31 +34,36 @@ export const ElectricityReadingGraphPage = () => {
   );
   const graphAbsorbCount = useSelector(selectGraphAbsorbCount);
 
-  // Server redux state selectors
-  const {
-    actions: {
-      resetElectricityReadingListData,
-      getElectricityReadingListRequest,
-    },
-    selectors: { selectGetElectricityReadingListData },
-  } = useElectricityReadingServerSlice();
-  const electricityReadingListData = useSelector(
-    selectGetElectricityReadingListData
-  );
+  const [electricityReadingsLoading, setElectricityReadingsLoading] =
+    useState(false);
+  const [electricityReadingsData, setElectricityReadingsData] = useState<
+    ElectricityReadingReadGraphDTO[] | null
+  >(null);
+  const [electricityReadingsError, setElectricityReadingsError] = useState<
+    string | null
+  >(null);
+
+  const getElectricityReadings = async (
+    startUnixTsMillisInc: number | undefined,
+    endUnixTsMillisInc: number | undefined
+  ) => {
+    setElectricityReadingsLoading(true);
+    setElectricityReadingsError(null);
+    const responseData = await axiosGetAllElectricityReadings(
+      startUnixTsMillisInc,
+      endUnixTsMillisInc
+    );
+    if (isRequestError(responseData)) {
+      setElectricityReadingsError(responseData.requestErrorDescription);
+    } else {
+      setElectricityReadingsData(responseData);
+    }
+    setElectricityReadingsLoading(false);
+  };
 
   // Debounced HTTP request-making functions
-  const debouncedGetElectricityReadingList = _.debounce(
-    (
-      startUnixTsMillisInc: number | undefined,
-      endUnixTsMillisInc: number | undefined
-    ) => {
-      dispatch(
-        getElectricityReadingListRequest({
-          startUnixTsMillisInc,
-          endUnixTsMillisInc,
-        })
-      );
-    },
+  const debouncedGetElectricityReadings = _.debounce(
+    getElectricityReadings,
     300
   );
 
@@ -68,12 +75,11 @@ export const ElectricityReadingGraphPage = () => {
     //   graphStartUnixTsMillisActInc ?? undefined,
     //   graphEndUnixTsMillisActInc
     // );
-    debouncedGetElectricityReadingList(
+    debouncedGetElectricityReadings(
       graphStartUnixTsMillisActInc ?? undefined, // on very first run, will be undefined
       graphEndUnixTsMillisActInc
     );
     return () => {
-      dispatch(resetElectricityReadingListData());
       dispatch(setGraphAbsorbCount(1));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,10 +88,10 @@ export const ElectricityReadingGraphPage = () => {
   // When fresh data has been fetched from the backend for the very first load
   useEffect(() => {
     if (
-      electricityReadingListData !== null &&
+      electricityReadingsData !== null &&
       graphStartUnixTsMillisActInc === null
     ) {
-      if (electricityReadingListData.length === 0) {
+      if (electricityReadingsData.length === 0) {
         // console.log(
         //   "elecListData changed (not null) AND sts is null : setting sts to startOfMonth(ets)"
         // );
@@ -104,7 +110,7 @@ export const ElectricityReadingGraphPage = () => {
         dispatch(
           setGraphStartUnixTsMillisActInc(
             getStartOfMonthTsFromTsUtil(
-              electricityReadingListData[0].unix_ts_millis,
+              electricityReadingsData[0].unix_ts_millis,
               DEFAULT_TARGET_TIME_ZONE
             )
           )
@@ -112,11 +118,14 @@ export const ElectricityReadingGraphPage = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [electricityReadingListData]);
+  }, [electricityReadingsData]);
 
   // console.log(`graphAbsorbCount is now ${graphAbsorbCount}`);
   useEffect(() => {
     // console.log("STS/ETS DEP USEEFFECT RAN...");
+    // 2 absorb counts:
+    // one to absorb when this useEffect() runs no matter what, and
+    // one to absorb when graphStartUnixTsMillisActInc is changed after first insert
     if (graphAbsorbCount > 0) {
       // console.log(
       //   `sts or ets changed: graphAbsorbCount is decremented to ${
@@ -128,11 +137,9 @@ export const ElectricityReadingGraphPage = () => {
       // console.log(
       //   `sts or ets changed: graphAbsorbCount is still ${graphAbsorbCount}, GET REQUEST list with ${graphStartUnixTsMillisActInc} ${graphEndUnixTsMillisActInc}`
       // );
-      dispatch(
-        getElectricityReadingListRequest({
-          startUnixTsMillisInc: graphStartUnixTsMillisActInc!,
-          endUnixTsMillisInc: graphEndUnixTsMillisActInc,
-        })
+      debouncedGetElectricityReadings(
+        graphStartUnixTsMillisActInc!,
+        graphEndUnixTsMillisActInc
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,8 +147,15 @@ export const ElectricityReadingGraphPage = () => {
 
   return (
     <>
-      <ElectricityReadingGraphHeader />
-      <ElectricityReadingGraph />
+      <ElectricityReadingGraphHeader
+        hasData={electricityReadingsData !== null}
+        hasError={electricityReadingsError !== null}
+      />
+      <ElectricityReadingGraph
+        electricityReadingsLoading={electricityReadingsLoading}
+        electricityReadingsData={electricityReadingsData}
+        electricityReadingsError={electricityReadingsError}
+      />
     </>
   );
 };

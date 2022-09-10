@@ -43,7 +43,7 @@ export const ElectricityReadingCreatePage = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
@@ -56,7 +56,7 @@ export const ElectricityReadingCreatePage = () => {
     setIsUploading(true);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
-    setErrorMessage("");
+    setErrorMessage(null);
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
