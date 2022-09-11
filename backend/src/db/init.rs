@@ -1,13 +1,18 @@
 use log::debug;
 use sqlx::{Pool, Sqlite};
 
-use crate::db::electricity_readings::create_electricity_reading_raw;
+use crate::db::electricity_readings::create_electricity_reading_raw_init;
 use crate::types::CEResult;
 
+/*
+sqlx database create
+sqlx migrate run
+// cargo sqlx prepare
+*/
 pub async fn initialise_database(pool: &Pool<Sqlite>) -> CEResult<()> {
     debug!("initialise_database() called");
     run_pending_migrations(pool).await?;
-    // add_dummy_data(pool).await?; // TODO: DEV ONLY
+    add_dummy_data(pool).await?; // TODO: DEV ONLY
     Ok(())
 }
 
@@ -22,11 +27,25 @@ async fn run_pending_migrations(pool: &Pool<Sqlite>) -> CEResult<()> {
 #[allow(clippy::too_many_lines)]
 async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
     debug!("add_dummy_data() called");
-    create_electricity_reading_raw(pool, 43518.2, 68008.3, 1641000383420, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(pool, 43569.3, 68278.8, 1641613072610, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        43518.2,
+        68008.3,
+        1641000383420,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
+        pool,
+        43569.3,
+        68278.8,
+        1641613072610,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         43465.0,
         68578.7,
@@ -35,7 +54,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         43642.0,
         68607.6,
@@ -44,7 +63,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         43866.8,
         69357.0,
@@ -53,7 +72,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         43800.4,
         69128.1,
@@ -62,7 +81,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         43872.6,
         69631.0,
@@ -71,7 +90,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         43966.4,
         69722.0,
@@ -80,7 +99,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44004.0,
         70053.6,
@@ -89,7 +108,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44138.1,
         70371.3,
@@ -98,7 +117,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44226.4,
         70519.0,
@@ -107,7 +126,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44111.4,
         71024.3,
@@ -116,7 +135,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44319.5,
         71353.9,
@@ -125,9 +144,16 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 44477.6, 71496.6, 1652834877746, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        44477.6,
+        71496.6,
+        1652834877746,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         44395.4,
         71778.7,
@@ -136,7 +162,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44376.1,
         71536.8,
@@ -145,7 +171,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44608.2,
         72130.3,
@@ -154,7 +180,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44590.3,
         72692.9,
@@ -163,7 +189,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44692.1,
         72461.3,
@@ -172,9 +198,16 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 44560.3, 72811.3, 1658329750575, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        44560.3,
+        72811.3,
+        1658329750575,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         44850.1,
         73038.1,
@@ -183,7 +216,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44803.4,
         73061.6,
@@ -192,7 +225,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         44908.8,
         73381.9,
@@ -201,7 +234,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45100.0,
         73862.5,
@@ -210,15 +243,43 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 44887.9, 73978.0, 1661398465217, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(pool, 45056.5, 74530.1, 1663754182584, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(pool, 45216.3, 74617.9, 1664075822971, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(pool, 45319.0, 74937.1, 1664734555408, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        44887.9,
+        73978.0,
+        1661398465217,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
+        pool,
+        45056.5,
+        74530.1,
+        1663754182584,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
+        pool,
+        45216.3,
+        74617.9,
+        1664075822971,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
+        pool,
+        45319.0,
+        74937.1,
+        1664734555408,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         45092.0,
         75254.1,
@@ -227,7 +288,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45148.5,
         75211.3,
@@ -236,9 +297,16 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 45386.6, 75655.2, 1668181165448, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        45386.6,
+        75655.2,
+        1668181165448,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         45342.6,
         75713.9,
@@ -247,9 +315,16 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 45471.7, 76135.9, 1668816977879, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        45471.7,
+        76135.9,
+        1668816977879,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         45491.1,
         76351.4,
@@ -258,7 +333,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45714.4,
         76775.9,
@@ -267,7 +342,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45763.0,
         76836.2,
@@ -276,7 +351,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45760.2,
         77176.0,
@@ -285,7 +360,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45587.8,
         77393.9,
@@ -294,9 +369,16 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 45917.4, 77682.1, 1674874285158, "Bob", "bob@bob.com")
-        .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
+        pool,
+        45917.4,
+        77682.1,
+        1674874285158,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
+    create_electricity_reading_raw_init(
         pool,
         45868.2,
         77765.8,
@@ -305,7 +387,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         45979.8,
         78297.5,
@@ -314,7 +396,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46078.4,
         78599.7,
@@ -323,7 +405,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46005.9,
         78595.5,
@@ -332,7 +414,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "alice@alice.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46180.3,
         79114.0,
@@ -341,7 +423,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46190.9,
         79232.8,
@@ -350,7 +432,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46234.2,
         79566.7,
@@ -359,7 +441,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46236.2,
         79753.5,
@@ -368,7 +450,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46405.7,
         79990.3,
@@ -377,7 +459,7 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "david@david.com",
     )
     .await?;
-    create_electricity_reading_raw(
+    create_electricity_reading_raw_init(
         pool,
         46407.4,
         80321.1,
@@ -386,7 +468,14 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         "charlie@charlie.com",
     )
     .await?;
-    create_electricity_reading_raw(pool, 46593.5, 80365.7, 1684268553274, "Bob", "bob@bob.com")
-        .await?;
+    create_electricity_reading_raw_init(
+        pool,
+        46593.5,
+        80365.7,
+        1684268553274,
+        "Bob",
+        "bob@bob.com",
+    )
+    .await?;
     Ok(())
 }

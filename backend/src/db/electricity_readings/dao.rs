@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[allow(dead_code)]
 pub struct ElectricityReadingDAO {
     pub id: i64,
     pub low_kwh: f64,
