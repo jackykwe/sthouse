@@ -6,7 +6,6 @@ import grey from "@mui/material/colors/grey";
 import red from "@mui/material/colors/red";
 import Typography from "@mui/material/Typography";
 import { Theme } from "@mui/system";
-import { formatInTimeZone } from "date-fns-tz";
 import { PageError } from "pages/PageError/PageError";
 import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useSelector } from "react-redux";
@@ -23,10 +22,7 @@ import {
 import { AxisDomain } from "recharts/types/util/types";
 import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { ElectricityReadingReadGraphDTO } from "services/electricity_readings";
-import {
-  DEFAULT_TARGET_TIME_ZONE,
-  fromUnixTimeMillisUtil,
-} from "utils/dateUtils";
+import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
 import { useElectricityReadingClientSlice } from "./store";
 
 interface GraphAxisDomains {
@@ -35,29 +31,29 @@ interface GraphAxisDomains {
 }
 
 /**
- * @param electricityReadingListData Assumed to have length >= 1
+ * @param readingsData Assumed to have length >= 1
  */
 const calculateGraphAxisDomains = (
-  electricityReadingListData: ElectricityReadingReadGraphDTO[]
+  readingsData: ElectricityReadingReadGraphDTO[]
 ) => {
-  if (electricityReadingListData.length === 1) {
+  if (readingsData.length === 1) {
     return {
       lowDomain: ["auto", "auto"],
       normalDomain: ["auto", "auto"],
     } as GraphAxisDomains;
   }
 
-  const minLow = electricityReadingListData
+  const minLow = readingsData
     .map((dto) => dto.low_kwh)
     .reduce((prevMin, val) => Math.min(prevMin, val), Number.MAX_SAFE_INTEGER);
-  const minNormal = electricityReadingListData
+  const minNormal = readingsData
     .map((dto) => dto.normal_kwh)
     .reduce((prevMin, val) => Math.min(prevMin, val), Number.MAX_SAFE_INTEGER);
 
-  const maxLow = electricityReadingListData
+  const maxLow = readingsData
     .map((dto) => dto.low_kwh)
     .reduce((prevMax, val) => Math.max(prevMax, val), Number.MIN_SAFE_INTEGER);
-  const maxNormal = electricityReadingListData
+  const maxNormal = readingsData
     .map((dto) => dto.normal_kwh)
     .reduce((prevMax, val) => Math.max(prevMax, val), Number.MIN_SAFE_INTEGER);
 
@@ -84,33 +80,28 @@ type GraphDataAndLegendLabels = {
 
 /**
  * Includes best fit line calculations
- * @param electricityReadingListData Assumed to have length >= 1
+ * @param readingsData Assumed to have length >= 1
  */
 const calculateGraphDataAndLegendLabels = (
-  electricityReadingListData: ElectricityReadingReadGraphDTO[]
+  readingsData: ElectricityReadingReadGraphDTO[]
 ) => {
-  if (electricityReadingListData.length === 1) {
+  if (readingsData.length === 1) {
     return {
-      data: electricityReadingListData,
+      data: readingsData,
       lowBestFitLabel: "Low",
       normalBestFitLabel: "Normal",
     } as GraphDataAndLegendLabels;
   }
 
-  const firstMillis = electricityReadingListData[0].unix_ts_millis;
-  const lastMillis =
-    electricityReadingListData[electricityReadingListData.length - 1]
-      .unix_ts_millis;
+  const firstMillis = readingsData[0].unix_ts_millis;
+  const lastMillis = readingsData[readingsData.length - 1].unix_ts_millis;
   const millisDiff = lastMillis - firstMillis;
   const daysDiff = millisDiff / 86_400_000; // 1000 * 60 * 60 * 24
 
-  const firstLow = electricityReadingListData[0].low_kwh;
-  const firstNormal = electricityReadingListData[0].normal_kwh;
-  const lastLow =
-    electricityReadingListData[electricityReadingListData.length - 1].low_kwh;
-  const lastNormal =
-    electricityReadingListData[electricityReadingListData.length - 1]
-      .normal_kwh;
+  const firstLow = readingsData[0].low_kwh;
+  const firstNormal = readingsData[0].normal_kwh;
+  const lastLow = readingsData[readingsData.length - 1].low_kwh;
+  const lastNormal = readingsData[readingsData.length - 1].normal_kwh;
 
   const lowDiff = lastLow - firstLow;
   const lowSign = lowDiff < 0 ? "-" : "+";
@@ -134,7 +125,7 @@ const calculateGraphDataAndLegendLabels = (
           normal_kwh_best_fit: lastNormal,
         },
       ] as GraphDataAndLegendLabels["data"]
-    ).concat(electricityReadingListData),
+    ).concat(readingsData),
     lowBestFitLabel: `Low (in this date range, average ${lowRate} kWh/day)`,
     normalBestFitLabel: `Normal (in this date range, average ${normalRate} kWh/day)`,
   } as GraphDataAndLegendLabels;
@@ -157,19 +148,15 @@ const calculateGraphColours = (theme: Theme) => {
 };
 
 interface ElectricityReadingGraphProps {
-  electricityReadingsLoading: boolean;
-  electricityReadingsData: ElectricityReadingReadGraphDTO[] | null;
-  electricityReadingsError: string | null;
+  readingsLoading: boolean;
+  readingsData: ElectricityReadingReadGraphDTO[] | null;
+  readingsError: string | null;
 }
 
 export const ElectricityReadingGraph = (
   props: ElectricityReadingGraphProps
 ) => {
-  const {
-    electricityReadingsLoading,
-    electricityReadingsData,
-    electricityReadingsError,
-  } = props;
+  const { readingsLoading, readingsData, readingsError } = props;
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -177,26 +164,22 @@ export const ElectricityReadingGraph = (
   const {
     selectors: {
       selectGraphShowBestFit,
-      selectGraphStartUnixTsMillisActInc,
-      selectGraphEndUnixTsMillisActInc,
+      selectGraphStartMillisActInc,
+      selectGraphEndMillisActInc,
     },
   } = useElectricityReadingClientSlice();
   const graphShowBestFit = useSelector(selectGraphShowBestFit);
-  const graphStartUnixTsMillisActInc = useSelector(
-    selectGraphStartUnixTsMillisActInc
-  );
-  const graphEndUnixTsMillisActInc = useSelector(
-    selectGraphEndUnixTsMillisActInc
-  );
+  const graphStartMillisActInc = useSelector(selectGraphStartMillisActInc);
+  const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
 
-  if (electricityReadingsLoading || electricityReadingsData === null) {
+  if (readingsLoading || readingsData === null) {
     return <PageLoading />;
   }
-  if (electricityReadingsError !== null) {
-    return <PageError errorMessage={electricityReadingsError} />;
+  if (readingsError !== null) {
+    return <PageError errorMessage={readingsError} />;
   }
 
-  if (electricityReadingsData.length === 0) {
+  if (readingsData.length === 0) {
     return (
       <Box
         sx={{
@@ -217,11 +200,9 @@ export const ElectricityReadingGraph = (
     );
   }
 
-  const { lowDomain, normalDomain } = calculateGraphAxisDomains(
-    electricityReadingsData
-  );
+  const { lowDomain, normalDomain } = calculateGraphAxisDomains(readingsData);
   const { data, lowBestFitLabel, normalBestFitLabel } =
-    calculateGraphDataAndLegendLabels(electricityReadingsData);
+    calculateGraphDataAndLegendLabels(readingsData);
   const { normalRed, lowBlue, xAxisColour, xyGridColour } =
     calculateGraphColours(theme);
 
@@ -285,18 +266,12 @@ export const ElectricityReadingGraph = (
           allowDecimals={false}
           // angle={45}
           tickCount={10}
-          domain={[graphStartUnixTsMillisActInc!, graphEndUnixTsMillisActInc]}
+          domain={[graphStartMillisActInc!, graphEndMillisActInc]}
           interval="preserveStartEnd"
           stroke={xAxisColour}
           tickLine={{ stroke: xAxisColour }}
           tickFormatter={(unix_ts_millis) =>
-            formatInTimeZone(
-              fromUnixTimeMillisUtil(unix_ts_millis),
-              // timestamp saved into DB is unambiguous; this forces frontend to render
-              // that timestamp as a Date in GMT/BST
-              DEFAULT_TARGET_TIME_ZONE,
-              "d MMM yyyy"
-            )
+            formatMillisInTzUtil(unix_ts_millis, "d MMM yyyy")
           }
           tick={{ fill: xAxisColour }}
         />
@@ -317,13 +292,7 @@ export const ElectricityReadingGraph = (
           separator=": "
           cursor={{ stroke: xyGridColour, strokeWidth: 2 }}
           labelFormatter={(unix_ts_millis) =>
-            formatInTimeZone(
-              fromUnixTimeMillisUtil(unix_ts_millis),
-              // timestamp saved into DB is unambiguous; this forces frontend to render
-              // that timestamp as a Date in GMT/BST
-              DEFAULT_TARGET_TIME_ZONE,
-              "HH':'mm':'ss eee d MMM yyyy (O)"
-            )
+            formatMillisInTzUtil(unix_ts_millis, DATE_FMTSTR_HMSDDMY_TZ)
           }
           formatter={(value: number, name: string) =>
             name === "low_kwh"

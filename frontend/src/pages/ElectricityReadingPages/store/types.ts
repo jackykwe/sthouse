@@ -1,6 +1,6 @@
 export interface ElectricityReadingClientState {
-  graphStartUnixTsMillisActInc: number | null;
-  graphEndUnixTsMillisActInc: number;
+  graphStartMillisActInc: number | null;
+  graphEndMillisActInc: number;
   graphAbsorbCount: number;
   graphShowBestFit: boolean;
 }

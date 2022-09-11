@@ -35,56 +35,52 @@ export const ElectricityReadingGraphHeader = (
   // Client redux state selectors
   const {
     actions: {
-      setGraphStartUnixTsMillisActInc,
-      setGraphEndUnixTsMillisActInc,
+      setGraphStartMillisActInc,
+      setGraphEndMillisActInc,
       setGraphShowBestFit,
     },
     selectors: {
-      selectGraphStartUnixTsMillisActInc,
-      selectGraphEndUnixTsMillisActInc,
+      selectGraphStartMillisActInc,
+      selectGraphEndMillisActInc,
       selectGraphShowBestFit,
     },
   } = useElectricityReadingClientSlice();
-  const graphStartUnixTsMillisActInc = useSelector(
-    selectGraphStartUnixTsMillisActInc
-  );
-  const graphEndUnixTsMillisActInc = useSelector(
-    selectGraphEndUnixTsMillisActInc
-  );
+  const graphStartMillisActInc = useSelector(selectGraphStartMillisActInc);
+  const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
   const graphShowBestFit = useSelector(selectGraphShowBestFit);
 
   // Client redux state derived
   const [fromPickerDate, setFromPickerDate] = useState<Date | null>(
-    graphStartUnixTsMillisActInc === null
+    graphStartMillisActInc === null
       ? null
       : tsActualToSystemReprUtil(
-          fromUnixTimeMillisUtil(graphStartUnixTsMillisActInc),
+          fromUnixTimeMillisUtil(graphStartMillisActInc),
           DEFAULT_TARGET_TIME_ZONE
         )
   ); // already -7h TS
   const [toPickerDate, setToPickerDate] = useState<Date | null>(
     tsActualToSystemReprUtil(
-      fromUnixTimeMillisUtil(graphEndUnixTsMillisActInc),
+      fromUnixTimeMillisUtil(graphEndMillisActInc),
       DEFAULT_TARGET_TIME_ZONE
     )
   ); // already -7h TS
 
   useEffect(() => {
-    if (fromPickerDate === null && graphStartUnixTsMillisActInc !== null) {
+    if (fromPickerDate === null && graphStartMillisActInc !== null) {
       // console.log(
       //   "sts changed (not null) AND fromPickerDate is null: setting picker date to startOfMonth(sts)"
       // );
       setFromPickerDate(
         tsActualToSystemReprUtil(
-          fromUnixTimeMillisUtil(graphStartUnixTsMillisActInc),
+          fromUnixTimeMillisUtil(graphStartMillisActInc),
           DEFAULT_TARGET_TIME_ZONE
         )
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graphStartUnixTsMillisActInc]);
+  }, [graphStartMillisActInc]);
 
-  if (graphStartUnixTsMillisActInc === null || !hasData || hasError) {
+  if (graphStartMillisActInc === null || !hasData || hasError) {
     return <></>;
   }
 
@@ -110,7 +106,7 @@ export const ElectricityReadingGraphHeader = (
               // Hack: add milliseconds to force auto-correction of text input
               setFromPickerDate(addMilliseconds(coercedDate, 1));
               dispatch(
-                setGraphStartUnixTsMillisActInc(
+                setGraphStartMillisActInc(
                   getUnixTimeMillisUtil(
                     systemReprToTsActualUtil(
                       coercedDate,
@@ -130,7 +126,7 @@ export const ElectricityReadingGraphHeader = (
             helperText={generateDatePickerHelperTextUtil(fromPickerDate)}
             // helperText={generateDatePickerHelperTextUtilDebug(
             //   fromPickerDate,
-            //   graphStartUnixTsMillisActInc,
+            //   graphStartMillisActInc,
             //   DEFAULT_TARGET_TIME_ZONE
             // )}
             {...params}
@@ -148,7 +144,7 @@ export const ElectricityReadingGraphHeader = (
             if (isWithinAllowedIntervalUtil(coercedDate)) {
               setToPickerDate(coercedDate);
               dispatch(
-                setGraphEndUnixTsMillisActInc(
+                setGraphEndMillisActInc(
                   getUnixTimeMillisUtil(
                     systemReprToTsActualUtil(
                       coercedDate,
@@ -168,7 +164,7 @@ export const ElectricityReadingGraphHeader = (
             helperText={generateDatePickerHelperTextUtil(toPickerDate)}
             // helperText={generateDatePickerHelperTextUtilDebug(
             //   toPickerDate,
-            //   graphEndUnixTsMillisActInc,
+            //   graphEndMillisActInc,
             //   DEFAULT_TARGET_TIME_ZONE
             // )}
             {...params}

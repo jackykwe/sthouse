@@ -32,36 +32,38 @@ interface ElectricityReadingCreatePageFormValues {
  * https://stackoverflow.com/a/41775258
  */
 export const ElectricityReadingCreatePage = () => {
+  // HOOKS
   const navigate = useNavigate();
 
+  // HOOKS FOR UPLOADING
+  const [readingUploading, setReadingUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
+  const [readingUploadError, setReadingUploadError] = useState<string | null>(
+    null
+  );
+
+  // FORM HOOKS
   const [imageFile, setImageFile] = useState<Blob | null>(null);
   const imageFilePreviewURLMemo = useMemo(
     () => (imageFile !== null ? URL.createObjectURL(imageFile) : ""),
     [imageFile]
   );
-
-  const [electricityReadingUploading, setElectricityReadingUploading] =
-    useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  const [electricityReadingError, setElectricityReadingError] = useState<
-    string | null
-  >(null);
-
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
 
-  if (electricityReadingError !== null) {
-    return <PageError errorMessage={electricityReadingError} />;
+  // EARLY RETURNS
+  if (readingUploadError !== null) {
+    return <PageError errorMessage={readingUploadError} />;
   }
 
   const onSubmit: SubmitHandler<
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
-    setElectricityReadingUploading(true);
+    setReadingUploading(true);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
-    setElectricityReadingError(null);
+    setReadingUploadError(null);
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
@@ -71,13 +73,13 @@ export const ElectricityReadingCreatePage = () => {
       setUploadProgress
     );
     if (isRequestError(responseData)) {
-      setElectricityReadingError(responseData.requestErrorDescription);
+      setReadingUploadError(responseData.requestErrorDescription);
       setErrorSnackbarOpen(true);
     } else {
       // responseData is the new ID of the newly created entry
       navigate(generateElectricityDetailPath(responseData));
     }
-    setElectricityReadingUploading(false);
+    setReadingUploading(false);
   };
 
   return (
@@ -174,7 +176,7 @@ export const ElectricityReadingCreatePage = () => {
           rules={{ required: "Please select an image" }}
         />
         <LoadingButton
-          loading={electricityReadingUploading}
+          loading={readingUploading}
           loadingIndicator={
             uploadProgress < 100 ? (
               <CircularProgress variant="determinate" value={uploadProgress} />
@@ -230,7 +232,7 @@ export const ElectricityReadingCreatePage = () => {
             </IconButton>
           }
         >
-          Submission failed: {electricityReadingError}. Please try again later.
+          Submission failed: {readingUploadError}. Please try again later.
         </Alert>
       </Snackbar>
     </>

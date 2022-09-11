@@ -1,17 +1,12 @@
-import {
-  DEFAULT_TARGET_TIME_ZONE,
-  endOfMonthMillisAsOfNowInTzUtil,
-} from "utils/dateUtils";
+import { endOfMonthMillisAsOfNowInTzUtil } from "utils/dateUtils";
 import { createSliceUtil } from "utils/toolkit";
 import { ElectricityReadingClientState } from "./types";
 
 export const SLICE_NAME = "electricityReadingClient";
 
 export const initialState: ElectricityReadingClientState = {
-  graphStartUnixTsMillisActInc: null, // Act for actual (compared to Sys for system)
-  graphEndUnixTsMillisActInc: endOfMonthMillisAsOfNowInTzUtil(
-    DEFAULT_TARGET_TIME_ZONE
-  ),
+  graphStartMillisActInc: null, // Act for actual (compared to Sys for system)
+  graphEndMillisActInc: endOfMonthMillisAsOfNowInTzUtil(),
   graphAbsorbCount: 2,
   graphShowBestFit: true,
 };
@@ -20,17 +15,17 @@ const clientSlice = createSliceUtil({
   name: SLICE_NAME,
   initialState,
   reducers: {
-    setGraphStartUnixTsMillisActInc: (
+    setGraphStartMillisActInc: (
       state,
       action: { payload: number; type: string }
     ) => {
-      state.graphStartUnixTsMillisActInc = action.payload;
+      state.graphStartMillisActInc = action.payload;
     },
-    setGraphEndUnixTsMillisActInc: (
+    setGraphEndMillisActInc: (
       state,
       action: { payload: number; type: string }
     ) => {
-      state.graphEndUnixTsMillisActInc = action.payload;
+      state.graphEndMillisActInc = action.payload;
     },
     setGraphAbsorbCount: (state, action: { payload: number; type: string }) => {
       state.graphAbsorbCount = action.payload;

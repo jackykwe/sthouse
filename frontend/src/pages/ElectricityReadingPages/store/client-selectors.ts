@@ -5,16 +5,14 @@ import { initialState } from "./client-slice";
 const selectElectricityReadingClient = (state: RootState) =>
   state.electricityReadingClient ?? initialState; // cos injection
 
-export const selectGraphStartUnixTsMillisActInc = createSelector(
+export const selectGraphStartMillisActInc = createSelector(
   [selectElectricityReadingClient],
-  (electricityReadingClient) =>
-    electricityReadingClient.graphStartUnixTsMillisActInc
+  (electricityReadingClient) => electricityReadingClient.graphStartMillisActInc
 );
 
-export const selectGraphEndUnixTsMillisActInc = createSelector(
+export const selectGraphEndMillisActInc = createSelector(
   [selectElectricityReadingClient],
-  (electricityReadingClient) =>
-    electricityReadingClient.graphEndUnixTsMillisActInc
+  (electricityReadingClient) => electricityReadingClient.graphEndMillisActInc
 );
 
 export const selectGraphAbsorbCount = createSelector(

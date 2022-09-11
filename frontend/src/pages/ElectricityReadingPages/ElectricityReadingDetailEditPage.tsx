@@ -11,7 +11,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { formatInTimeZone } from "date-fns-tz";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
 import { PageError } from "pages/PageError/PageError";
@@ -27,11 +26,8 @@ import {
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
-import {
-  DEFAULT_TARGET_TIME_ZONE,
-  fromUnixTimeMillisUtil,
-} from "utils/dateUtils";
-import { isValidParam, responseIs404 } from "./ElectricityReadingDetailPage";
+import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
+import { isValidParam, responseIs404 } from "./utils";
 
 // Most of this page's skeleton is from ElectricityReadingCreatePage.
 
@@ -42,75 +38,71 @@ interface ElectricityReadingDetailEditPageFormValues {
 }
 
 export const ElectricityReadingDetailEditPage = () => {
+  // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
 
+  // HOOKS FOR FETCHING DATA
+  const [readingLoading, setReadingLoading] = useState(false);
+  const [readingData, setReadingData] =
+    useState<ElectricityReadingReadFullDTO | null>(null);
+  const [readingError, setReadingError] = useState<string | null>(null);
+
+  const getReading = async (id: number) => {
+    const responseData = await axiosGetElectricityReading(id);
+    if (isRequestError(responseData)) {
+      setReadingError(responseData.requestErrorDescription);
+    } else {
+      setReadingData(responseData);
+    }
+  };
+  const debouncedGetReading = _.debounce(getReading, 300);
+  useEffect(() => {
+    if (id !== undefined && isValidParam(id)) {
+      setReadingLoading(true);
+      debouncedGetReading(parseInt(id));
+      setReadingLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // HOOKS FOR UPLOADING
+  const [readingUploading, setReadingUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
+  const [readingUploadError, setReadingUploadError] = useState<string | null>(
+    null
+  );
+
+  // FORM HOOKS
   const [imageFile, setImageFile] = useState<Blob | null>(null);
   const imageFilePreviewURLMemo = useMemo(
     () => (imageFile !== null ? URL.createObjectURL(imageFile) : ""),
     [imageFile]
   );
-
-  const [electricityReadingUploading, setElectricityReadingUploading] =
-    useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  const [electricityReadingUploadError, setElectricityReadingUploadError] =
-    useState<string | null>(null);
-
-  const [electricityReadingLoading, setElectricityReadingLoading] =
-    useState(false);
-  const [electricityReadingData, setElectricityReadingData] =
-    useState<ElectricityReadingReadFullDTO | null>(null);
-  const [electricityReadingError, setElectricityReadingError] = useState<
-    string | null
-  >(null);
-
-  const fetchData = async (id: number) => {
-    const responseData = await axiosGetElectricityReading(id);
-    if (isRequestError(responseData)) {
-      setElectricityReadingError(responseData.requestErrorDescription);
-    } else {
-      setElectricityReadingData(responseData);
-    }
-  };
-  const debouncedFetchData = _.debounce(fetchData, 300);
-
-  useEffect(() => {
-    if (id !== undefined && isValidParam(id)) {
-      setElectricityReadingLoading(true);
-      debouncedFetchData(parseInt(id));
-      setElectricityReadingLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { control, handleSubmit } =
     useForm<ElectricityReadingDetailEditPageFormValues>();
 
-  if (
-    id === undefined ||
-    !isValidParam(id) ||
-    responseIs404(electricityReadingError)
-  ) {
+  // EARLY RETURNS
+  if (id === undefined || !isValidParam(id) || responseIs404(readingError)) {
     return <NotFoundPageLazy />;
   }
 
-  if (electricityReadingError !== null) {
-    return <PageError errorMessage={electricityReadingError} />;
+  if (readingError !== null) {
+    return <PageError errorMessage={readingError} />;
   }
 
-  if (electricityReadingLoading || electricityReadingData === null) {
+  if (readingLoading || readingData === null) {
     return <PageLoading />;
   }
 
   const onSubmit: SubmitHandler<
     ElectricityReadingDetailEditPageFormValues
   > = async (data) => {
-    setElectricityReadingUploading(true);
+    setReadingUploading(true);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
-    setElectricityReadingError(null);
+    setReadingError(null);
     const responseData = await axiosUpdateElectricityReading(
       parseInt(id),
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
@@ -121,13 +113,13 @@ export const ElectricityReadingDetailEditPage = () => {
       setUploadProgress
     );
     if (isRequestError(responseData)) {
-      setElectricityReadingUploadError(responseData.requestErrorDescription);
+      setReadingUploadError(responseData.requestErrorDescription);
       setErrorSnackbarOpen(true);
     } else {
       console.log("OK");
       navigate(generateElectricityDetailPath(parseInt(id)));
     }
-    setElectricityReadingUploading(false);
+    setReadingUploading(false);
   };
 
   return (
@@ -142,14 +134,9 @@ export const ElectricityReadingDetailEditPage = () => {
       >
         <Typography variant="h4">On </Typography>
         <Typography variant="h4" fontWeight={700}>
-          {formatInTimeZone(
-            fromUnixTimeMillisUtil(
-              electricityReadingData.creation_unix_ts_millis
-            ),
-            // timestamp saved into DB is unambiguous; this forces frontend to render
-            // that timestamp as a Date in GMT/BST
-            DEFAULT_TARGET_TIME_ZONE,
-            "HH':'mm':'ss eee d MMM yyyy (O)"
+          {formatMillisInTzUtil(
+            readingData.creation_unix_ts_millis,
+            DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
       </Box>
@@ -183,7 +170,7 @@ export const ElectricityReadingDetailEditPage = () => {
               }}
             />
           )}
-          defaultValue={electricityReadingData.low_kwh.toString()} // suppress controlled/uncontrolled warning
+          defaultValue={readingData.low_kwh.toString()} // suppress controlled/uncontrolled warning
           rules={{ required: "Low Reading must not be empty" }}
         />
         <Controller
@@ -206,7 +193,7 @@ export const ElectricityReadingDetailEditPage = () => {
               }}
             />
           )}
-          defaultValue={electricityReadingData.normal_kwh.toString()} // suppress controlled/uncontrolled warning
+          defaultValue={readingData.normal_kwh.toString()} // suppress controlled/uncontrolled warning
           rules={{ required: "Normal Reading must not be empty" }}
         />
         <Controller
@@ -242,7 +229,7 @@ export const ElectricityReadingDetailEditPage = () => {
           defaultValue={""}
         />
         <LoadingButton
-          loading={electricityReadingUploading}
+          loading={readingUploading}
           loadingIndicator={
             uploadProgress < 100 ? (
               <CircularProgress variant="determinate" value={uploadProgress} />
@@ -298,8 +285,7 @@ export const ElectricityReadingDetailEditPage = () => {
             </IconButton>
           }
         >
-          Submission failed: {electricityReadingUploadError}. Please try again
-          later.
+          Submission failed: {readingUploadError}. Please try again later.
         </Alert>
       </Snackbar>
     </>

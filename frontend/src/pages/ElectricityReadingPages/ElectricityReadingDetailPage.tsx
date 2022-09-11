@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import { grey } from "@mui/material/colors";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { formatInTimeZone } from "date-fns-tz";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
 import { PageLoading } from "pages/PageLoading/PageLoading";
@@ -18,56 +17,44 @@ import {
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
-import {
-  DEFAULT_TARGET_TIME_ZONE,
-  fromUnixTimeMillisUtil,
-} from "utils/dateUtils";
-
-export const isValidParam = (id: string) => /^\d+$/.test(id);
-
-export const responseIs404 = (error: string | null) =>
-  error === null ? false : error === "404 Not Found ";
+import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
+import { isValidParam, responseIs404 } from "./utils";
 
 export const ElectricityReadingDetailPage = () => {
+  // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [electricityReadingLoading, setElectricityReadingLoading] =
-    useState(false);
-  const [electricityReadingData, setElectricityReadingData] =
+  // HOOKS FOR FETCHING DATA
+  const [readingLoading, setReadingLoading] = useState(false);
+  const [readingData, setReadingData] =
     useState<ElectricityReadingReadFullDTO | null>(null);
-  const [electricityReadingError, setElectricityReadingError] = useState<
-    string | null
-  >(null);
+  const [readingError, setReadingError] = useState<string | null>(null);
 
-  const fetchData = async (id: number) => {
+  const getReading = async (id: number) => {
     const responseData = await axiosGetElectricityReading(id);
     if (isRequestError(responseData)) {
-      setElectricityReadingError(responseData.requestErrorDescription);
+      setReadingError(responseData.requestErrorDescription);
     } else {
-      setElectricityReadingData(responseData);
+      setReadingData(responseData);
     }
   };
-  const debouncedFetchData = _.debounce(fetchData, 300);
-
+  const debouncedGetReading = _.debounce(getReading, 300);
   useEffect(() => {
     if (id !== undefined && isValidParam(id)) {
-      setElectricityReadingLoading(true);
-      debouncedFetchData(parseInt(id));
-      setElectricityReadingLoading(false);
+      setReadingLoading(true);
+      debouncedGetReading(parseInt(id));
+      setReadingLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (
-    id === undefined ||
-    !isValidParam(id) ||
-    responseIs404(electricityReadingError)
-  ) {
+  // EARLY RETURNS
+  if (id === undefined || !isValidParam(id) || responseIs404(readingError)) {
     return <NotFoundPageLazy />;
   }
 
-  if (electricityReadingLoading || electricityReadingData === null) {
+  if (readingLoading || readingData === null) {
     return <PageLoading />;
   }
 
@@ -83,14 +70,9 @@ export const ElectricityReadingDetailPage = () => {
       >
         <Typography variant="h4">On </Typography>
         <Typography variant="h4" fontWeight={700}>
-          {formatInTimeZone(
-            fromUnixTimeMillisUtil(
-              electricityReadingData.creation_unix_ts_millis
-            ),
-            // timestamp saved into DB is unambiguous; this forces frontend to render
-            // that timestamp as a Date in GMT/BST
-            DEFAULT_TARGET_TIME_ZONE,
-            "HH':'mm':'ss eee d MMM yyyy (O)"
+          {formatMillisInTzUtil(
+            readingData.creation_unix_ts_millis,
+            DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
       </Box>
@@ -116,7 +98,7 @@ export const ElectricityReadingDetailPage = () => {
               width={112}
               align="right"
             >
-              {electricityReadingData.low_kwh.toFixed(1)}
+              {readingData.low_kwh.toFixed(1)}
             </Typography>
           </Box>
 
@@ -137,7 +119,7 @@ export const ElectricityReadingDetailPage = () => {
               width={112}
               align="right"
             >
-              {electricityReadingData.normal_kwh.toFixed(1)}
+              {readingData.normal_kwh.toFixed(1)}
             </Typography>
           </Box>
         </Box>
@@ -192,7 +174,7 @@ export const ElectricityReadingDetailPage = () => {
           }
           fontStyle="italic"
         >
-          {electricityReadingData.creator_name}
+          {readingData.creator_name}
         </Typography>
         <Typography
           color={(theme) =>
@@ -210,14 +192,9 @@ export const ElectricityReadingDetailPage = () => {
           }
           fontStyle="italic"
         >
-          {formatInTimeZone(
-            fromUnixTimeMillisUtil(
-              electricityReadingData.creation_unix_ts_millis
-            ),
-            // timestamp saved into DB is unambiguous; this forces frontend to render
-            // that timestamp as a Date in GMT/BST
-            DEFAULT_TARGET_TIME_ZONE,
-            "HH':'mm':'ss eee d MMM yyyy (O)"
+          {formatMillisInTzUtil(
+            readingData.creation_unix_ts_millis,
+            DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
       </Box>
@@ -244,7 +221,7 @@ export const ElectricityReadingDetailPage = () => {
           }
           fontStyle="italic"
         >
-          {electricityReadingData.latest_modifier_name}
+          {readingData.latest_modifier_name}
         </Typography>
         <Typography
           color={(theme) =>
@@ -262,14 +239,9 @@ export const ElectricityReadingDetailPage = () => {
           }
           fontStyle="italic"
         >
-          {formatInTimeZone(
-            fromUnixTimeMillisUtil(
-              electricityReadingData.latest_modification_unix_ts_millis
-            ),
-            // timestamp saved into DB is unambiguous; this forces frontend to render
-            // that timestamp as a Date in GMT/BST
-            DEFAULT_TARGET_TIME_ZONE,
-            "HH':'mm':'ss eee d MMM yyyy (O)"
+          {formatMillisInTzUtil(
+            readingData.latest_modification_unix_ts_millis,
+            DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
       </Box>

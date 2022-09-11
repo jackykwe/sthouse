@@ -12,7 +12,8 @@ import {
 import { formatInTimeZone, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 
 export const DEFAULT_TARGET_TIME_ZONE = "Europe/London";
-export const DATE_FMTSTR_HMSDMY_TZ = "HH:mm:ss.SSS d LLL yyyy (O)";
+export const DATE_FMTSTR_HMSSDMY_TZ = "HH:mm:ss.SSS d LLL yyyy (O)";
+export const DATE_FMTSTR_HMSDDMY_TZ = "HH:mm:ss eee d LLL yyyy (O)";
 
 export const DATE_PICKER_MIN_DATE = startOfDay(new Date(2021, 8, 1));
 export const DATE_PICKER_MAX_DATE = endOfDay(new Date(2024, 7, 31));
@@ -52,19 +53,9 @@ export const tsActualToSystemReprUtil = utcToZonedTime;
 /**
  * Returns the correct timestamp.
  */
-export const startOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
-  getUnixTimeMillisUtil(
-    systemReprToTsActualUtil(
-      // startOfMonth returns first millisecond
-      startOfMonth(tsActualToSystemReprUtil(new Date(), timeZone)),
-      timeZone
-    )
-  );
-
-/**
- * Returns the correct timestamp.
- */
-export const endOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
+export const endOfMonthMillisAsOfNowInTzUtil = (
+  timeZone: string = DEFAULT_TARGET_TIME_ZONE
+) =>
   getUnixTimeMillisUtil(
     systemReprToTsActualUtil(
       // endOfMonth returns last millisecond
@@ -73,7 +64,10 @@ export const endOfMonthMillisAsOfNowInTzUtil = (timeZone: string) =>
     )
   );
 
-export const getStartOfMonthTsFromTsUtil = (ts: number, timeZone: string) =>
+export const getStartOfMonthTsFromTsInTzUtil = (
+  ts: number,
+  timeZone: string = DEFAULT_TARGET_TIME_ZONE
+) =>
   getUnixTimeMillisUtil(
     systemReprToTsActualUtil(
       // startOfMonth returns first millisecond
@@ -114,20 +108,33 @@ export const generateDatePickerHelperTextUtilDebug = (
       ? 'Date is not of form "month yyyy"'
       : !isWithinAllowedIntervalUtil(date)
       ? "Date is outside of allowed range"
-      : formatInTimeZone(date, timeZone, DATE_FMTSTR_HMSDMY_TZ);
+      : formatInTimeZone(date, timeZone, DATE_FMTSTR_HMSSDMY_TZ);
   const reduxString =
     unixTsMillisActInc === null
       ? "null"
       : formatInTimeZone(
           fromUnixTimeMillisUtil(unixTsMillisActInc),
           DEFAULT_TARGET_TIME_ZONE,
-          DATE_FMTSTR_HMSDMY_TZ
+          DATE_FMTSTR_HMSSDMY_TZ
         );
   return `Picker: ${pickerString}; Redux: ${reduxString}`;
 };
 
-export const getCurrentTimeZoneString = (timeZone: string) =>
-  formatInTimeZone(getUnixTimeMillisUtil(new Date()), timeZone, "O");
+// export const getCurrentTimeZoneString = (timeZone: string) =>
+//   formatInTimeZone(getUnixTimeMillisUtil(new Date()), timeZone, "O");
+
+export const formatMillisInTzUtil = (
+  millisActInc: number,
+  formatStr: string,
+  timeZone: string = DEFAULT_TARGET_TIME_ZONE
+) =>
+  formatInTimeZone(
+    fromUnixTimeMillisUtil(millisActInc),
+    // timestamp saved into DB is unambiguous; this forces frontend to render
+    // that timestamp as a Date in GMT/BST
+    timeZone,
+    formatStr
+  );
 
 /*
 const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

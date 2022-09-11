@@ -6,10 +6,7 @@ import {
   ElectricityReadingReadGraphDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
-import {
-  DEFAULT_TARGET_TIME_ZONE,
-  getStartOfMonthTsFromTsUtil,
-} from "utils/dateUtils";
+import { getStartOfMonthTsFromTsInTzUtil } from "utils/dateUtils";
 import { ElectricityReadingGraph } from "./ElectricityReadingGraph";
 import { ElectricityReadingGraphHeader } from "./ElectricityReadingGraphHeader";
 import { useElectricityReadingClientSlice } from "./store";
@@ -19,53 +16,43 @@ export const ElectricityReadingGraphPage = () => {
 
   // Client redux state selectors
   const {
-    actions: { setGraphStartUnixTsMillisActInc, setGraphAbsorbCount },
+    actions: { setGraphStartMillisActInc, setGraphAbsorbCount },
     selectors: {
-      selectGraphStartUnixTsMillisActInc,
-      selectGraphEndUnixTsMillisActInc,
+      selectGraphStartMillisActInc,
+      selectGraphEndMillisActInc,
       selectGraphAbsorbCount,
     },
   } = useElectricityReadingClientSlice();
-  const graphStartUnixTsMillisActInc = useSelector(
-    selectGraphStartUnixTsMillisActInc
-  );
-  const graphEndUnixTsMillisActInc = useSelector(
-    selectGraphEndUnixTsMillisActInc
-  );
+  const graphStartMillisActInc = useSelector(selectGraphStartMillisActInc);
+  const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
   const graphAbsorbCount = useSelector(selectGraphAbsorbCount);
 
-  const [electricityReadingsLoading, setElectricityReadingsLoading] =
-    useState(false);
-  const [electricityReadingsData, setElectricityReadingsData] = useState<
+  const [readingsLoading, setReadingsLoading] = useState(false);
+  const [readingsData, setReadingsData] = useState<
     ElectricityReadingReadGraphDTO[] | null
   >(null);
-  const [electricityReadingsError, setElectricityReadingsError] = useState<
-    string | null
-  >(null);
+  const [readingsError, setReadingsError] = useState<string | null>(null);
 
-  const getElectricityReadings = async (
+  const getReadings = async (
     startUnixTsMillisInc: number | undefined,
     endUnixTsMillisInc: number | undefined
   ) => {
-    setElectricityReadingsLoading(true);
-    setElectricityReadingsError(null);
+    setReadingsLoading(true);
+    setReadingsError(null);
     const responseData = await axiosGetAllElectricityReadings(
       startUnixTsMillisInc,
       endUnixTsMillisInc
     );
     if (isRequestError(responseData)) {
-      setElectricityReadingsError(responseData.requestErrorDescription);
+      setReadingsError(responseData.requestErrorDescription);
     } else {
-      setElectricityReadingsData(responseData);
+      setReadingsData(responseData);
     }
-    setElectricityReadingsLoading(false);
+    setReadingsLoading(false);
   };
 
   // Debounced HTTP request-making functions
-  const debouncedGetElectricityReadings = _.debounce(
-    getElectricityReadings,
-    300
-  );
+  const debouncedGetReadings = _.debounce(getReadings, 300);
 
   // Use Effects
   useEffect(() => {
@@ -75,9 +62,9 @@ export const ElectricityReadingGraphPage = () => {
     //   graphStartUnixTsMillisActInc ?? undefined,
     //   graphEndUnixTsMillisActInc
     // );
-    debouncedGetElectricityReadings(
-      graphStartUnixTsMillisActInc ?? undefined, // on very first run, will be undefined
-      graphEndUnixTsMillisActInc
+    debouncedGetReadings(
+      graphStartMillisActInc ?? undefined, // on very first run, will be undefined
+      graphEndMillisActInc
     );
     return () => {
       dispatch(setGraphAbsorbCount(1));
@@ -87,20 +74,14 @@ export const ElectricityReadingGraphPage = () => {
 
   // When fresh data has been fetched from the backend for the very first load
   useEffect(() => {
-    if (
-      electricityReadingsData !== null &&
-      graphStartUnixTsMillisActInc === null
-    ) {
-      if (electricityReadingsData.length === 0) {
+    if (readingsData !== null && graphStartMillisActInc === null) {
+      if (readingsData.length === 0) {
         // console.log(
         //   "elecListData changed (not null) AND sts is null : setting sts to startOfMonth(ets)"
         // );
         dispatch(
-          setGraphStartUnixTsMillisActInc(
-            getStartOfMonthTsFromTsUtil(
-              graphEndUnixTsMillisActInc,
-              DEFAULT_TARGET_TIME_ZONE
-            )
+          setGraphStartMillisActInc(
+            getStartOfMonthTsFromTsInTzUtil(graphEndMillisActInc)
           )
         );
       } else {
@@ -108,17 +89,14 @@ export const ElectricityReadingGraphPage = () => {
         //   "elecListData changed (not null) AND sts is null: setting sts to startOfMonth(elecListdata[0])"
         // );
         dispatch(
-          setGraphStartUnixTsMillisActInc(
-            getStartOfMonthTsFromTsUtil(
-              electricityReadingsData[0].unix_ts_millis,
-              DEFAULT_TARGET_TIME_ZONE
-            )
+          setGraphStartMillisActInc(
+            getStartOfMonthTsFromTsInTzUtil(readingsData[0].unix_ts_millis)
           )
         );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [electricityReadingsData]);
+  }, [readingsData]);
 
   // console.log(`graphAbsorbCount is now ${graphAbsorbCount}`);
   useEffect(() => {
@@ -137,24 +115,21 @@ export const ElectricityReadingGraphPage = () => {
       // console.log(
       //   `sts or ets changed: graphAbsorbCount is still ${graphAbsorbCount}, GET REQUEST list with ${graphStartUnixTsMillisActInc} ${graphEndUnixTsMillisActInc}`
       // );
-      debouncedGetElectricityReadings(
-        graphStartUnixTsMillisActInc!,
-        graphEndUnixTsMillisActInc
-      );
+      debouncedGetReadings(graphStartMillisActInc!, graphEndMillisActInc);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graphStartUnixTsMillisActInc, graphEndUnixTsMillisActInc]);
+  }, [graphStartMillisActInc, graphEndMillisActInc]);
 
   return (
     <>
       <ElectricityReadingGraphHeader
-        hasData={electricityReadingsData !== null}
-        hasError={electricityReadingsError !== null}
+        hasData={readingsData !== null}
+        hasError={readingsError !== null}
       />
       <ElectricityReadingGraph
-        electricityReadingsLoading={electricityReadingsLoading}
-        electricityReadingsData={electricityReadingsData}
-        electricityReadingsError={electricityReadingsError}
+        readingsLoading={readingsLoading}
+        readingsData={readingsData}
+        readingsError={readingsError}
       />
     </>
   );
