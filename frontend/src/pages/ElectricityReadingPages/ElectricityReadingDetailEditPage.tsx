@@ -18,9 +18,10 @@ import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { generateElectricityDetailPath } from "routes/RouteEnum";
+import { generateElectricityDetailPath, routeEnum } from "routes/RouteEnum";
 import { BACKEND_API_URL } from "services";
 import {
+  axiosDeleteElectricityReading,
   axiosGetElectricityReading,
   axiosUpdateElectricityReading,
   ElectricityReadingReadFullDTO,
@@ -69,6 +70,9 @@ export const ElectricityReadingDetailEditPage = () => {
   // HOOKS FOR UPLOADING
   const [readingUploading, setReadingUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  // HOOKS FOR UPLOADING
+  const [readingDeleting, setReadingDeleting] = useState(false);
+  // HOOKS FOR UPLOADING AND DELETING
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
   const [readingUploadError, setReadingUploadError] = useState<string | null>(
     null
@@ -116,10 +120,27 @@ export const ElectricityReadingDetailEditPage = () => {
       setReadingUploadError(responseData.requestErrorDescription);
       setErrorSnackbarOpen(true);
     } else {
-      console.log("OK");
       navigate(generateElectricityDetailPath(parseInt(id)));
     }
     setReadingUploading(false);
+  };
+
+  const onDelete = async () => {
+    setReadingDeleting(true);
+    setErrorSnackbarOpen(false);
+    setReadingError(null);
+    const responseData = await axiosDeleteElectricityReading(
+      parseInt(id),
+      "TODO IDENTITY",
+      "todoidentity@example.com"
+    );
+    if (isRequestError(responseData)) {
+      setReadingUploadError(responseData.requestErrorDescription);
+      setErrorSnackbarOpen(true);
+    } else {
+      navigate(routeEnum.ElectricityGraph.path);
+    }
+    setReadingDeleting(false);
   };
 
   return (
@@ -232,9 +253,13 @@ export const ElectricityReadingDetailEditPage = () => {
           loading={readingUploading}
           loadingIndicator={
             uploadProgress < 100 ? (
-              <CircularProgress variant="determinate" value={uploadProgress} />
+              <CircularProgress
+                variant="determinate"
+                color="primary"
+                value={uploadProgress}
+              />
             ) : (
-              <CircularProgress />
+              <CircularProgress color="primary" />
             )
           }
           disableElevation
@@ -244,6 +269,17 @@ export const ElectricityReadingDetailEditPage = () => {
           sx={{ height: 56 }}
         >
           SUBMIT
+        </LoadingButton>
+        <LoadingButton
+          loading={readingDeleting}
+          loadingIndicator={<CircularProgress color="secondary" />}
+          disableElevation
+          onClick={onDelete}
+          variant="contained"
+          color="secondary"
+          sx={{ height: 56 }}
+        >
+          DELETE
         </LoadingButton>
       </Box>
       <Box

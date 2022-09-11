@@ -102,12 +102,12 @@ export const axiosUpdateElectricityReading = async (
 export const axiosDeleteElectricityReading = async (
   id: number,
   _modifier_name: string,
-  _modifier_email: string,
-  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
+  _modifier_email: string
 ) => {
   try {
     const request = `${BASE_URLS}/${id}`;
     await appAxios.delete<void>(request);
+    return 0;
   } catch (error) {
     return commonAxiosErrorHandler(error);
   }
