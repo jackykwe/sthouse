@@ -1,11 +1,12 @@
 import {
   ElectricityReadingCreatePageLazy,
+  ElectricityReadingDetailPageLazy,
   ElectricityReadingGraphPageLazy,
   HomePageLazy,
   UserListPageLazy,
 } from "pages";
 import { CallbackPageLazy } from "pages/CallbackPage/CallbackPageLazy";
-import { ElectricityReadingDetailPageLazy } from "pages/ElectricityReadingDetailPage/ElectricityReadingDetailPageLazy";
+import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
 import { LazyExoticComponent } from "react";
 import { generatePath } from "react-router-dom";
@@ -41,6 +42,10 @@ export const routeEnum = {
     path: "/electricity-readings/:id",
     element: ElectricityReadingDetailPageLazy,
   },
+  ElectricityDetailEdit: {
+    path: "/electricity-readings/:id/edit",
+    element: ElectricityReadingDetailEditPageLazy,
+  },
   UserList: {
     appBarName: "Users (Debug)",
     path: "/users",
@@ -68,3 +73,6 @@ export const appBarRouteEnum: Record<
 
 export const generateElectricityDetailPath = (id: number) =>
   generatePath(routeEnum.ElectricityDetail.path, { id: id.toString() });
+
+export const generateElectricityDetailEditPath = (id: number) =>
+  generatePath(routeEnum.ElectricityDetailEdit.path, { id: id.toString() });

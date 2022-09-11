@@ -17,20 +17,15 @@ import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { axiosCreateElectricityReading } from "services/electricity_readings";
 import { isRequestError } from "types";
 
-interface ElectricityReadingCreatePageFormValues {
+// Most of this page's skeleton is from ElectricityReadingCreatePage.
+
+interface ElectricityReadingDetailEditPageFormValues {
   low_kwh: string;
   normal_kwh: string;
   image: string;
 }
 
-/**
- * Image preview courtesy of
- * https://medium.com/@650egor/react-30-day-challenge-day-2-image-upload-preview-2d534f8eaaa
- *
- * Image fitting to container courtesy of
- * https://stackoverflow.com/a/41775258
- */
-export const ElectricityReadingCreatePage = () => {
+export const ElectricityReadingDetailEditPage = () => {
   const navigate = useNavigate();
 
   const [imageFile, setImageFile] = useState<Blob | null>(null);
@@ -48,10 +43,10 @@ export const ElectricityReadingCreatePage = () => {
   >(null);
 
   const { control, handleSubmit } =
-    useForm<ElectricityReadingCreatePageFormValues>();
+    useForm<ElectricityReadingDetailEditPageFormValues>();
 
   const onSubmit: SubmitHandler<
-    ElectricityReadingCreatePageFormValues
+    ElectricityReadingDetailEditPageFormValues
   > = async (data) => {
     setElectricityReadingsUploading(true);
     setUploadProgress(0);
@@ -229,4 +224,4 @@ export const ElectricityReadingCreatePage = () => {
   );
 };
 
-export default ElectricityReadingCreatePage;
+export default ElectricityReadingDetailEditPage;

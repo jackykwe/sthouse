@@ -1,3 +1,5 @@
+import "@fontsource/fira-sans";
+import "@fontsource/jetbrains-mono";
 import { PaletteMode, ThemeOptions } from "@mui/material";
 
 export const appThemeOptions: (mode: PaletteMode) => ThemeOptions = (mode) => ({
