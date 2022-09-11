@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
+import { PageError } from "pages/PageError/PageError";
 import { useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -39,40 +40,44 @@ export const ElectricityReadingCreatePage = () => {
     [imageFile]
   );
 
-  const [electricityReadingsUploading, setElectricityReadingsUploading] =
+  const [electricityReadingUploading, setElectricityReadingUploading] =
     useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  const [electricityReadingsError, setElectricityReadingsError] = useState<
+  const [electricityReadingError, setElectricityReadingError] = useState<
     string | null
   >(null);
 
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
 
+  if (electricityReadingError !== null) {
+    return <PageError errorMessage={electricityReadingError} />;
+  }
+
   const onSubmit: SubmitHandler<
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
-    setElectricityReadingsUploading(true);
+    setElectricityReadingUploading(true);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
-    setElectricityReadingsError(null);
+    setElectricityReadingError(null);
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
+      imageFile!, // assumed non-null, since react-hook-form validated
       "TODO IDENTITY",
       "todoidentity@example.com",
-      imageFile!, // assumed non-null, since react-hook-form validated
       setUploadProgress
     );
     if (isRequestError(responseData)) {
-      setElectricityReadingsError(responseData.requestErrorDescription);
+      setElectricityReadingError(responseData.requestErrorDescription);
       setErrorSnackbarOpen(true);
     } else {
       // responseData is the new ID of the newly created entry
       navigate(generateElectricityDetailPath(responseData));
     }
-    setElectricityReadingsUploading(false);
+    setElectricityReadingUploading(false);
   };
 
   return (
@@ -96,7 +101,7 @@ export const ElectricityReadingCreatePage = () => {
               variant="outlined"
               value={field.value}
               error={fieldState.error !== undefined}
-              helperText={fieldState.error?.message ?? ""}
+              helperText={fieldState.error?.message ?? " "}
               onChange={field.onChange}
               onBlur={field.onBlur}
               InputProps={{
@@ -119,7 +124,7 @@ export const ElectricityReadingCreatePage = () => {
               variant="outlined"
               value={field.value}
               error={fieldState.error !== undefined}
-              helperText={fieldState.error?.message ?? ""}
+              helperText={fieldState.error?.message ?? " "}
               onChange={field.onChange}
               onBlur={field.onBlur}
               InputProps={{
@@ -169,7 +174,7 @@ export const ElectricityReadingCreatePage = () => {
           rules={{ required: "Please select an image" }}
         />
         <LoadingButton
-          loading={electricityReadingsUploading}
+          loading={electricityReadingUploading}
           loadingIndicator={
             uploadProgress < 100 ? (
               <CircularProgress variant="determinate" value={uploadProgress} />
@@ -188,7 +193,7 @@ export const ElectricityReadingCreatePage = () => {
       </Box>
       <Box
         sx={{
-          flexGrow: 1,
+          flexGrow: imageFile !== null ? 0 : 1,
           display: "flex",
           justifyContent: "center",
           alignItems: imageFile !== null ? "normal" : "center",
@@ -199,7 +204,10 @@ export const ElectricityReadingCreatePage = () => {
           <img
             src={imageFilePreviewURLMemo}
             alt="Preview of electricty reading"
-            style={{ objectFit: "scale-down" }}
+            style={{
+              maxWidth: "100%",
+              objectFit: "scale-down",
+            }}
           />
         ) : (
           <span>No image selected</span>
@@ -222,7 +230,7 @@ export const ElectricityReadingCreatePage = () => {
             </IconButton>
           }
         >
-          Submission failed: {electricityReadingsError}. Please try again later.
+          Submission failed: {electricityReadingError}. Please try again later.
         </Alert>
       </Snackbar>
     </>

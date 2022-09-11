@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { formatInTimeZone } from "date-fns-tz";
 import _ from "lodash";
-import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
+import { NotFoundPageLazy } from "pages";
 import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,9 +23,9 @@ import {
   fromUnixTimeMillisUtil,
 } from "utils/dateUtils";
 
-const isValidParam = (id: string) => /^\d+$/.test(id);
+export const isValidParam = (id: string) => /^\d+$/.test(id);
 
-const responseIs404 = (error: string | null) =>
+export const responseIs404 = (error: string | null) =>
   error === null ? false : error === "404 Not Found ";
 
 export const ElectricityReadingDetailPage = () => {
@@ -78,6 +78,7 @@ export const ElectricityReadingDetailPage = () => {
           display: "flex",
           gap: (theme) => theme.spacing(1),
           alignSelf: "center",
+          marginBottom: (theme) => theme.spacing(1),
         }}
       >
         <Typography variant="h4">On </Typography>
@@ -112,7 +113,7 @@ export const ElectricityReadingDetailPage = () => {
               variant="h5"
               fontWeight={700}
               fontFamily="Jetbrains Mono"
-              width={100}
+              width={112}
               align="right"
             >
               {electricityReadingData.low_kwh.toFixed(1)}
@@ -133,7 +134,7 @@ export const ElectricityReadingDetailPage = () => {
               variant="h5"
               fontWeight={700}
               fontFamily="Jetbrains Mono"
-              width={100}
+              width={112}
               align="right"
             >
               {electricityReadingData.normal_kwh.toFixed(1)}
@@ -155,18 +156,17 @@ export const ElectricityReadingDetailPage = () => {
 
       <Box
         sx={{
-          flexGrow: 1,
           display: "flex",
           justifyContent: "center",
           alignItems: "normal",
           minHeight: 0,
-          margin: (theme) => theme.spacing(1),
+          marginY: (theme) => theme.spacing(1),
         }}
       >
         <img
           src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
           alt={`Failed to fetch ${id}.jpg`}
-          style={{ objectFit: "scale-down" }}
+          style={{ objectFit: "scale-down", maxWidth: "100%" }}
         />
       </Box>
 
