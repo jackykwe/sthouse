@@ -205,6 +205,7 @@ pub async fn handler_update_electricity_reading(
     Ok(HttpResponse::NoContent().finish())
 }
 
+// TODO: TRANSMIT IDENTITY FROM FRONTEND TO BACKEND
 #[delete("/{reading_id}")]
 pub async fn handler_delete_electricity_reading(
     pool: web::Data<Pool<Sqlite>>,

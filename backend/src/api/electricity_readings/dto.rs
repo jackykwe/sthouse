@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct ElectricityReadingCreateMultipartForm {
     pub low_kwh: f64,
     pub normal_kwh: f64,
+    pub image: File,
     pub creator_name: String,
     pub creator_email: String,
-    pub image: File,
 }
 
 #[derive(Serialize, Deserialize)]
