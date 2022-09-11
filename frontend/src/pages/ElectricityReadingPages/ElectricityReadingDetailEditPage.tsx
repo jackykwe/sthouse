@@ -6,6 +6,11 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Snackbar from "@mui/material/Snackbar";
@@ -70,8 +75,9 @@ export const ElectricityReadingDetailEditPage = () => {
   // HOOKS FOR UPLOADING
   const [readingUploading, setReadingUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  // HOOKS FOR UPLOADING
+  // HOOKS FOR DELETING
   const [readingDeleting, setReadingDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   // HOOKS FOR UPLOADING AND DELETING
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
   const [readingUploadError, setReadingUploadError] = useState<string | null>(
@@ -229,7 +235,7 @@ export const ElectricityReadingDetailEditPage = () => {
                 variant="outlined"
                 sx={{ height: 56 }}
               >
-                Select Photo
+                Change Photo
                 <input
                   hidden
                   accept="image/*"
@@ -270,17 +276,15 @@ export const ElectricityReadingDetailEditPage = () => {
         >
           SUBMIT
         </LoadingButton>
-        <LoadingButton
-          loading={readingDeleting}
-          loadingIndicator={<CircularProgress color="secondary" />}
+        <Button
           disableElevation
-          onClick={onDelete}
+          onClick={() => setDeleteDialogOpen(true)}
           variant="contained"
           color="secondary"
           sx={{ height: 56 }}
         >
-          DELETE
-        </LoadingButton>
+          Delete
+        </Button>
       </Box>
       <Box
         sx={{
@@ -304,6 +308,28 @@ export const ElectricityReadingDetailEditPage = () => {
           />
         )}
       </Box>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Delete this entry?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>This action is irreversible.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <LoadingButton
+            loading={readingDeleting}
+            loadingIndicator={<CircularProgress color="secondary" size={24} />}
+            disableElevation
+            onClick={onDelete}
+            variant="contained"
+            color="secondary"
+          >
+            Delete
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={errorSnackbarOpen}
         onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
