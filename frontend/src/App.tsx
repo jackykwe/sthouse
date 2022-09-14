@@ -45,18 +45,35 @@ const authLoadingTexts = [
   "Adjusting the heater...",
 ];
 
+const SELECTED_PALETTE_MODE_KEY = "selectedPaletteMode";
+function selectedPaletteModeIsValid(
+  selectedPaletteMode: string | null
+): selectedPaletteMode is PaletteMode {
+  return (
+    selectedPaletteMode !== null &&
+    ["light", "dark"].includes(selectedPaletteMode)
+  );
+}
+
 export const App = () => {
+  const selectedPaletteMode = localStorage.getItem(SELECTED_PALETTE_MODE_KEY);
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)"); // default false
 
   const [mode, setMode] = useState<PaletteMode>(
-    prefersDarkMode ? "dark" : "light"
+    selectedPaletteModeIsValid(selectedPaletteMode)
+      ? selectedPaletteMode
+      : prefersDarkMode
+      ? "dark"
+      : "light"
   );
   const colourMode = useMemo(
     () => ({
       toggleColourMode: () => {
-        setMode((prevMode: PaletteMode) =>
-          prevMode === "light" ? "dark" : "light"
-        );
+        setMode((prevMode) => {
+          const newMode = prevMode === "light" ? "dark" : "light";
+          localStorage.setItem(SELECTED_PALETTE_MODE_KEY, newMode);
+          return newMode;
+        });
       },
     }),
     []
