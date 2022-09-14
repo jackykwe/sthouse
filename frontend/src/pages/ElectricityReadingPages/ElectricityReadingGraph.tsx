@@ -296,15 +296,29 @@ export const ElectricityReadingGraph = (
             formatMillisInTzUtil(unix_ts_millis, DATE_FMTSTR_HMSDDMY_TZ)
           }
           formatter={(value: number, name: string) =>
+            // yes, I'm subverting the type system here. No choice, bad API. Bad language.
             name === "low_kwh"
-              ? [`${value.toFixed(1)} kWh`, "Low"]
+              ? [`${value.toFixed(1)} kWh` as unknown as number, "Low"]
               : name === "normal_kwh"
-              ? [`${value.toFixed(1)} kWh`, "Normal"]
+              ? [`${value.toFixed(1)} kWh` as unknown as number, "Normal"]
               : name === "low_kwh_best_fit"
-              ? [`${value.toFixed(1)} kWh (Linear interpolation)`, "Low"]
+              ? [
+                  `${value.toFixed(
+                    1
+                  )} kWh (Linear interpolation)` as unknown as number,
+                  "Low",
+                ]
               : name === "normal_kwh_best_fit"
-              ? [`${value.toFixed(1)} kWh (Linear interpolation)`, "Normal"]
-              : "ERROR PLEASE REPORT THIS BUG"
+              ? [
+                  `${value.toFixed(
+                    1
+                  )} kWh (Linear interpolation)` as unknown as number,
+                  "Normal",
+                ]
+              : [
+                  "ERROR PLEASE REPORT THIS BUG" as unknown as number,
+                  "ERROR PLEASE REPORT THIS BUG",
+                ]
           }
         />
         <Line

@@ -1,10 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
 import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import MenuIcon from "@mui/icons-material/Menu";
 import OutletIcon from "@mui/icons-material/Outlet";
-import { useTheme } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -16,15 +13,13 @@ import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { ColourModeContext } from "App";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { appBarRouteEnum, routeEnum } from "routes/RouteEnum";
+import { LightDarkToggle } from "./LightDarkToggle";
 import LogoutMenuItem from "./LogoutMenuItem";
 
 export const AuthenticatedAppBar = () => {
-  const theme = useTheme();
-  const colourMode = useContext(ColourModeContext);
   const navigate = useNavigate();
   const { user } = useAuth0();
 
@@ -128,43 +123,49 @@ export const AuthenticatedAppBar = () => {
           </Menu>
         </Box>
 
-        <IconButton
-          sx={{ marginLeft: "auto", marginRight: (theme) => theme.spacing(1) }}
-          onClick={colourMode.toggleColourMode}
-          color="inherit"
+        <Box
+          sx={{
+            display: "flex",
+            marginLeft: "auto",
+            alignItems: "center",
+          }}
         >
-          {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
-        </IconButton>
-        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}>
-          <IconButton
-            disableRipple
-            onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
+          <Box sx={{ marginRight: -1 }}>
+            <LightDarkToggle />
+          </Box>
+          <Box
+            sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}
           >
-            <Tooltip title={getAvatarTooltip()} arrow>
-              <Avatar
-                alt={user?.given_name ?? user?.name}
-                src={user?.picture}
-                sx={{
-                  outlineStyle: Boolean(avatarAnchorEl) ? "solid" : "none",
-                  outlineWidth: 4,
-                  outlineColor: "#FFFFFF88",
-                }}
-              />
-            </Tooltip>
-          </IconButton>
-          <Menu
-            keepMounted
-            anchorEl={avatarAnchorEl}
-            anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
-            transformOrigin={{ horizontal: "center", vertical: "top" }}
-            open={Boolean(avatarAnchorEl)}
-            onClose={() => setAvatarAnchorEl(null)}
-            sx={{ display: "block" }}
-          >
-            <MenuItem disabled>Logged in as {getAvatarTooltip()}</MenuItem>
-            <Divider />
-            <LogoutMenuItem />
-          </Menu>
+            <IconButton
+              disableRipple
+              onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
+            >
+              <Tooltip title={getAvatarTooltip()} arrow>
+                <Avatar
+                  alt={user?.given_name ?? user?.name}
+                  src={user?.picture}
+                  sx={{
+                    outlineStyle: Boolean(avatarAnchorEl) ? "solid" : "none",
+                    outlineWidth: 4,
+                    outlineColor: "#FFFFFF88",
+                  }}
+                />
+              </Tooltip>
+            </IconButton>
+            <Menu
+              keepMounted
+              anchorEl={avatarAnchorEl}
+              anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+              transformOrigin={{ horizontal: "center", vertical: "top" }}
+              open={Boolean(avatarAnchorEl)}
+              onClose={() => setAvatarAnchorEl(null)}
+              sx={{ display: "block" }}
+            >
+              <MenuItem disabled>Logged in as {getAvatarTooltip()}</MenuItem>
+              <Divider />
+              <LogoutMenuItem />
+            </Menu>
+          </Box>
         </Box>
       </Toolbar>
     </AppBar>

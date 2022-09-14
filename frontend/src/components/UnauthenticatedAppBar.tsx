@@ -1,9 +1,6 @@
-import DarkModeIcon from "@mui/icons-material/DarkMode";
 import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import MenuIcon from "@mui/icons-material/Menu";
 import OutletIcon from "@mui/icons-material/Outlet";
-import { useTheme } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,16 +8,14 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { ColourModeContext } from "App";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { routeEnum } from "routes/RouteEnum";
+import { LightDarkToggle } from "./LightDarkToggle";
 import LoginButton from "./LoginButton";
 import LoginMenuItem from "./LoginMenuItem";
 
 export const UnauthenticatedAppBar = () => {
-  const theme = useTheme();
-  const colourMode = useContext(ColourModeContext);
   const navigate = useNavigate();
 
   const [navAnchorEl, setNavAnchorEl] = useState<HTMLElement | null>(null);
@@ -86,15 +81,17 @@ export const UnauthenticatedAppBar = () => {
           </Menu>
         </Box>
 
-        <IconButton
-          sx={{ ml: "auto", mr: (theme) => theme.spacing(1) }}
-          onClick={colourMode.toggleColourMode}
-          color="inherit"
+        <Box
+          sx={{
+            display: "flex",
+            marginLeft: "auto",
+            alignItems: "center",
+          }}
         >
-          {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
-        </IconButton>
-        <Box sx={{ display: { xs: "none", sm: "flex" } }}>
-          <LoginButton />
+          <LightDarkToggle />
+          <Box sx={{ display: { xs: "none", sm: "flex" } }}>
+            <LoginButton />
+          </Box>
         </Box>
       </Toolbar>
     </AppBar>
