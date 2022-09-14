@@ -82,6 +82,31 @@ export const axiosGetElectricityReading = async (
   }
 };
 
+export const axiosGetElectricityReadingImage = async (
+  id: number,
+  accessToken: string
+) => {
+  try {
+    const request = `${BASE_URLS}/images/compressed/${id}.jpg`;
+    const response = await appAxios.get<ArrayBuffer>(request, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      responseType: "arraybuffer",
+    });
+    const base64 = window.btoa(
+      new Uint8Array(response.data).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      )
+    ); // deprecation workaround at https://stackoverflow.com/a/70733727
+    return base64;
+  } catch (error) {
+    console.log(error);
+    return commonAxiosErrorHandler(error);
+  }
+};
+
 export const axiosUpdateElectricityReading = async (
   id: number,
   low_kwh: number,

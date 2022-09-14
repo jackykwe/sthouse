@@ -13,9 +13,9 @@ import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailEditPath } from "routes/RouteEnum";
-import { BACKEND_API_URL } from "services";
 import {
   axiosGetElectricityReading,
+  axiosGetElectricityReadingImage,
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
@@ -29,6 +29,7 @@ export const ElectricityReadingDetailPage = () => {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
+  const [imageBase64, setImageBase64] = useState("");
   const [readingLoading, setReadingLoading] = useState(false);
   const [readingData, setReadingData] =
     useState<ElectricityReadingReadFullDTO | null>(null);
@@ -38,6 +39,18 @@ export const ElectricityReadingDetailPage = () => {
     if (!isAuthenticated) return;
 
     const accessToken = await getAccessTokenSilently();
+    // Fetch image
+    const newImageBase64 = await axiosGetElectricityReadingImage(
+      id,
+      accessToken
+    );
+    if (isRequestError(newImageBase64)) {
+      setReadingError(newImageBase64.requestErrorDescription);
+      return;
+    } else {
+      setImageBase64(newImageBase64);
+    }
+    // Fetch data
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
@@ -160,7 +173,8 @@ export const ElectricityReadingDetailPage = () => {
         }}
       >
         <img
-          src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
+          // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
+          src={`data:image/jpeg;base64,${imageBase64}`}
           alt={`Failed to fetch ${id}.jpg`}
           style={{ objectFit: "scale-down", maxWidth: "100%" }}
         />
