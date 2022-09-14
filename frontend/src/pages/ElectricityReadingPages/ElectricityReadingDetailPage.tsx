@@ -1,5 +1,6 @@
 // interface ElectricityReadingDetailPageProps {}
 
+import { useAuth0 } from "@auth0/auth0-react";
 import EditIcon from "@mui/icons-material/Edit";
 import Box from "@mui/material/Box";
 import { grey } from "@mui/material/colors";
@@ -24,6 +25,7 @@ export const ElectricityReadingDetailPage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
+  const { getAccessTokenSilently } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
   const [readingLoading, setReadingLoading] = useState(false);
@@ -32,7 +34,8 @@ export const ElectricityReadingDetailPage = () => {
   const [readingError, setReadingError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
-    const responseData = await axiosGetElectricityReading(id);
+    const accessToken = await getAccessTokenSilently();
+    const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
     } else {

@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   createTheme,
   CssBaseline,
@@ -7,6 +8,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createContext, useMemo, useState } from "react";
@@ -49,33 +51,49 @@ export const App = () => {
     [mode]
   );
 
+  const { isLoading } = useAuth0();
+
   return (
     <ColourModeContext.Provider value={colourMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline enableColorScheme />
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <BrowserRouter>
+          {isLoading ? (
             <Box
               sx={{
                 height: "100vh",
                 display: "flex",
                 flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <MyAppBar />
+              <CircularProgress size={72} />
+            </Box>
+          ) : (
+            <BrowserRouter>
               <Box
                 sx={{
-                  flexGrow: 1,
-                  overflow: "auto",
-                  padding: (theme) => theme.spacing(2),
+                  height: "100vh",
                   display: "flex",
                   flexDirection: "column",
                 }}
               >
-                <AppRoutes />
+                <MyAppBar />
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    overflow: "auto",
+                    padding: (theme) => theme.spacing(2),
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <AppRoutes />
+                </Box>
               </Box>
-            </Box>
-          </BrowserRouter>
+            </BrowserRouter>
+          )}
         </LocalizationProvider>
       </ThemeProvider>
     </ColourModeContext.Provider>

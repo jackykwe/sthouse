@@ -11,19 +11,19 @@ export const axiosCreateElectricityReading = async (
   low_kwh: number,
   normal_kwh: number,
   imageFile: Blob,
-  creator_name: string,
-  creator_email: string,
-  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>,
+  accessToken: string
 ) => {
   try {
     const formData = new FormData();
     formData.append("low_kwh", low_kwh.toString());
     formData.append("normal_kwh", normal_kwh.toString());
-    formData.append("creator_name", creator_name);
-    formData.append("creator_email", creator_email);
     formData.append("image", imageFile);
     const request = BASE_URLS;
     const response = await appAxios.post<number>(request, formData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       onUploadProgress: (progressEvent: ProgressEvent) => {
         setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
       },
@@ -38,14 +38,18 @@ export const axiosCreateElectricityReading = async (
  * Backend returns a list sorted by timestamp
  */
 export const axiosGetAllElectricityReadings = async (
-  startUnixTsMillisInc?: number,
-  endUnixTsMillisInc?: number
+  startUnixTsMillisInc: number | undefined,
+  endUnixTsMillisInc: number | undefined,
+  accessToken: string
 ) => {
   try {
     const request = BASE_URLS;
     const response = await appAxios.get<ElectricityReadingReadGraphDTO[]>(
       request,
       {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
         params: {
           start_unix_ts_millis_inc: startUnixTsMillisInc,
           end_unix_ts_millis_inc: endUnixTsMillisInc,
@@ -58,10 +62,20 @@ export const axiosGetAllElectricityReadings = async (
   }
 };
 
-export const axiosGetElectricityReading = async (id: number) => {
+export const axiosGetElectricityReading = async (
+  id: number,
+  accessToken: string
+) => {
   try {
     const request = `${BASE_URLS}/${id}`;
-    const response = await appAxios.get<ElectricityReadingReadFullDTO>(request);
+    const response = await appAxios.get<ElectricityReadingReadFullDTO>(
+      request,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     return commonAxiosErrorHandler(error);
@@ -73,21 +87,21 @@ export const axiosUpdateElectricityReading = async (
   low_kwh: number,
   normal_kwh: number,
   imageFile: Blob | null,
-  modifier_name: string,
-  modifier_email: string,
-  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>,
+  accessToken: string
 ) => {
   try {
     const formData = new FormData();
     formData.append("low_kwh", low_kwh.toString());
     formData.append("normal_kwh", normal_kwh.toString());
-    formData.append("modifier_name", modifier_name);
-    formData.append("modifier_email", modifier_email);
     if (imageFile !== null) {
       formData.append("image", imageFile);
     }
     const request = `${BASE_URLS}/${id}`;
     await appAxios.put<void>(request, formData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       onUploadProgress: (progressEvent: ProgressEvent) => {
         setUploadProgress((progressEvent.loaded / progressEvent.total) * 100);
       },
@@ -98,15 +112,17 @@ export const axiosUpdateElectricityReading = async (
   }
 };
 
-// TODO: TRANSMIT IDENTITY FROM FRONTEND TO BACKEND
 export const axiosDeleteElectricityReading = async (
   id: number,
-  _modifier_name: string,
-  _modifier_email: string
+  accessToken: string
 ) => {
   try {
     const request = `${BASE_URLS}/${id}`;
-    await appAxios.delete<void>(request);
+    await appAxios.delete<void>(request, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return 0;
   } catch (error) {
     return commonAxiosErrorHandler(error);

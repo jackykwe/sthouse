@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,9 +13,11 @@ import { ElectricityReadingGraphHeader } from "./ElectricityReadingGraphHeader";
 import { useElectricityReadingClientSlice } from "./store";
 
 export const ElectricityReadingGraphPage = () => {
+  // GENERAL HOOKS
   const dispatch = useDispatch();
+  const { getAccessTokenSilently } = useAuth0();
 
-  // Client redux state selectors
+  // CLIENT REDUX STATE SELECTORS
   const {
     actions: { setGraphStartMillisActInc, setGraphAbsorbCount },
     selectors: {
@@ -27,6 +30,7 @@ export const ElectricityReadingGraphPage = () => {
   const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
   const graphAbsorbCount = useSelector(selectGraphAbsorbCount);
 
+  // HOOKS FOR FETCHING DATA
   const [readingsLoading, setReadingsLoading] = useState(false);
   const [readingsData, setReadingsData] = useState<
     ElectricityReadingReadGraphDTO[] | null
@@ -39,9 +43,11 @@ export const ElectricityReadingGraphPage = () => {
   ) => {
     setReadingsLoading(true);
     setReadingsError(null);
+    const accessToken = await getAccessTokenSilently();
     const responseData = await axiosGetAllElectricityReadings(
       startUnixTsMillisInc,
-      endUnixTsMillisInc
+      endUnixTsMillisInc,
+      accessToken
     );
     if (isRequestError(responseData)) {
       setReadingsError(responseData.requestErrorDescription);
@@ -50,11 +56,9 @@ export const ElectricityReadingGraphPage = () => {
     }
     setReadingsLoading(false);
   };
-
-  // Debounced HTTP request-making functions
   const debouncedGetReadings = _.debounce(getReadings, 300);
 
-  // Use Effects
+  // BUSINESS LOGIC: USE EFFECTS GALORE
   useEffect(() => {
     // When the page is loaded (very first load or further reloads)
     // console.log(

@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
 import LightModeIcon from "@mui/icons-material/LightMode";
@@ -11,11 +12,14 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { ColourModeContext } from "App";
 import { MouseEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { appBarRouteEnum, routeEnum } from "routes/RouteEnum";
+import LoginButton from "./LoginButton";
+import LogoutButton from "./LogoutButton";
 
 // const settings = ["Profile", "Activity", "Logout"];
 
@@ -25,6 +29,8 @@ export const MyAppBar = () => {
 
   const [navAnchorEl, setNavAnchorEl] = useState<HTMLElement | null>(null);
   const navigate = useNavigate();
+
+  const { user, isAuthenticated } = useAuth0();
 
   const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setNavAnchorEl(event.currentTarget);
@@ -118,12 +124,26 @@ export const MyAppBar = () => {
         </Box>
 
         <IconButton
-          sx={{ ml: "auto" }}
+          sx={{ ml: "auto", mr: (theme) => theme.spacing(1) }}
           onClick={colourMode.toggleColourMode}
           color="inherit"
         >
           {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
         </IconButton>
+
+        {isAuthenticated ? (
+          <>
+            <Tooltip title={user?.email ?? "unknown email"} arrow>
+              <Typography fontStyle="italic">
+                Logged in as {user?.given_name}
+              </Typography>
+            </Tooltip>
+
+            <LogoutButton />
+          </>
+        ) : (
+          <LoginButton />
+        )}
       </Toolbar>
     </AppBar>
   );

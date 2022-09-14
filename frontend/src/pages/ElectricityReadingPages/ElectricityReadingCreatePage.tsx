@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -32,8 +33,9 @@ interface ElectricityReadingCreatePageFormValues {
  * https://stackoverflow.com/a/41775258
  */
 export const ElectricityReadingCreatePage = () => {
-  // HOOKS
+  // GENERAL HOOKS
   const navigate = useNavigate();
+  const { getAccessTokenSilently } = useAuth0();
 
   // HOOKS FOR UPLOADING
   const [readingUploading, setReadingUploading] = useState(false);
@@ -64,13 +66,13 @@ export const ElectricityReadingCreatePage = () => {
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
     setReadingUploadError(null);
+    const accessToken = await getAccessTokenSilently();
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
       imageFile!, // assumed non-null, since react-hook-form validated
-      "TODO IDENTITY",
-      "todoidentity@example.com",
-      setUploadProgress
+      setUploadProgress,
+      accessToken
     );
     if (isRequestError(responseData)) {
       setReadingUploadError(responseData.requestErrorDescription);

@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -47,6 +48,7 @@ export const ElectricityReadingDetailEditPage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
+  const { getAccessTokenSilently } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
   const [readingLoading, setReadingLoading] = useState(false);
@@ -55,7 +57,8 @@ export const ElectricityReadingDetailEditPage = () => {
   const [readingError, setReadingError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
-    const responseData = await axiosGetElectricityReading(id);
+    const accessToken = await getAccessTokenSilently();
+    const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
     } else {
@@ -113,14 +116,14 @@ export const ElectricityReadingDetailEditPage = () => {
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
     setReadingError(null);
+    const accessToken = await getAccessTokenSilently();
     const responseData = await axiosUpdateElectricityReading(
       parseInt(id),
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
       imageFile, // if null, no new file will be uploaded
-      "TODO IDENTITY",
-      "todoidentity@example.com",
-      setUploadProgress
+      setUploadProgress,
+      accessToken
     );
     if (isRequestError(responseData)) {
       setReadingUploadError(responseData.requestErrorDescription);
@@ -135,10 +138,10 @@ export const ElectricityReadingDetailEditPage = () => {
     setReadingDeleting(true);
     setErrorSnackbarOpen(false);
     setReadingError(null);
+    const accessToken = await getAccessTokenSilently();
     const responseData = await axiosDeleteElectricityReading(
       parseInt(id),
-      "TODO IDENTITY",
-      "todoidentity@example.com"
+      accessToken
     );
     if (isRequestError(responseData)) {
       setReadingUploadError(responseData.requestErrorDescription);
