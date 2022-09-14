@@ -6,15 +6,25 @@ export const commonAxiosErrorHandler = (error: unknown) => {
     axios.isAxiosError(error) &&
     (error as AxiosError).response !== undefined
   ) {
-    return {
-      requestErrorCode: error.response!.status,
-      requestErrorDescription:
-        error.response!.status !== 0
-          ? `${error.response!.status} ${error.response!.statusText} ${
-              error.response!.data
-            }`
-          : "Unable to reach backend",
-    } as RequestError;
+    switch (error.response!.status) {
+      case 401:
+        return {
+          requestErrorCode: error.response!.status,
+          requestErrorDescription:
+            `[${error.response!.status} ${
+              error.response!.statusText
+            }] Please try again.` + (` (${error.response!.data})` ?? ""),
+        } as RequestError;
+      default:
+        return {
+          requestErrorCode: error.response!.status,
+          requestErrorDescription:
+            error.response!.status !== 0
+              ? `[${error.response!.status} ${error.response!.statusText}]` +
+                (` ${error.response!.data}` ?? "")
+              : "Unable to reach backend",
+        } as RequestError;
+    }
   }
   return {
     requestErrorDescription: "Unknown error encountered",

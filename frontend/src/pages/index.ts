@@ -4,4 +4,3 @@ export { ElectricityReadingDetailPageLazy } from "./ElectricityReadingPages/Elec
 export { ElectricityReadingGraphPageLazy } from "./ElectricityReadingPages/ElectricityReadingGraphPageLazy";
 export { HomePageLazy } from "./HomePage/HomePageLazy";
 export { NotFoundPageLazy } from "./NotFoundPage/NotFoundPageLazy";
-export { UserListPageLazy } from "./UserListPage/UserListPageLazy";

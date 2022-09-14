@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import _ from "lodash";
+import { PageError } from "pages/PageError/PageError";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -15,7 +16,7 @@ import { useElectricityReadingClientSlice } from "./store";
 export const ElectricityReadingGraphPage = () => {
   // GENERAL HOOKS
   const dispatch = useDispatch();
-  const { getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
   // CLIENT REDUX STATE SELECTORS
   const {
@@ -41,6 +42,8 @@ export const ElectricityReadingGraphPage = () => {
     startUnixTsMillisInc: number | undefined,
     endUnixTsMillisInc: number | undefined
   ) => {
+    if (!isAuthenticated) return;
+
     setReadingsLoading(true);
     setReadingsError(null);
     const accessToken = await getAccessTokenSilently();
@@ -71,7 +74,7 @@ export const ElectricityReadingGraphPage = () => {
       graphEndMillisActInc
     );
     return () => {
-      dispatch(setGraphAbsorbCount(1));
+      dispatch(setGraphAbsorbCount(readingsData === null ? 2 : 1));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -106,8 +109,8 @@ export const ElectricityReadingGraphPage = () => {
   useEffect(() => {
     // console.log("STS/ETS DEP USEEFFECT RAN...");
     // 2 absorb counts:
-    // one to absorb when this useEffect() runs no matter what, and
-    // one to absorb when graphStartUnixTsMillisActInc is changed after first insert
+    // one to absorb when this useEffect() runs no matter what (this one gets reset on navigating away),
+    // and one to absorb when graphStartUnixTsMillisActInc is changed after first insert
     if (graphAbsorbCount > 0) {
       // console.log(
       //   `sts or ets changed: graphAbsorbCount is decremented to ${
@@ -123,6 +126,10 @@ export const ElectricityReadingGraphPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphStartMillisActInc, graphEndMillisActInc]);
+
+  if (!isAuthenticated) {
+    return <PageError errorMessage="Please log in to access this page." />;
+  }
 
   return (
     <>

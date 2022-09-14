@@ -7,9 +7,12 @@ export const LoginButton = () => {
 
   return (
     <Button
+      disableElevation
       disableRipple
       onClick={() => loginWithRedirect()}
       sx={{ textTransform: "none" }}
+      variant="contained"
+      color="secondary"
     >
       <Typography variant="subtitle1">Log In</Typography>
     </Button>

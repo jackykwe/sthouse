@@ -35,7 +35,7 @@ interface ElectricityReadingCreatePageFormValues {
 export const ElectricityReadingCreatePage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR UPLOADING
   const [readingUploading, setReadingUploading] = useState(false);
@@ -54,11 +54,6 @@ export const ElectricityReadingCreatePage = () => {
   const { control, handleSubmit } =
     useForm<ElectricityReadingCreatePageFormValues>();
 
-  // EARLY RETURNS
-  if (readingUploadError !== null) {
-    return <PageError errorMessage={readingUploadError} />;
-  }
-
   const onSubmit: SubmitHandler<
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
@@ -66,7 +61,7 @@ export const ElectricityReadingCreatePage = () => {
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
     setReadingUploadError(null);
-    const accessToken = await getAccessTokenSilently();
+    const accessToken = await getAccessTokenSilently(); // if not authenticated, will throw exn
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated
       parseFloat(data.normal_kwh), // assumed to never fail, since react-hook-form validated
@@ -83,6 +78,10 @@ export const ElectricityReadingCreatePage = () => {
     }
     setReadingUploading(false);
   };
+
+  if (!isAuthenticated) {
+    return <PageError errorMessage="Please log in to access this page." />;
+  }
 
   return (
     <>
@@ -234,7 +233,7 @@ export const ElectricityReadingCreatePage = () => {
             </IconButton>
           }
         >
-          Submission failed: {readingUploadError}. Please try again later.
+          Submission failed: {readingUploadError}
         </Alert>
       </Snackbar>
     </>

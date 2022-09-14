@@ -48,7 +48,7 @@ export const ElectricityReadingDetailEditPage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
   const [readingLoading, setReadingLoading] = useState(false);
@@ -57,6 +57,8 @@ export const ElectricityReadingDetailEditPage = () => {
   const [readingError, setReadingError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
+    if (!isAuthenticated) return;
+
     const accessToken = await getAccessTokenSilently();
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
@@ -97,6 +99,10 @@ export const ElectricityReadingDetailEditPage = () => {
     useForm<ElectricityReadingDetailEditPageFormValues>();
 
   // EARLY RETURNS
+  if (!isAuthenticated) {
+    return <PageError errorMessage="Please log in to access this page." />;
+  }
+
   if (id === undefined || !isValidParam(id) || responseIs404(readingError)) {
     return <NotFoundPageLazy />;
   }

@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createContext, useMemo, useState } from "react";
@@ -28,6 +29,21 @@ import { AppRoutes } from "./routes/AppRoutes";
 // });
 
 export const ColourModeContext = createContext({ toggleColourMode: () => {} });
+
+const authLoadingTexts = [
+  "Vacuuming the floor...",
+  "Taking out the trash...",
+  "Unclogging the sink...",
+  "Disarming the fire alarm...",
+  "Washing dishes...",
+  "Toasting bagels...",
+  "Cooking rice...",
+  "Cleaning the toilet...",
+  "Removing laundry from washing machine...",
+  "Collecting Asda delivery...",
+  "Ensuring doors are locked...",
+  "Adjusting the heater...",
+];
 
 export const App = () => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)"); // default false
@@ -69,6 +85,16 @@ export const App = () => {
               }}
             >
               <CircularProgress size={72} />
+              <Typography
+                variant="h5"
+                sx={{ margin: (theme) => theme.spacing(2) }}
+              >
+                {
+                  authLoadingTexts[
+                    Math.floor(Math.random() * authLoadingTexts.length)
+                  ]
+                }
+              </Typography>
             </Box>
           ) : (
             <BrowserRouter>

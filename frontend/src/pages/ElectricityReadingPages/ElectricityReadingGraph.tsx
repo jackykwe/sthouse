@@ -172,11 +172,12 @@ export const ElectricityReadingGraph = (
   const graphStartMillisActInc = useSelector(selectGraphStartMillisActInc);
   const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
 
-  if (readingsLoading || readingsData === null) {
-    return <PageLoading />;
-  }
   if (readingsError !== null) {
     return <PageError errorMessage={readingsError} />;
+  }
+
+  if (readingsLoading || readingsData === null) {
+    return <PageLoading />;
   }
 
   if (readingsData.length === 0) {

@@ -3,7 +3,6 @@ import {
   ElectricityReadingDetailPageLazy,
   ElectricityReadingGraphPageLazy,
   HomePageLazy,
-  UserListPageLazy,
 } from "pages";
 import { CallbackPageLazy } from "pages/CallbackPage/CallbackPageLazy";
 import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
@@ -45,11 +44,6 @@ export const routeEnum = {
   ElectricityDetailEdit: {
     path: "/electricity-readings/:id/edit",
     element: ElectricityReadingDetailEditPageLazy,
-  },
-  UserList: {
-    appBarName: "Users (Debug)",
-    path: "/users",
-    element: UserListPageLazy,
   },
   Auth0Callback: {
     path: "/callback",

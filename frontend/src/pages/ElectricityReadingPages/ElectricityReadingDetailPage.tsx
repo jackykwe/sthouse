@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
+import { PageError } from "pages/PageError/PageError";
 import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,7 +26,7 @@ export const ElectricityReadingDetailPage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
   const { id } = useParams();
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
   const [readingLoading, setReadingLoading] = useState(false);
@@ -34,6 +35,8 @@ export const ElectricityReadingDetailPage = () => {
   const [readingError, setReadingError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
+    if (!isAuthenticated) return;
+
     const accessToken = await getAccessTokenSilently();
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
@@ -53,8 +56,16 @@ export const ElectricityReadingDetailPage = () => {
   }, []);
 
   // EARLY RETURNS
+  if (!isAuthenticated) {
+    return <PageError errorMessage="Please log in to access this page." />;
+  }
+
   if (id === undefined || !isValidParam(id) || responseIs404(readingError)) {
     return <NotFoundPageLazy />;
+  }
+
+  if (readingError !== null) {
+    return <PageError errorMessage={readingError} />;
   }
 
   if (readingLoading || readingData === null) {

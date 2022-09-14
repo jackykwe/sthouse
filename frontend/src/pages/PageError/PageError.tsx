@@ -18,11 +18,12 @@ export const PageError = (props: PageErrorProps) => {
         justifyContent: "center",
       }}
     >
-      <ErrorIcon
-        sx={{ fontSize: 60, paddingBottom: (theme) => theme.spacing(1) }}
+      <ErrorIcon sx={{ fontSize: 60 }} color="error" />
+      <Typography
+        variant="h5"
         color="error"
-      />
-      <Typography variant="h5" color="error">
+        sx={{ margin: (theme) => theme.spacing(1) }}
+      >
         {errorMessage}
       </Typography>
     </Box>
