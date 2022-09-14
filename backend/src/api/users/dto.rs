@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct UserReadDTO {
     pub id: i64,
     pub display_name: String,

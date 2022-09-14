@@ -1,6 +1,8 @@
 mod api;
 mod app_env_config;
+mod auth_config;
 mod db;
+mod extractors;
 mod middlewares;
 mod types;
 
@@ -14,6 +16,7 @@ use log::info;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 
 use crate::app_env_config::AppEnvConfig as AEC;
+use crate::auth_config::Auth0EnvConfig as A0EC;
 // use crate::db::types::Pool;
 
 #[actix_web::main]
@@ -23,6 +26,7 @@ async fn main() -> CEResult<()> {
     color_eyre::install()?;
 
     let aec = AEC::read_from_dot_env();
+    let a0ec = A0EC::read_from_dot_env();
 
     let pool = SqlitePoolOptions::new()
         .max_connections(4)
@@ -38,6 +42,7 @@ async fn main() -> CEResult<()> {
     HttpServer::new(move || {
         // one of these is run for every thread (default is number of physical CPUs)
         App::new()
+            .app_data(a0ec.clone())
             .app_data(web::Data::new(pool.clone())) // store db pool as Data object
             .wrap(middleware::Logger::default())
             .wrap(middlewares::cors(&aec.client_origin_url))

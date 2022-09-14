@@ -1,16 +1,14 @@
 use actix_easy_multipart::{File, FromMultipart};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 #[derive(FromMultipart)]
 pub struct ElectricityReadingCreateMultipartForm {
     pub low_kwh: f64,
     pub normal_kwh: f64,
     pub image: File,
-    pub creator_name: String,
-    pub creator_email: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct ElectricityReadingReadFullDTO {
     pub id: i64,
     pub low_kwh: f64,
@@ -21,7 +19,7 @@ pub struct ElectricityReadingReadFullDTO {
     pub latest_modifier_name: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct ElectricityReadingReadGraphDTO {
     pub id: i64,
     pub low_kwh: f64,
@@ -33,7 +31,5 @@ pub struct ElectricityReadingReadGraphDTO {
 pub struct ElectricityReadingUpdateMultipartForm {
     pub low_kwh: f64,
     pub normal_kwh: f64,
-    pub modifier_name: String,
-    pub modifier_email: String,
     pub image: Option<File>,
 }

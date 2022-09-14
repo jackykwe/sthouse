@@ -1,13 +1,11 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct AppEnvConfig {
     pub host: String,
     pub port: u16,
     pub database_url: String,
     pub client_origin_url: String,
-    pub auth0_audience: String,
-    pub auth0_domain: String,
 }
 
 impl AppEnvConfig {

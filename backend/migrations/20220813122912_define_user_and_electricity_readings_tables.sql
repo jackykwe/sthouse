@@ -5,9 +5,9 @@ DROP TABLE IF EXISTS electricity_readings;
 
 CREATE TABLE IF NOT EXISTS users(
     id INTEGER PRIMARY KEY NOT NULL,
+    auth0_id TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    UNIQUE(display_name, email)
+    email TEXT NOT NULL
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS electricity_readings(

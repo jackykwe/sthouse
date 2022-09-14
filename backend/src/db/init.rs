@@ -22,6 +22,11 @@ async fn run_pending_migrations(pool: &Pool<Sqlite>) -> CEResult<()> {
     Ok(())
 }
 
+const ALICE: (&str, &str, &str) = ("alice_auth_id", "Alice", "alice@alice.com");
+const BOB: (&str, &str, &str) = ("bob_auth_id", "Bob", "bob@bob.com");
+const CHARLIE: (&str, &str, &str) = ("charlie_auth_id", "Charlie", "charlie@charlie.com");
+const DAVID: (&str, &str, &str) = ("david_auth_id", "David", "david@david.com");
+
 #[allow(dead_code)]
 #[allow(clippy::unreadable_literal)]
 #[allow(clippy::too_many_lines)]
@@ -32,8 +37,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43518.2,
         68008.3,
         1641000383420,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -41,8 +47,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43569.3,
         68278.8,
         1641613072610,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -50,8 +57,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43465.0,
         68578.7,
         1643129641115,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -59,8 +67,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43642.0,
         68607.6,
         1643272674020,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -68,8 +77,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43866.8,
         69357.0,
         1645552039937,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -77,8 +87,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43800.4,
         69128.1,
         1645232612324,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -86,8 +97,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43872.6,
         69631.0,
         1646723225305,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -95,8 +107,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         43966.4,
         69722.0,
         1647230029042,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -104,8 +117,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44004.0,
         70053.6,
         1647917739878,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -113,8 +127,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44138.1,
         70371.3,
         1648670845999,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -122,8 +137,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44226.4,
         70519.0,
         1649555336563,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -131,8 +147,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44111.4,
         71024.3,
         1651140763696,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -140,8 +157,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44319.5,
         71353.9,
         1651727360317,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -149,8 +167,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44477.6,
         71496.6,
         1652834877746,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -158,8 +177,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44395.4,
         71778.7,
         1653484748384,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -167,8 +187,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44376.1,
         71536.8,
         1653451394170,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -176,8 +197,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44608.2,
         72130.3,
         1655084401446,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -185,8 +207,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44590.3,
         72692.9,
         1656671199136,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -194,8 +217,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44692.1,
         72461.3,
         1656533898031,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -203,8 +227,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44560.3,
         72811.3,
         1658329750575,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -212,8 +237,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44850.1,
         73038.1,
         1658341703844,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -221,8 +247,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44803.4,
         73061.6,
         1659052954662,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -230,8 +257,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44908.8,
         73381.9,
         1659910160523,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -239,8 +267,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45100.0,
         73862.5,
         1661026701187,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -248,8 +277,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         44887.9,
         73978.0,
         1661398465217,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -257,8 +287,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45056.5,
         74530.1,
         1663754182584,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -266,8 +297,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45216.3,
         74617.9,
         1664075822971,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -275,8 +307,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45319.0,
         74937.1,
         1664734555408,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -284,8 +317,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45092.0,
         75254.1,
         1666030078248,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -293,8 +327,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45148.5,
         75211.3,
         1666533749259,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -302,8 +337,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45386.6,
         75655.2,
         1668181165448,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -311,8 +347,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45342.6,
         75713.9,
         1667868287956,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -320,8 +357,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45471.7,
         76135.9,
         1668816977879,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -329,8 +367,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45491.1,
         76351.4,
         1670100810589,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -338,8 +377,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45714.4,
         76775.9,
         1671550525785,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -347,8 +387,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45763.0,
         76836.2,
         1671720937888,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -356,8 +397,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45760.2,
         77176.0,
         1673004938684,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -365,8 +407,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45587.8,
         77393.9,
         1673280099937,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -374,8 +417,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45917.4,
         77682.1,
         1674874285158,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -383,8 +427,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45868.2,
         77765.8,
         1674799862469,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -392,8 +437,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         45979.8,
         78297.5,
         1676811200620,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -401,8 +447,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46078.4,
         78599.7,
         1677161016562,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -410,8 +457,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46005.9,
         78595.5,
         1677962471680,
-        "Alice",
-        "alice@alice.com",
+        String::from(ALICE.0),
+        String::from(ALICE.1),
+        String::from(ALICE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -419,8 +467,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46180.3,
         79114.0,
         1679029057653,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -428,8 +477,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46190.9,
         79232.8,
         1679741055745,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -437,8 +487,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46234.2,
         79566.7,
         1680704416455,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -446,8 +497,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46236.2,
         79753.5,
         1681555555372,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -455,8 +507,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46405.7,
         79990.3,
         1682651802853,
-        "David",
-        "david@david.com",
+        String::from(DAVID.0),
+        String::from(DAVID.1),
+        String::from(DAVID.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -464,8 +517,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46407.4,
         80321.1,
         1683525557483,
-        "Charlie",
-        "charlie@charlie.com",
+        String::from(CHARLIE.0),
+        String::from(CHARLIE.1),
+        String::from(CHARLIE.2),
     )
     .await?;
     create_electricity_reading_raw_init(
@@ -473,8 +527,9 @@ async fn add_dummy_data(pool: &Pool<Sqlite>) -> CEResult<()> {
         46593.5,
         80365.7,
         1684268553274,
-        "Bob",
-        "bob@bob.com",
+        String::from(BOB.0),
+        String::from(BOB.1),
+        String::from(BOB.2),
     )
     .await?;
     Ok(())
