@@ -147,9 +147,9 @@ export const ElectricityReadingDetailEditPage = () => {
   > = async (data) => {
     setReadingUploading(true);
     setUploadProgress(0);
-    setErrorSnackbarOpen(false);
     setUploadCompleteSnackbarOpen(false);
-    setReadingError(null);
+    setErrorSnackbarOpen(false);
+    setReadingUploadError(null);
     const accessToken = await getAccessTokenSilently();
     const responseData = await axiosUpdateElectricityReading(
       parseInt(id),

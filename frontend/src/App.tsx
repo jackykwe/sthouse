@@ -12,10 +12,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { MyAppBar } from "components/AppBar/AppBar";
 import { createContext, useMemo, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { appThemeOptions } from "theme/theme";
-import { MyAppBar } from "./components/AppBar";
 import { AppRoutes } from "./routes/AppRoutes";
 
 // axios.interceptors.request.use((config) => {

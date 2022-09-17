@@ -64,10 +64,10 @@ export const ElectricityReadingCreatePage = () => {
     ElectricityReadingCreatePageFormValues
   > = async (data) => {
     setReadingUploading(true);
-    setUploadCompleteSnackbarOpen(false);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
     setReadingUploadError(null);
+    setUploadCompleteSnackbarOpen(false);
     const accessToken = await getAccessTokenSilently(); // if not authenticated, will throw exn
     const responseData = await axiosCreateElectricityReading(
       parseFloat(data.low_kwh), // assumed to never fail, since react-hook-form validated

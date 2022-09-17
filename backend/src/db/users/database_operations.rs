@@ -9,7 +9,7 @@ pub async fn create_user(
     display_name: String,
     email: String,
 ) -> CEResult<UserReadDTO> {
-    let result = sqlx::query_as!(
+    sqlx::query_as!(
         UserReadDTO,
         "\
         INSERT INTO users (auth0_id, display_name, email) \
@@ -24,8 +24,7 @@ pub async fn create_user(
     )
     .fetch_one(pool)
     .await
-    .map_err(CEReport::from)?;
-    Ok(result)
+    .map_err(CEReport::from)
 }
 
 pub async fn get_user(pool: &Pool<Sqlite>, auth0_id: String) -> CEResult<Option<UserReadDTO>> {
@@ -44,21 +43,26 @@ pub async fn get_user(pool: &Pool<Sqlite>, auth0_id: String) -> CEResult<Option<
                              // the ? and so auto-coercing isn't done
 }
 
+/// Assumption: User already exists
 pub async fn update_user(
     pool: &Pool<Sqlite>,
     auth0_id: String,
     new_display_name: String,
-) -> CEResult<()> {
-    sqlx::query!(
+) -> CEResult<UserReadDTO> {
+    sqlx::query_as!(
+        UserReadDTO,
         "\
         UPDATE users \
         SET display_name = ? \
+        WHERE auth0_id = ?; \
+        SELECT display_name, email FROM users \
         WHERE auth0_id = ?;\
         ",
         new_display_name,
         auth0_id,
+        auth0_id,
     )
-    .execute(pool)
-    .await?;
-    Ok(())
+    .fetch_one(pool)
+    .await
+    .map_err(CEReport::from)
 }

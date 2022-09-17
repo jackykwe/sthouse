@@ -14,7 +14,7 @@ import LoginButton from "./LoginButton";
 export const UnauthenticatedAppBar = () => {
   const navigate = useNavigate();
 
-  const handleNavigateToHome = () => navigate(routeEnum["HomePage"].path);
+  const handleNavigateToHome = () => navigate(routeEnum["Home"].path);
 
   return (
     <AppBar position="static">
