@@ -3,6 +3,7 @@ mod app_env_config;
 mod auth_config;
 mod db;
 mod extractors;
+mod https_config;
 mod middlewares;
 mod types;
 
@@ -12,12 +13,13 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use color_eyre::{Report as CEReport, Result as CEResult}; // pub use eyre as well, so eyre is accessible
 use dotenvy::dotenv;
 use eyre::Context;
-use log::info;
+use log::{info, LevelFilter};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::ConnectOptions;
 
 use crate::app_env_config::AppEnvConfig as AEC;
 use crate::auth_config::Auth0EnvConfig as A0EC;
-// use crate::db::types::Pool;
+use crate::https_config::load_rustls_config;
 
 #[actix_web::main]
 async fn main() -> CEResult<()> {
@@ -28,9 +30,17 @@ async fn main() -> CEResult<()> {
     let aec = AEC::read_from_dot_env();
     let a0ec = A0EC::read_from_dot_env();
 
+    let https_config = load_rustls_config();
+
     let pool = SqlitePoolOptions::new()
         .max_connections(4)
-        .connect_with(SqliteConnectOptions::from_str(&aec.database_url)?.create_if_missing(true))
+        .connect_with(
+            SqliteConnectOptions::from_str(&aec.database_url)?
+                .create_if_missing(true)
+                // Set sqlx SQL statement execution logging to DEBUG (otherwise INFO is very noisy
+                .log_statements(LevelFilter::Debug)
+                .clone(), // minor efficiency sacrifice, because log_statements returns &mut Self...
+        )
         .await?;
 
     db::init::initialise_database(&pool)
@@ -49,8 +59,11 @@ async fn main() -> CEResult<()> {
             .service(api::routes::routes())
             .default_service(web::to(HttpResponse::NotFound))
     })
-    .bind((aec.host, aec.port))?
+    .bind_rustls((aec.host, aec.port), https_config)?
+    // .bind((aec.host, aec.port))?
     .run()
     .await
-    .map_err(CEReport::from)
+    .map_err(CEReport::from) // All errors in the middle of code (with ?) don't need to be mapped,
+                             // but the return type one needs to be mapped, because we aren't using
+                             // the ? and so auto-coercing isn't done
 }
