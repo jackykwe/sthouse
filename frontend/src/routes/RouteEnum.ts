@@ -4,7 +4,6 @@ import {
   ElectricityReadingGraphPageLazy,
   HomePageLazy,
 } from "pages";
-import { CallbackPageLazy } from "pages/CallbackPage/CallbackPageLazy";
 import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
 import { LazyExoticComponent } from "react";
@@ -44,10 +43,6 @@ export const routeEnum = {
   ElectricityDetailEdit: {
     path: "/electricity-readings/:id/edit",
     element: ElectricityReadingDetailEditPageLazy,
-  },
-  Auth0Callback: {
-    path: "/callback",
-    element: CallbackPageLazy,
   },
   Default: {
     path: "*",

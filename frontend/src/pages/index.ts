@@ -1,4 +1,3 @@
-export { CallbackPageLazy } from "./CallbackPage/CallbackPageLazy";
 export { ElectricityReadingCreatePageLazy } from "./ElectricityReadingPages/ElectricityReadingCreatePageLazy";
 export { ElectricityReadingDetailPageLazy } from "./ElectricityReadingPages/ElectricityReadingDetailPageLazy";
 export { ElectricityReadingGraphPageLazy } from "./ElectricityReadingPages/ElectricityReadingGraphPageLazy";
