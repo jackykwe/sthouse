@@ -48,21 +48,18 @@ pub async fn update_user(
     pool: &Pool<Sqlite>,
     auth0_id: String,
     new_display_name: String,
-) -> CEResult<UserReadDTO> {
-    sqlx::query_as!(
-        UserReadDTO,
+) -> CEResult<()> {
+    sqlx::query!(
         "\
         UPDATE users \
         SET display_name = ? \
-        WHERE auth0_id = ?; \
-        SELECT display_name, email FROM users \
         WHERE auth0_id = ?;\
         ",
         new_display_name,
         auth0_id,
-        auth0_id,
     )
-    .fetch_one(pool)
+    .execute(pool)
     .await
-    .map_err(CEReport::from)
+    .map_err(CEReport::from)?;
+    Ok(())
 }
