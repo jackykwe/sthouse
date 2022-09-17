@@ -3,17 +3,62 @@ use sqlx::{Pool, Sqlite};
 use crate::api::users::UserReadDTO;
 use crate::types::{CEReport, CEResult};
 
-pub async fn get_all_users(pool: &Pool<Sqlite>) -> CEResult<Vec<UserReadDTO>> {
+pub async fn create_user(
+    pool: &Pool<Sqlite>,
+    auth0_id: String,
+    display_name: String,
+    email: String,
+) -> CEResult<UserReadDTO> {
+    let result = sqlx::query_as!(
+        UserReadDTO,
+        "\
+        INSERT INTO users (auth0_id, display_name, email) \
+        VALUES (?, ?, ?); \
+        SELECT display_name, email FROM users \
+        WHERE auth0_id = ?;\
+        ",
+        auth0_id,
+        display_name,
+        email,
+        auth0_id,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(CEReport::from)?;
+    Ok(result)
+}
+
+pub async fn get_user(pool: &Pool<Sqlite>, auth0_id: String) -> CEResult<Option<UserReadDTO>> {
     sqlx::query_as!(
         UserReadDTO,
         "\
-        SELECT id, display_name, email FROM users \
-        ORDER BY id ASC;\
-        "
+        SELECT display_name, email FROM users \
+        WHERE auth0_id = ?;\
+        ",
+        auth0_id,
     )
-    .fetch_all(pool)
+    .fetch_optional(pool)
     .await
     .map_err(CEReport::from) // All errors in the middle of code (with ?) don't need to be mapped,
                              // but the return type one needs to be mapped, because we aren't using
                              // the ? and so auto-coercing isn't done
+}
+
+pub async fn update_user(
+    pool: &Pool<Sqlite>,
+    auth0_id: String,
+    new_display_name: String,
+) -> CEResult<()> {
+    sqlx::query!(
+        "\
+        UPDATE users \
+        SET display_name = ? \
+        WHERE auth0_id = ?;\
+        ",
+        new_display_name,
+        auth0_id,
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
 }

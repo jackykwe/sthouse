@@ -1,8 +1,8 @@
-use std::{collections::HashSet, pin::Pin};
+use std::{collections::HashSet, io::Write, path::Path, pin::Pin};
 
 use actix_web::{
     http::{StatusCode, Uri},
-    HttpResponse, ResponseError,
+    web, HttpResponse, ResponseError,
 };
 use actix_web_httpauth::{
     extractors::{bearer::BearerAuth, AuthenticationError},
@@ -15,18 +15,36 @@ use jsonwebtoken::{
     jwk::{AlgorithmParameters, JwkSet},
     Algorithm, DecodingKey, Validation,
 };
+use log::info;
 use serde::Deserialize;
+use sqlx::{Pool, Sqlite};
 
-use crate::auth_config::Auth0EnvConfig;
+use crate::{
+    auth_config::Auth0EnvConfig,
+    db::users::{create_user, get_user},
+};
 
 // Most of this code is taken from Auth0's code.
 // Main logic that uses jsonwebtoken is at the bottom.
 
 #[derive(Deserialize)]
-struct UserInfo {
-    pub given_name: Option<String>,
-    pub name: String, // fallback if given_name is not present
-    pub email: String,
+#[serde(untagged)] // achieves something like a "algebraic union type" with serde deserialisation
+enum UserInfo {
+    Success {
+        name: String,
+        email: String,
+    },
+    /// When rate limited
+    /// {
+    ///     "error": "access_denied",
+    ///     "error_description": "Too Many Requests",
+    ///     "error_uri": "https://auth0.com/docs/policies/rate-limits"
+    /// }
+    Error {
+        _error: String,
+        error_description: String,
+        _error_uri: String,
+    },
 }
 
 #[derive(Deserialize)]
@@ -38,8 +56,7 @@ pub struct JWTClaims {
 
 pub struct VerifiedAuthInfo {
     pub jwt_claims: JWTClaims,
-    pub given_name: Option<String>,
-    pub name: String, // fallback if given_name is not present
+    pub name: String,
     pub email: String,
 }
 
@@ -56,17 +73,17 @@ impl VerifiedAuthInfo {
 
 // ResponseError must implement both Debug and Display...
 #[derive(Debug, Display)]
-enum ClientError {
+pub enum ClientError {
     #[display(fmt = "missing_bearer")]
-    MissingBearer(AuthenticationError<Bearer>),
+    MissingBearer(AuthenticationError<Bearer>), // Bearer token missing
     #[display(fmt = "decode_error")]
-    DecodeError(JWTError),
+    DecodeError(JWTError), // errors related to JWT decoding
     #[display(fmt = "validation_error")]
-    ValidationError(String),
+    ValidationError(String), // errors related to signature validation (catch-all; fetching /jwks.json)
     #[display(fmt = "unsupported_algorithm")]
-    UnsupportedAlgortithm(AlgorithmParameters),
+    UnsupportedAlgortithm(AlgorithmParameters), // if the JWT was signed by anything other than RS256
     #[display(fmt = "identification_error")]
-    IdentificationError(String),
+    IdentificationError(String), // errors related to fetching /userinfo (catch-all)
 }
 
 impl ResponseError for ClientError {
@@ -100,10 +117,12 @@ impl actix_web::FromRequest for VerifiedAuthInfo {
     type Future = Pin<Box<dyn std::future::Future<Output = Result<Self, Self::Error>>>>;
 
     #[allow(clippy::unwrap_used)]
+    #[allow(clippy::too_many_lines)]
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
+        let pool = req.app_data::<web::Data<Pool<Sqlite>>>().unwrap().clone();
         let config = req.app_data::<Auth0EnvConfig>().unwrap().clone();
         let extractor = BearerAuth::extract(req);
         // Box::pin is due to from_request's contract. Everything below can use async; above cannot
@@ -115,29 +134,74 @@ impl actix_web::FromRequest for VerifiedAuthInfo {
                 ClientError::ValidationError("kid not found in token header".to_string())
             })?;
             let domain = config.domain.as_str();
+
             // JSON Web Key Sets
-            let jwks: JwkSet = awc::Client::new()
-                .get(
-                    Uri::builder()
-                        .scheme("https")
-                        .authority(domain)
-                        .path_and_query("/.well-known/jwks.json")
-                        .build()
-                        .unwrap(),
-                )
-                .send()
-                .await
-                .map_err(|send_request_error| {
-                    ClientError::ValidationError(send_request_error.to_string())
-                })?
-                .json()
-                .await
-                .map_err(|json_payload_error| {
-                    ClientError::ValidationError(json_payload_error.to_string())
-                })?;
-            let jwk = jwks
-                .find(&kid)
-                .ok_or_else(|| ClientError::ValidationError("No JWK found for kid".to_string()))?;
+            // fetch_latest_jwks_json() only if:
+            // 1) ./jwks.json doesn't exist
+            // 2) ./jwks.json exists but old
+            if !Path::new("./jwks.json").exists() {
+                info!("Backend is making a request to /.well-known/jwks.json");
+                let mut new_cached_file = std::fs::File::create("./jwks.json")?;
+                let jwks_response_bytes = awc::Client::new()
+                    .get(
+                        Uri::builder()
+                            .scheme("https")
+                            .authority(domain)
+                            .path_and_query("/.well-known/jwks.json")
+                            .build()
+                            .unwrap(),
+                    )
+                    .send()
+                    .await
+                    .map_err(|send_request_error| {
+                        ClientError::ValidationError(send_request_error.to_string())
+                    })?
+                    .body()
+                    .await
+                    .map_err(|payload_error| {
+                        ClientError::ValidationError(payload_error.to_string())
+                    })?;
+                new_cached_file.write_all(&jwks_response_bytes)?;
+            }
+            let cached_file = std::fs::read_to_string("./jwks.json").unwrap(); // cached_file should be Ok(_) by now
+            let mut jwks: JwkSet = serde_json::from_str(&cached_file)
+                .map_err(|serde_error| ClientError::ValidationError(serde_error.to_string()))?;
+            let jwk_option = jwks.find(&kid);
+            let jwk = match jwk_option {
+                Some(e) => e,
+                None => {
+                    // Retry once
+                    info!("Backend is making a request to /.well-known/jwks.json");
+                    let mut overwritten_cached_file = std::fs::File::create("./jwks.json")?;
+                    let jwks_response_bytes = awc::Client::new()
+                        .get(
+                            Uri::builder()
+                                .scheme("https")
+                                .authority(domain)
+                                .path_and_query("/.well-known/jwks.json")
+                                .build()
+                                .unwrap(),
+                        )
+                        .send()
+                        .await
+                        .map_err(|send_request_error| {
+                            ClientError::ValidationError(send_request_error.to_string())
+                        })?
+                        .body()
+                        .await
+                        .map_err(|payload_error| {
+                            ClientError::ValidationError(payload_error.to_string())
+                        })?;
+                    overwritten_cached_file.write_all(&jwks_response_bytes)?;
+                    let cached_file = std::fs::read_to_string("./jwks.json").unwrap(); // cached_file should be Ok(_) by now
+                    jwks = serde_json::from_str(&cached_file).map_err(|serde_error| {
+                        ClientError::ValidationError(serde_error.to_string())
+                    })?;
+                    jwks.find(&kid).ok_or_else(|| {
+                        ClientError::ValidationError("No JWK found for kid".to_string())
+                    })?
+                }
+            };
             match jwk.clone().algorithm {
                 AlgorithmParameters::RSA(ref rsa) => {
                     let mut validation = Validation::new(Algorithm::RS256);
@@ -153,32 +217,60 @@ impl actix_web::FromRequest for VerifiedAuthInfo {
                     let verified_token = decode::<JWTClaims>(token, &key, &validation)
                         .map_err(ClientError::DecodeError)?;
 
-                    let identity: UserInfo = awc::Client::new()
-                        .get(
-                            Uri::builder()
-                                .scheme("https")
-                                .authority(domain)
-                                .path_and_query("/userinfo")
-                                .build()
-                                .unwrap(),
-                        )
-                        .bearer_auth(token)
-                        .send()
+                    let user_option = get_user(&pool, verified_token.claims.auth0_id.clone())
                         .await
-                        .map_err(|send_request_error| {
-                            ClientError::IdentificationError(send_request_error.to_string())
-                        })?
-                        .json()
-                        .await
-                        .map_err(|json_payload_error| {
-                            ClientError::IdentificationError(json_payload_error.to_string())
-                        })?;
-
+                        .map_err(actix_web::error::ErrorInternalServerError)?;
+                    let user = match user_option {
+                        Some(e) => e,
+                        None => {
+                            info!("Backend is making a request to /userinfo");
+                            let identity: UserInfo = awc::Client::new()
+                                .get(
+                                    Uri::builder()
+                                        .scheme("https")
+                                        .authority(domain)
+                                        .path_and_query("/userinfo")
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .bearer_auth(token)
+                                .send()
+                                .await
+                                .map_err(|send_request_error| {
+                                    ClientError::IdentificationError(send_request_error.to_string())
+                                })?
+                                .json()
+                                .await
+                                .map_err(|json_payload_error| {
+                                    ClientError::IdentificationError(json_payload_error.to_string())
+                                })?;
+                            match identity {
+                                UserInfo::Success { name, email } => create_user(
+                                    &pool,
+                                    verified_token.claims.auth0_id.clone(),
+                                    name,
+                                    email,
+                                )
+                                .await
+                                .map_err(actix_web::error::ErrorInternalServerError)?,
+                                UserInfo::Error {
+                                    _error: _,
+                                    error_description,
+                                    _error_uri: _,
+                                } => {
+                                    return Err(ClientError::IdentificationError(format!(
+                                        "Please try again later ({}).",
+                                        error_description
+                                    ))
+                                    .into());
+                                }
+                            }
+                        }
+                    };
                     Ok(Self {
                         jwt_claims: verified_token.claims,
-                        given_name: identity.given_name,
-                        name: identity.name,
-                        email: identity.email,
+                        name: user.display_name,
+                        email: user.email,
                     })
                 }
                 algorithm => Err(ClientError::UnsupportedAlgortithm(algorithm).into()),

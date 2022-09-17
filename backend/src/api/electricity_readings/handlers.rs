@@ -116,7 +116,7 @@ pub async fn handler_create_electricity_reading(
         form.0.low_kwh,
         form.0.normal_kwh,
         vai.jwt_claims.auth0_id,
-        vai.given_name.unwrap_or(vai.name),
+        vai.name,
         vai.email,
     )
     .await
@@ -151,14 +151,10 @@ pub async fn handler_get_electricity_readings(
         query_params.end_unix_ts_millis_inc,
     ) {
         (None, None) => {
-            let result = get_all_electricity_readings(
-                &pool,
-                vai.jwt_claims.auth0_id,
-                vai.given_name.unwrap_or(vai.name),
-                vai.email,
-            )
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+            let result =
+                get_all_electricity_readings(&pool, vai.jwt_claims.auth0_id, vai.name, vai.email)
+                    .await
+                    .map_err(actix_web::error::ErrorInternalServerError)?;
             Ok(HttpResponse::Ok().json(result))
         }
         (start, end) => {
@@ -167,7 +163,7 @@ pub async fn handler_get_electricity_readings(
                 start.unwrap_or(std::i64::MIN),
                 end.unwrap_or(std::i64::MAX),
                 vai.jwt_claims.auth0_id,
-                vai.given_name.unwrap_or(vai.name),
+                vai.name,
                 vai.email,
             )
             .await
@@ -189,15 +185,9 @@ pub async fn handler_get_electricity_reading(
 
     let path = path.into_inner();
 
-    let result = get_electricity_reading(
-        &pool,
-        path,
-        vai.jwt_claims.auth0_id,
-        vai.given_name.unwrap_or(vai.name),
-        vai.email,
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    let result = get_electricity_reading(&pool, path, vai.jwt_claims.auth0_id, vai.name, vai.email)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     match result {
         Some(dto) => Ok(HttpResponse::Ok().json(dto)),
         None => Ok(HttpResponse::NotFound().finish()),
@@ -232,7 +222,7 @@ pub async fn handler_update_electricity_reading(
         form.0.low_kwh,
         form.0.normal_kwh,
         vai.jwt_claims.auth0_id,
-        vai.given_name.unwrap_or(vai.name),
+        vai.name,
         vai.email,
     )
     .await
@@ -267,7 +257,7 @@ pub async fn handler_delete_electricity_reading(
         &pool,
         path,
         vai.jwt_claims.auth0_id.clone(),
-        vai.given_name.clone().unwrap_or_else(|| vai.name.clone()),
+        vai.name.clone(),
         vai.email.clone(),
     )
     .await
@@ -276,15 +266,9 @@ pub async fn handler_delete_electricity_reading(
         return Ok(HttpResponse::NotFound().finish());
     }
 
-    delete_electricity_reading(
-        &pool,
-        path,
-        vai.jwt_claims.auth0_id,
-        vai.given_name.unwrap_or(vai.name),
-        vai.email,
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    delete_electricity_reading(&pool, path, vai.jwt_claims.auth0_id, vai.name, vai.email)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     // Delete image (from compressed folder only)
     // Ignore errors

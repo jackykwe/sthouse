@@ -245,7 +245,7 @@ pub async fn get_electricity_reading(
 
     let reading = sqlx::query!(
         "\
-        SELECT e.id, e.low_kwh, e.normal_kwh, e.unix_ts_millis, u.display_name \
+        SELECT e.id, e.low_kwh, e.normal_kwh, e.unix_ts_millis, u.display_name, u.email \
         FROM electricity_readings AS e INNER JOIN users AS u \
         ON e.creator_id = u.id \
         WHERE e.tombstone = 0 AND e.id = ?;\
@@ -265,7 +265,7 @@ pub async fn get_electricity_reading(
 
     let latest_modification = sqlx::query!(
         "\
-        SELECT m.unix_ts_millis, u.display_name \
+        SELECT m.unix_ts_millis, u.display_name, u.email \
         FROM electricity_readings AS e \
         INNER JOIN electricity_reading_modifications AS m ON e.id = m.reading_id \
         INNER JOIN users AS u ON m.modifier_id = u.id \
@@ -288,8 +288,10 @@ pub async fn get_electricity_reading(
             normal_kwh: reading.normal_kwh,
             creation_unix_ts_millis: reading.unix_ts_millis,
             creator_name: reading.display_name,
+            creator_email: reading.email,
             latest_modification_unix_ts_millis: record.unix_ts_millis.unwrap(), // never fails (?)
             latest_modifier_name: record.display_name.unwrap(),                 // never fails (?)
+            latest_modifier_email: record.email.unwrap(),                       // never fails (?)
         },
         None => ElectricityReadingReadFullDTO {
             id: reading.id,
@@ -297,8 +299,10 @@ pub async fn get_electricity_reading(
             normal_kwh: reading.normal_kwh,
             creation_unix_ts_millis: reading.unix_ts_millis,
             creator_name: reading.display_name.clone(),
+            creator_email: reading.email.clone(),
             latest_modification_unix_ts_millis: reading.unix_ts_millis,
             latest_modifier_name: reading.display_name,
+            latest_modifier_email: reading.email,
         },
     }))
 }
