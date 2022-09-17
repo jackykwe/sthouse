@@ -15,7 +15,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createContext, useMemo, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { appThemeOptions } from "theme/theme";
-import "./App.css";
 import { MyAppBar } from "./components/AppBar";
 import { AppRoutes } from "./routes/AppRoutes";
 
