@@ -80,7 +80,11 @@ export const App = () => {
   );
   // Update the theme only if the mode changes
   const theme = useMemo(
-    () => responsiveFontSizes(createTheme(appThemeOptions(mode))),
+    () =>
+      responsiveFontSizes(createTheme(appThemeOptions(mode)), {
+        breakpoints: ["xs", "md"],
+        factor: 8,
+      }),
     [mode]
   );
 

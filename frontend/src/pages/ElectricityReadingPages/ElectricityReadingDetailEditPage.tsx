@@ -1,8 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import CloseIcon from "@mui/icons-material/Close";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { FormHelperText } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -13,27 +11,32 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
+import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Grid2 from "@mui/material/Unstable_Grid2";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
 import { PageError } from "pages/PageError/PageError";
 import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useMemo, useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailPath, routeEnum } from "routes/RouteEnum";
-import { BACKEND_API_URL } from "services";
 import {
   axiosDeleteElectricityReading,
   axiosGetElectricityReading,
+  axiosGetElectricityReadingImage,
   axiosUpdateElectricityReading,
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
 import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
+import { DeleteButton } from "./components/DeleteButton";
+import { ImageInput } from "./components/ImageInput";
+import { LowKwhInput } from "./components/LowKwhInput";
+import { NormalKwhInput } from "./components/NormalKwhInput";
+import { SubmitButton } from "./components/SubmitButton";
 import { isValidParam, responseIs404 } from "./utils";
 
 // Most of this page's skeleton is from ElectricityReadingCreatePage.
@@ -45,51 +48,75 @@ interface ElectricityReadingDetailEditPageFormValues {
 }
 
 export const ElectricityReadingDetailEditPage = () => {
-  // GENERAL HOOKS
+  // GENERAL HOOKS (verbatim from DetailPage.tsx)
   const navigate = useNavigate();
   const { id } = useParams();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  // HOOKS FOR FETCHING DATA
-  const [readingLoading, setReadingLoading] = useState(false);
+  // HOOKS FOR FETCHING DATA (verbatim from DetailPage.tsx)
   const [readingData, setReadingData] =
     useState<ElectricityReadingReadFullDTO | null>(null);
   const [readingError, setReadingError] = useState<string | null>(null);
+  // For image
+  const [imageBase64, setImageBase64] = useState("");
+  const [imageErrorSnackbarOpen, setImageErrorSnackbarOpen] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
     if (!isAuthenticated) return;
 
+    setImageErrorSnackbarOpen(false);
+    setImageError(null);
     const accessToken = await getAccessTokenSilently();
+    // Fetch data
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
+      return;
     } else {
       setReadingData(responseData);
+    }
+    // Fetch image
+    const newImageBase64 = await axiosGetElectricityReadingImage(
+      id,
+      accessToken
+    );
+    if (isRequestError(newImageBase64)) {
+      setImageError(newImageBase64.requestErrorDescription);
+      setImageErrorSnackbarOpen(true);
+    } else {
+      setImageBase64(newImageBase64);
     }
   };
   const debouncedGetReading = _.debounce(getReading, 300);
   useEffect(() => {
     if (id !== undefined && isValidParam(id)) {
-      setReadingLoading(true);
       debouncedGetReading(parseInt(id));
-      setReadingLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // HOOKS FOR UPLOADING
+  // HOOKS FOR UPLOADING (verbatim from CreatePage.tsx)
   const [readingUploading, setReadingUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadCompleteSnackbarOpen, setUploadCompleteSnackbarOpen] =
+    useState(false);
+  useEffect(() => {
+    if (uploadProgress === 100) {
+      setUploadCompleteSnackbarOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadProgress]);
   // HOOKS FOR DELETING
   const [readingDeleting, setReadingDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  // HOOKS FOR UPLOADING AND DELETING
+  // HOOKS FOR UPLOADING AND DELETING (verbatim from CreatePage.tsx)
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
   const [readingUploadError, setReadingUploadError] = useState<string | null>(
     null
   );
 
-  // FORM HOOKS
+  // FORM HOOKS (verbatim from CreatePage.tsx)
   const [imageFile, setImageFile] = useState<Blob | null>(null);
   const imageFilePreviewURLMemo = useMemo(
     () => (imageFile !== null ? URL.createObjectURL(imageFile) : ""),
@@ -111,7 +138,7 @@ export const ElectricityReadingDetailEditPage = () => {
     return <PageError errorMessage={readingError} />;
   }
 
-  if (readingLoading || readingData === null) {
+  if (readingData === null) {
     return <PageLoading />;
   }
 
@@ -121,6 +148,7 @@ export const ElectricityReadingDetailEditPage = () => {
     setReadingUploading(true);
     setUploadProgress(0);
     setErrorSnackbarOpen(false);
+    setUploadCompleteSnackbarOpen(false);
     setReadingError(null);
     const accessToken = await getAccessTokenSilently();
     const responseData = await axiosUpdateElectricityReading(
@@ -165,7 +193,7 @@ export const ElectricityReadingDetailEditPage = () => {
           display: "flex",
           gap: (theme) => theme.spacing(1),
           alignSelf: "center",
-          marginBottom: (theme) => theme.spacing(1),
+          marginBottom: (theme) => theme.spacing(2),
         }}
       >
         <Typography variant="h4">On </Typography>
@@ -179,139 +207,127 @@ export const ElectricityReadingDetailEditPage = () => {
 
       <Box
         sx={{
-          display: "flex",
+          display: { xs: "none", md: "flex" },
           justifyContent: "center",
           alignItems: "start",
           gap: (theme) => theme.spacing(1),
           marginBottom: (theme) => theme.spacing(2),
         }}
       >
-        <Controller
+        <LowKwhInput
+          fullWidth={false}
           name="low_kwh"
           control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              label="Low Reading"
-              type="number"
-              variant="outlined"
-              value={field.value}
-              error={fieldState.error !== undefined}
-              helperText={fieldState.error?.message ?? " "}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">kWh</InputAdornment>
-                ),
-              }}
-            />
-          )}
-          defaultValue={readingData.low_kwh.toString()} // suppress controlled/uncontrolled warning
-          rules={{ required: "Low Reading must not be empty" }}
+          defaultValue={readingData.low_kwh.toString()}
         />
-        <Controller
+        <NormalKwhInput
+          fullWidth={false}
           name="normal_kwh"
           control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              label="Normal Reading"
-              type="number"
-              variant="outlined"
-              value={field.value}
-              error={fieldState.error !== undefined}
-              helperText={fieldState.error?.message ?? " "}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">kWh</InputAdornment>
-                ),
-              }}
-            />
-          )}
-          defaultValue={readingData.normal_kwh.toString()} // suppress controlled/uncontrolled warning
-          rules={{ required: "Normal Reading must not be empty" }}
+          defaultValue={readingData.normal_kwh.toString()}
         />
-        <Controller
+        <ImageInput
+          fullWidth={false}
           name="image"
           control={control}
-          render={({ field, fieldState }) => (
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Button
-                endIcon={<PhotoCameraIcon />}
-                component="label"
-                size="large"
-                variant="outlined"
-                sx={{ height: 56 }}
-              >
-                Change Photo
-                <input
-                  hidden
-                  accept="image/*"
-                  type="file"
-                  onChange={async (event) => {
-                    const fileOptional = event.target.files?.item(0);
-                    setImageFile(fileOptional ?? null);
-                    // does something to form state, idc. Able to trigger react-hook-form validation
-                    // on change, s.t. red text shows up if null
-                    field.onChange(event);
-                  }}
-                  onBlur={field.onBlur}
-                />
-              </Button>
-              <FormHelperText> </FormHelperText>
-            </Box>
-          )}
-          defaultValue={""}
+          defaultValue=""
+          buttonText="Change Photo"
+          nullImageAllowed={true}
+          setImageFile={setImageFile}
         />
-        <LoadingButton
+        <SubmitButton
+          fullWidth={false}
           loading={readingUploading}
-          loadingIndicator={
-            uploadProgress < 100 ? (
-              <CircularProgress
-                variant="determinate"
-                color="primary"
-                value={uploadProgress}
-              />
-            ) : (
-              <CircularProgress color="primary" />
-            )
-          }
-          disableElevation
+          progress={uploadProgress}
           onClick={handleSubmit(onSubmit)}
-          variant="contained"
-          color="primary"
-          sx={{ height: 56 }}
-        >
-          SUBMIT
-        </LoadingButton>
-        <Button
-          disableElevation
+        />
+        <DeleteButton
+          fullWidth={false}
           onClick={() => setDeleteDialogOpen(true)}
-          variant="contained"
-          color="secondary"
-          sx={{ height: 56 }}
-        >
-          Delete
-        </Button>
+        />
       </Box>
+
+      <Box
+        sx={{
+          display: { xs: "flex", md: "none" },
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: (theme) => theme.spacing(1),
+          marginBottom: (theme) => theme.spacing(2),
+        }}
+      >
+        <Grid2 container spacing={1}>
+          <Grid2 xs={6}>
+            <LowKwhInput
+              fullWidth={true}
+              name="low_kwh"
+              control={control}
+              defaultValue={readingData.low_kwh.toString()}
+            />
+          </Grid2>
+          <Grid2 xs={6}>
+            <NormalKwhInput
+              fullWidth={true}
+              name="normal_kwh"
+              control={control}
+              defaultValue={readingData.normal_kwh.toString()}
+            />
+          </Grid2>
+          <Grid2 xs={6}>
+            <ImageInput
+              fullWidth={true}
+              name="image"
+              control={control}
+              defaultValue=""
+              buttonText="Change Photo"
+              nullImageAllowed={true}
+              setImageFile={setImageFile}
+            />
+          </Grid2>
+          <Grid2 xs={3}>
+            <SubmitButton
+              fullWidth={true}
+              loading={readingUploading}
+              progress={uploadProgress}
+              onClick={handleSubmit(onSubmit)}
+            />
+          </Grid2>
+          <Grid2 xs={3}>
+            <DeleteButton
+              fullWidth={true}
+              onClick={() => setDeleteDialogOpen(true)}
+            />
+          </Grid2>
+        </Grid2>
+      </Box>
+
       <Box
         sx={{
           display: "flex",
+          flexGrow: imageFile === null && imageBase64 === "" ? 1 : 0,
           justifyContent: "center",
           alignItems: "normal",
           minHeight: 0,
         }}
       >
         {imageFile !== null ? (
+          // From CreatePage.tsx
           <img
             src={imageFilePreviewURLMemo}
             alt="Preview of electricty reading"
-            style={{ objectFit: "scale-down", maxWidth: "100%" }}
+            style={{ maxWidth: "100%", objectFit: "scale-down" }}
+          />
+        ) : imageBase64 === "" ? (
+          <Skeleton
+            animation={imageError !== null ? false : "wave"}
+            variant="rectangular"
+            sx={{ width: "100%", height: "100%" }}
           />
         ) : (
           <img
-            src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
+            // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
+            src={`data:image/jpeg;base64,${imageBase64}`}
             alt={`Failed to fetch ${id}.jpg`}
             style={{ objectFit: "scale-down", maxWidth: "100%" }}
           />
@@ -339,6 +355,47 @@ export const ElectricityReadingDetailEditPage = () => {
           </LoadingButton>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={imageErrorSnackbarOpen}
+        onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
+      >
+        <Alert
+          variant="filled"
+          severity="error"
+          action={
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => setImageErrorSnackbarOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          Failed to fetch image: {imageError}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={uploadCompleteSnackbarOpen}
+        onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
+      >
+        <Alert
+          variant="filled"
+          severity="success"
+          action={
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => setErrorSnackbarOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          Upload complete! You may wait for redirect, or safely leave this page.
+        </Alert>
+      </Snackbar>
       <Snackbar
         open={errorSnackbarOpen}
         onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
@@ -356,7 +413,7 @@ export const ElectricityReadingDetailEditPage = () => {
             </IconButton>
           }
         >
-          Submission failed: {readingUploadError}. Please try again later.
+          Submission failed: {readingUploadError}
         </Alert>
       </Snackbar>
     </>

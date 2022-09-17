@@ -14,6 +14,7 @@ import { formatInTimeZone, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 export const DEFAULT_TARGET_TIME_ZONE = "Europe/London";
 export const DATE_FMTSTR_HMSSDMY_TZ = "HH:mm:ss.SSS d LLL yyyy (O)";
 export const DATE_FMTSTR_HMSDDMY_TZ = "HH:mm:ss eee d LLL yyyy (O)";
+export const DATE_FMTSTR_HMDMY = "HH:mm d LLL yyyy";
 
 export const DATE_PICKER_MIN_DATE = startOfDay(new Date(2021, 8, 1));
 export const DATE_PICKER_MAX_DATE = endOfDay(new Date(2024, 7, 31));

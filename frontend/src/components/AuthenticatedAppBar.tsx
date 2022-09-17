@@ -58,7 +58,7 @@ export const AuthenticatedAppBar = () => {
       <Toolbar disableGutters sx={{ paddingX: (theme) => theme.spacing(1) }}>
         <Box
           sx={{
-            display: { xs: "none", sm: "flex" },
+            display: { xs: "none", md: "flex" },
             alignItems: "center",
           }}
         >
@@ -93,7 +93,7 @@ export const AuthenticatedAppBar = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center" }}>
+        <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}>
           <IconButton
             size="large"
             onClick={(event) => setNavAnchorEl(event.currentTarget)}
@@ -119,7 +119,6 @@ export const AuthenticatedAppBar = () => {
                 {item.appBarName}
               </MenuItem>
             ))}
-            <LogoutMenuItem />
           </Menu>
         </Box>
 
@@ -133,39 +132,35 @@ export const AuthenticatedAppBar = () => {
           <Box sx={{ marginRight: -1 }}>
             <LightDarkToggle />
           </Box>
-          <Box
-            sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}
+          <IconButton
+            disableRipple
+            onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
           >
-            <IconButton
-              disableRipple
-              onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
-            >
-              <Tooltip title={getAvatarTooltip()} arrow>
-                <Avatar
-                  alt={user?.given_name ?? user?.name}
-                  src={user?.picture}
-                  sx={{
-                    outlineStyle: Boolean(avatarAnchorEl) ? "solid" : "none",
-                    outlineWidth: 4,
-                    outlineColor: "#FFFFFF88",
-                  }}
-                />
-              </Tooltip>
-            </IconButton>
-            <Menu
-              keepMounted
-              anchorEl={avatarAnchorEl}
-              anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
-              transformOrigin={{ horizontal: "center", vertical: "top" }}
-              open={Boolean(avatarAnchorEl)}
-              onClose={() => setAvatarAnchorEl(null)}
-              sx={{ display: "block" }}
-            >
-              <MenuItem disabled>Logged in as {getAvatarTooltip()}</MenuItem>
-              <Divider />
-              <LogoutMenuItem />
-            </Menu>
-          </Box>
+            <Tooltip title={getAvatarTooltip()} arrow>
+              <Avatar
+                alt={user?.given_name ?? user?.name}
+                src={user?.picture}
+                sx={{
+                  outlineStyle: Boolean(avatarAnchorEl) ? "solid" : "none",
+                  outlineWidth: 4,
+                  outlineColor: "#FFFFFF88",
+                }}
+              />
+            </Tooltip>
+          </IconButton>
+          <Menu
+            keepMounted
+            anchorEl={avatarAnchorEl}
+            anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+            transformOrigin={{ horizontal: "center", vertical: "top" }}
+            open={Boolean(avatarAnchorEl)}
+            onClose={() => setAvatarAnchorEl(null)}
+            sx={{ display: "block" }}
+          >
+            <MenuItem disabled>Logged in as {getAvatarTooltip()}</MenuItem>
+            <Divider />
+            <LogoutMenuItem />
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

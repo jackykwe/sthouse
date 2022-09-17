@@ -1,10 +1,12 @@
-// interface ElectricityReadingDetailPageProps {}
-
 import { useAuth0 } from "@auth0/auth0-react";
+import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import { grey } from "@mui/material/colors";
 import IconButton from "@mui/material/IconButton";
+import Skeleton from "@mui/material/Skeleton";
+import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
@@ -19,7 +21,11 @@ import {
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
-import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
+import {
+  DATE_FMTSTR_HMDMY,
+  DATE_FMTSTR_HMSDDMY_TZ,
+  formatMillisInTzUtil,
+} from "utils/dateUtils";
 import { isValidParam, responseIs404 } from "./utils";
 
 export const ElectricityReadingDetailPage = () => {
@@ -29,41 +35,45 @@ export const ElectricityReadingDetailPage = () => {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
-  const [imageBase64, setImageBase64] = useState("");
-  const [readingLoading, setReadingLoading] = useState(false);
+  // For JSON data
   const [readingData, setReadingData] =
     useState<ElectricityReadingReadFullDTO | null>(null);
   const [readingError, setReadingError] = useState<string | null>(null);
+  // For image
+  const [imageBase64, setImageBase64] = useState("");
+  const [imageErrorSnackbarOpen, setImageErrorSnackbarOpen] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
     if (!isAuthenticated) return;
 
+    setImageErrorSnackbarOpen(false);
+    setImageError(null);
     const accessToken = await getAccessTokenSilently();
+    // Fetch data
+    const responseData = await axiosGetElectricityReading(id, accessToken);
+    if (isRequestError(responseData)) {
+      setReadingError(responseData.requestErrorDescription);
+      return;
+    } else {
+      setReadingData(responseData);
+    }
     // Fetch image
     const newImageBase64 = await axiosGetElectricityReadingImage(
       id,
       accessToken
     );
     if (isRequestError(newImageBase64)) {
-      setReadingError(newImageBase64.requestErrorDescription);
-      return;
+      setImageError(newImageBase64.requestErrorDescription);
+      setImageErrorSnackbarOpen(true);
     } else {
       setImageBase64(newImageBase64);
-    }
-    // Fetch data
-    const responseData = await axiosGetElectricityReading(id, accessToken);
-    if (isRequestError(responseData)) {
-      setReadingError(responseData.requestErrorDescription);
-    } else {
-      setReadingData(responseData);
     }
   };
   const debouncedGetReading = _.debounce(getReading, 300);
   useEffect(() => {
     if (id !== undefined && isValidParam(id)) {
-      setReadingLoading(true);
       debouncedGetReading(parseInt(id));
-      setReadingLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -81,7 +91,7 @@ export const ElectricityReadingDetailPage = () => {
     return <PageError errorMessage={readingError} />;
   }
 
-  if (readingLoading || readingData === null) {
+  if (readingData === null) {
     return <PageLoading />;
   }
 
@@ -107,46 +117,40 @@ export const ElectricityReadingDetailPage = () => {
       <Box
         sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box sx={{ display: "flex", gap: (theme) => theme.spacing(1) }}>
           <Box
             sx={{
               display: "flex",
-              gap: (theme) => theme.spacing(1),
-              alignSelf: "center",
+              flexDirection: "column",
+              alignItems: "end",
             }}
           >
-            <Typography variant="h5" width={285}>
-              Low reading (kWh) was{" "}
-            </Typography>
-            <Typography
-              variant="h5"
-              fontWeight={700}
-              fontFamily="Jetbrains Mono"
-              width={112}
-              align="right"
-            >
-              {readingData.low_kwh.toFixed(1)}
-            </Typography>
+            <Typography variant="h5">Low reading (kWh) was </Typography>
+            <Typography variant="h5">Normal reading (kWh) was </Typography>
           </Box>
 
           <Box
             sx={{
               display: "flex",
-              gap: (theme) => theme.spacing(1),
-              alignSelf: "center",
+              flexDirection: "column",
+              alignItems: "end",
             }}
           >
-            <Typography variant="h5" width={285}>
-              Normal reading (kWh) was{" "}
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              fontFamily="Jetbrains Mono"
+              align="right"
+            >
+              {readingData.normal_kwh.toFixed(1)}
             </Typography>
             <Typography
               variant="h5"
               fontWeight={700}
               fontFamily="Jetbrains Mono"
-              width={112}
               align="right"
             >
-              {readingData.normal_kwh.toFixed(1)}
+              {readingData.low_kwh.toFixed(1)}
             </Typography>
           </Box>
         </Box>
@@ -154,7 +158,17 @@ export const ElectricityReadingDetailPage = () => {
         <IconButton
           size="large"
           color="primary"
-          sx={{ marginX: (theme) => theme.spacing(2) }}
+          sx={{
+            marginX: (theme) => theme.spacing(2),
+            color: (theme) =>
+              theme.palette.mode === "light" ? grey[300] : grey[800],
+            ":hover": {
+              color: (theme) =>
+                theme.palette.mode === "light"
+                  ? theme.palette.primary.light
+                  : theme.palette.primary.dark,
+            },
+          }}
           onClick={() =>
             navigate(generateElectricityDetailEditPath(parseInt(id)))
           }
@@ -166,22 +180,32 @@ export const ElectricityReadingDetailPage = () => {
       <Box
         sx={{
           display: "flex",
+          flexGrow: imageBase64 === "" ? 1 : 0,
           justifyContent: "center",
           alignItems: "normal",
           minHeight: 0,
           marginY: (theme) => theme.spacing(1),
         }}
       >
-        <img
-          // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
-          src={`data:image/jpeg;base64,${imageBase64}`}
-          alt={`Failed to fetch ${id}.jpg`}
-          style={{ objectFit: "scale-down", maxWidth: "100%" }}
-        />
+        {imageBase64 === "" ? (
+          <Skeleton
+            animation={imageError !== null ? false : "wave"}
+            variant="rectangular"
+            sx={{ width: "100%", height: "100%" }}
+          />
+        ) : (
+          <img
+            // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
+            src={`data:image/jpeg;base64,${imageBase64}`}
+            alt={`Failed to fetch ${id}.jpg`}
+            style={{ objectFit: "scale-down", maxWidth: "100%" }}
+          />
+        )}
       </Box>
 
       <Box
         sx={{
+          maxWidth: "100%",
           display: "flex",
           gap: (theme) => theme.spacing(1),
           alignSelf: "end",
@@ -219,16 +243,31 @@ export const ElectricityReadingDetailPage = () => {
             theme.palette.mode === "light" ? grey[300] : grey[800]
           }
           fontStyle="italic"
+          sx={{ display: { xs: "none", md: "flex" } }}
         >
           {formatMillisInTzUtil(
             readingData.creation_unix_ts_millis,
             DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
+        <Typography
+          fontWeight={700}
+          color={(theme) =>
+            theme.palette.mode === "light" ? grey[300] : grey[800]
+          }
+          fontStyle="italic"
+          sx={{ display: { xs: "flex", md: "none" } }}
+        >
+          {formatMillisInTzUtil(
+            readingData.creation_unix_ts_millis,
+            DATE_FMTSTR_HMDMY
+          )}
+        </Typography>
       </Box>
 
       <Box
         sx={{
+          maxWidth: "100%",
           display: "flex",
           gap: (theme) => theme.spacing(1),
           alignSelf: "end",
@@ -266,13 +305,48 @@ export const ElectricityReadingDetailPage = () => {
             theme.palette.mode === "light" ? grey[300] : grey[800]
           }
           fontStyle="italic"
+          sx={{ display: { xs: "none", md: "flex" } }}
         >
           {formatMillisInTzUtil(
             readingData.latest_modification_unix_ts_millis,
             DATE_FMTSTR_HMSDDMY_TZ
           )}
         </Typography>
+        <Typography
+          fontWeight={700}
+          color={(theme) =>
+            theme.palette.mode === "light" ? grey[300] : grey[800]
+          }
+          fontStyle="italic"
+          sx={{ display: { xs: "flex", md: "none" } }}
+        >
+          {formatMillisInTzUtil(
+            readingData.latest_modification_unix_ts_millis,
+            DATE_FMTSTR_HMDMY
+          )}
+        </Typography>
       </Box>
+
+      <Snackbar
+        open={imageErrorSnackbarOpen}
+        onClose={() => {}} // disable timeout, clickaway and escapeKeyDown from closing snackbar
+      >
+        <Alert
+          variant="filled"
+          severity="error"
+          action={
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => setImageErrorSnackbarOpen(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          Failed to fetch image: {imageError}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
