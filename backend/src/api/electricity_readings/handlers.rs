@@ -91,6 +91,20 @@ fn compress_save_cleanup(
     Ok(())
 }
 
+fn validate_reading(reading: f64, field_name: &str) -> Result<f64, String> {
+    if reading < 0_f64 {
+        return Err(format!("{} is negative", field_name));
+    }
+    let trunc = f64::trunc(reading * 10_f64) / 10_f64;
+    if (trunc - reading).abs() >= f64::EPSILON {
+        return Err(format!("{} has more than 1 d.p.", field_name));
+    }
+    if reading >= 100_000_f64 {
+        return Err(format!("{} is too big", field_name));
+    }
+    Ok(trunc)
+}
+
 /**
  * Main code here courtesy of
  * https://github.com/actix/examples/blob/master/forms/multipart/src/main.rs
@@ -107,22 +121,25 @@ pub async fn handler_create_electricity_reading(
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
+    let low_kwh =
+        validate_reading(form.0.low_kwh, "low_kwh").map_err(actix_web::error::ErrorBadRequest)?;
+    let normal_kwh = validate_reading(form.0.normal_kwh, "normal_kwh")
+        .map_err(actix_web::error::ErrorBadRequest)?;
+
     // Save image to ./images/original
+    // This step is actually pretty fast
     let img_path_in_original_temp = web::block(|| save_image(form.0.image)).await??;
 
     // Database access
-    let new_reading_id = create_electricity_reading(
-        &pool,
-        form.0.low_kwh,
-        form.0.normal_kwh,
-        vai.jwt_claims.auth0_id,
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    let new_reading_id =
+        create_electricity_reading(&pool, low_kwh, normal_kwh, vai.jwt_claims.auth0_id)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     // Save into ./images/original
     // Compress (if needed) and save into ./images/compressed
     // Delete temporary image in ./images/original
+    // This step is slow!
     web::block(move || compress_save_cleanup(img_path_in_original_temp, new_reading_id)).await??;
 
     Ok(HttpResponse::Created().json(new_reading_id))
@@ -203,6 +220,11 @@ pub async fn handler_update_electricity_reading(
 
     let path = path.into_inner();
 
+    let low_kwh =
+        validate_reading(form.0.low_kwh, "low_kwh").map_err(actix_web::error::ErrorBadRequest)?;
+    let normal_kwh = validate_reading(form.0.normal_kwh, "normal_kwh")
+        .map_err(actix_web::error::ErrorBadRequest)?;
+
     // Save image to ./images/original if present
     let img_path_in_original_temp: Option<String> = match form.0.image {
         Some(image) => Some(web::block(|| save_image(image)).await??),
@@ -210,15 +232,9 @@ pub async fn handler_update_electricity_reading(
     };
 
     // Database access
-    update_electricity_reading(
-        &pool,
-        path,
-        form.0.low_kwh,
-        form.0.normal_kwh,
-        vai.jwt_claims.auth0_id,
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    update_electricity_reading(&pool, path, low_kwh, normal_kwh, vai.jwt_claims.auth0_id)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     if let Some(img_path_in_original_temp) = img_path_in_original_temp {
         // Save into ./images/original
@@ -258,7 +274,7 @@ pub async fn handler_delete_electricity_reading(
 
     // Delete image (from compressed folder only)
     // Ignore errors
-    std::fs::remove_file(format!("./images/original/{}.png", path))?;
+    // std::fs::remove_file(format!("./images/original/{}.png", path))?;
     std::fs::remove_file(format!("./images/compressed/{}.jpg", path))?;
 
     Ok(HttpResponse::NoContent().finish())
