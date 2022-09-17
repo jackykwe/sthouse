@@ -11,28 +11,17 @@ pub async fn create_electricity_reading(
     low_kwh: f64,
     normal_kwh: f64,
     creator_auth0_id: String,
-    creator_name: String,
-    creator_email: String,
 ) -> CEResult<i64> {
     let unix_ts_millis = Utc::now().timestamp_millis();
     let mut transaction = pool.begin().await?;
 
+    // This method runs after a vai guard in the handler, so the user is already authenticated,
+    // authorised, and guaranteed to exist in users database
     let creator_id = sqlx::query!(
         "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?; \
         SELECT id FROM users \
         WHERE auth0_id = ?;\
         ",
-        creator_auth0_id,
-        creator_name,
-        creator_email,
-        creator_name,
-        creator_email,
-        creator_auth0_id,
         creator_auth0_id,
     )
     .fetch_one(&mut transaction)
@@ -114,30 +103,7 @@ pub async fn create_electricity_reading_raw_init(
 
 pub async fn get_all_electricity_readings(
     pool: &Pool<Sqlite>,
-    reader_auth0_id: String,
-    reader_name: String,
-    reader_email: String,
 ) -> CEResult<Vec<ElectricityReadingReadGraphDTO>> {
-    let mut transaction = pool.begin().await?;
-
-    sqlx::query!(
-        "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?;\
-        ",
-        reader_auth0_id,
-        reader_name,
-        reader_email,
-        reader_name,
-        reader_email,
-        reader_auth0_id
-    )
-    .execute(&mut transaction)
-    .await?;
-
     let result = sqlx::query!(
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis \
@@ -146,7 +112,7 @@ pub async fn get_all_electricity_readings(
         ORDER BY unix_ts_millis ASC;\
         ",
     )
-    .fetch_all(&mut transaction)
+    .fetch_all(pool)
     .await?
     .into_iter()
     .map(|record| ElectricityReadingReadGraphDTO {
@@ -157,8 +123,6 @@ pub async fn get_all_electricity_readings(
     })
     .collect::<Vec<_>>();
 
-    transaction.commit().await?;
-
     Ok(result)
 }
 
@@ -166,30 +130,7 @@ pub async fn get_electricity_readings_between(
     pool: &Pool<Sqlite>,
     start_unix_ts_millis_inc: i64,
     end_unix_ts_millis_inc: i64,
-    reader_auth0_id: String,
-    reader_name: String,
-    reader_email: String,
 ) -> CEResult<Vec<ElectricityReadingReadGraphDTO>> {
-    let mut transaction = pool.begin().await?;
-
-    sqlx::query!(
-        "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?;\
-        ",
-        reader_auth0_id,
-        reader_name,
-        reader_email,
-        reader_name,
-        reader_email,
-        reader_auth0_id
-    )
-    .execute(&mut transaction)
-    .await?;
-
     let result = sqlx::query!(
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis \
@@ -200,7 +141,7 @@ pub async fn get_electricity_readings_between(
         start_unix_ts_millis_inc,
         end_unix_ts_millis_inc
     )
-    .fetch_all(&mut transaction)
+    .fetch_all(pool)
     .await?
     .into_iter()
     .map(|record| ElectricityReadingReadGraphDTO {
@@ -211,37 +152,14 @@ pub async fn get_electricity_readings_between(
     })
     .collect::<Vec<_>>();
 
-    transaction.commit().await?;
-
     Ok(result)
 }
 
 pub async fn get_electricity_reading(
     pool: &Pool<Sqlite>,
     id: i64,
-    reader_auth0_id: String,
-    reader_name: String,
-    reader_email: String,
 ) -> CEResult<Option<ElectricityReadingReadFullDTO>> {
     let mut transaction = pool.begin().await?;
-
-    sqlx::query!(
-        "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?;\
-        ",
-        reader_auth0_id,
-        reader_name,
-        reader_email,
-        reader_name,
-        reader_email,
-        reader_auth0_id
-    )
-    .execute(&mut transaction)
-    .await?;
 
     let reading = sqlx::query!(
         "\
@@ -313,28 +231,17 @@ pub async fn update_electricity_reading(
     new_low_kwh: f64,
     new_normal_kwh: f64,
     modifier_auth0_id: String,
-    modifier_name: String,
-    modifier_email: String,
 ) -> CEResult<()> {
     let unix_ts_millis = Utc::now().timestamp_millis();
     let mut transaction = pool.begin().await?;
 
+    // This method runs after a vai guard in the handler, so the user is already authenticated,
+    // authorised, and guaranteed to exist in users database
     let modifier_id = sqlx::query!(
         "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?; \
         SELECT id FROM users \
         WHERE auth0_id = ?;\
         ",
-        modifier_auth0_id,
-        modifier_name,
-        modifier_email,
-        modifier_name,
-        modifier_email,
-        modifier_auth0_id,
         modifier_auth0_id,
     )
     .fetch_one(&mut transaction)
@@ -375,28 +282,17 @@ pub async fn delete_electricity_reading(
     pool: &Pool<Sqlite>,
     reading_id: i64,
     modifier_auth0_id: String,
-    modifier_name: String,
-    modifier_email: String,
 ) -> CEResult<()> {
     let unix_ts_millis = Utc::now().timestamp_millis();
     let mut transaction = pool.begin().await?;
 
+    // This method runs after a vai guard in the handler, so the user is already authenticated,
+    // authorised, and guaranteed to exist in users database
     let modifier_id = sqlx::query!(
         "\
-        INSERT INTO users (auth0_id, display_name, email) \
-        VALUES (?, ?, ?) \
-        ON CONFLICT (auth0_id) DO \
-        UPDATE SET (display_name, email) = (?, ?) \
-        WHERE auth0_id = ?; \
         SELECT id FROM users \
         WHERE auth0_id = ?;\
         ",
-        modifier_auth0_id,
-        modifier_name,
-        modifier_email,
-        modifier_name,
-        modifier_email,
-        modifier_auth0_id,
         modifier_auth0_id,
     )
     .fetch_one(&mut transaction)

@@ -116,8 +116,6 @@ pub async fn handler_create_electricity_reading(
         form.0.low_kwh,
         form.0.normal_kwh,
         vai.jwt_claims.auth0_id,
-        vai.name,
-        vai.email,
     )
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -151,10 +149,9 @@ pub async fn handler_get_electricity_readings(
         query_params.end_unix_ts_millis_inc,
     ) {
         (None, None) => {
-            let result =
-                get_all_electricity_readings(&pool, vai.jwt_claims.auth0_id, vai.name, vai.email)
-                    .await
-                    .map_err(actix_web::error::ErrorInternalServerError)?;
+            let result = get_all_electricity_readings(&pool)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
             Ok(HttpResponse::Ok().json(result))
         }
         (start, end) => {
@@ -162,9 +159,6 @@ pub async fn handler_get_electricity_readings(
                 &pool,
                 start.unwrap_or(std::i64::MIN),
                 end.unwrap_or(std::i64::MAX),
-                vai.jwt_claims.auth0_id,
-                vai.name,
-                vai.email,
             )
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -185,7 +179,7 @@ pub async fn handler_get_electricity_reading(
 
     let path = path.into_inner();
 
-    let result = get_electricity_reading(&pool, path, vai.jwt_claims.auth0_id, vai.name, vai.email)
+    let result = get_electricity_reading(&pool, path)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     match result {
@@ -222,8 +216,6 @@ pub async fn handler_update_electricity_reading(
         form.0.low_kwh,
         form.0.normal_kwh,
         vai.jwt_claims.auth0_id,
-        vai.name,
-        vai.email,
     )
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -253,20 +245,14 @@ pub async fn handler_delete_electricity_reading(
     let path = path.into_inner();
 
     // Ensure that record exists (not deleted)
-    let result = get_electricity_reading(
-        &pool,
-        path,
-        vai.jwt_claims.auth0_id.clone(),
-        vai.name.clone(),
-        vai.email.clone(),
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    let result = get_electricity_reading(&pool, path)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     if result.is_none() {
         return Ok(HttpResponse::NotFound().finish());
     }
 
-    delete_electricity_reading(&pool, path, vai.jwt_claims.auth0_id, vai.name, vai.email)
+    delete_electricity_reading(&pool, path, vai.jwt_claims.auth0_id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
