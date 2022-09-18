@@ -61,12 +61,30 @@ pub struct VerifiedAuthInfo {
 }
 
 impl VerifiedAuthInfo {
-    pub fn has_permissions(&self, required_permissions: &HashSet<String>) -> bool {
+    pub fn has_this_permission(&self, this_permission: &str) -> bool {
         self.jwt_claims
             .permissions
             .as_ref()
-            .map_or(false, |permissions| {
-                permissions.is_superset(required_permissions)
+            .map_or(false, |possessed_permissions| {
+                possessed_permissions.contains(this_permission)
+            })
+    }
+
+    // pub fn has_all_of_these_permissions(&self, these_permissions: &HashSet<String>) -> bool {
+    //     self.jwt_claims
+    //         .permissions
+    //         .as_ref()
+    //         .map_or(false, |possessed_permissions| {
+    //             possessed_permissions.is_superset(these_permissions)
+    //         })
+    // }
+
+    pub fn has_any_of_these_permissions(&self, these_permissions: &HashSet<String>) -> bool {
+        self.jwt_claims
+            .permissions
+            .as_ref()
+            .map_or(false, |possessed_permissions| {
+                !possessed_permissions.is_disjoint(these_permissions)
             })
     }
 }

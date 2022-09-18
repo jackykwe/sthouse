@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use actix_easy_multipart::extractor::MultipartFormConfig;
 use actix_files::Files;
 use actix_web::{
@@ -15,7 +13,7 @@ use crate::{
 use super::handlers::{
     handler_create_electricity_reading, handler_delete_electricity_reading,
     handler_get_electricity_reading, handler_get_electricity_readings,
-    handler_update_electricity_reading,
+    handler_get_latest_electricity_reading_millis, handler_update_electricity_reading,
 };
 
 pub fn routes() -> Scope {
@@ -26,8 +24,9 @@ pub fn routes() -> Scope {
                 .max_parts(5),
         )
         .service(handler_get_electricity_readings)
+        .service(handler_get_latest_electricity_reading_millis) // order matters
+        .service(handler_get_electricity_reading) // order matters
         .service(handler_create_electricity_reading)
-        .service(handler_get_electricity_reading)
         .service(handler_update_electricity_reading)
         .service(handler_delete_electricity_reading)
         // ./images is relative to root of crate, i.e. the "backend" folder
@@ -50,9 +49,7 @@ pub fn routes() -> Scope {
                         let vai =
                             VerifiedAuthInfo::from_request(response.request(), &mut Payload::None)
                                 .await?;
-                        if vai.has_permissions(&HashSet::from([
-                            ElectricityReadingPerms::Read.to_string()
-                        ])) {
+                        if vai.has_this_permission(&ElectricityReadingPerms::Read.to_string()) {
                             Ok(response)
                         } else {
                             Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT))

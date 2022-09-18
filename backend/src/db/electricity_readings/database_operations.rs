@@ -225,6 +225,23 @@ pub async fn get_electricity_reading(
     }))
 }
 
+pub async fn get_latest_electricity_reading_millis(pool: &Pool<Sqlite>) -> CEResult<Option<i64>> {
+    let result = sqlx::query!(
+        "\
+        SELECT unix_ts_millis \
+        FROM electricity_readings \
+        WHERE tombstone = 0 \
+        ORDER BY unix_ts_millis DESC \
+        LIMIT 1;
+        ",
+    )
+    .fetch_optional(pool)
+    .await?
+    .map(|record| record.unix_ts_millis);
+
+    Ok(result)
+}
+
 pub async fn update_electricity_reading(
     pool: &Pool<Sqlite>,
     reading_id: i64,

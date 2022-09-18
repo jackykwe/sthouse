@@ -14,7 +14,8 @@ use crate::api::electricity_readings::{
 use crate::api::FORBIDDEN_ERROR_TEXT;
 use crate::db::electricity_readings::{
     create_electricity_reading, delete_electricity_reading, get_all_electricity_readings,
-    get_electricity_reading, get_electricity_readings_between, update_electricity_reading,
+    get_electricity_reading, get_electricity_readings_between,
+    get_latest_electricity_reading_millis, update_electricity_reading,
 };
 use crate::extractors::{ElectricityReadingPerms, VerifiedAuthInfo};
 use crate::types::HandlerResult;
@@ -115,9 +116,7 @@ pub async fn handler_create_electricity_reading(
     form: MultipartForm<ElectricityReadingCreateMultipartForm>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
-    if !vai.has_permissions(&HashSet::from(
-        [ElectricityReadingPerms::Create.to_string()],
-    )) {
+    if !vai.has_this_permission(&ElectricityReadingPerms::Create.to_string()) {
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
@@ -157,7 +156,7 @@ pub async fn handler_get_electricity_readings(
     query_params: web::Query<GetElectricityReadingsQueryParams>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
-    if !vai.has_permissions(&HashSet::from([ElectricityReadingPerms::Read.to_string()])) {
+    if !vai.has_this_permission(&ElectricityReadingPerms::Read.to_string()) {
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
@@ -190,7 +189,7 @@ pub async fn handler_get_electricity_reading(
     path: web::Path<i64>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
-    if !vai.has_permissions(&HashSet::from([ElectricityReadingPerms::Read.to_string()])) {
+    if !vai.has_this_permission(&ElectricityReadingPerms::Read.to_string()) {
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
@@ -205,6 +204,27 @@ pub async fn handler_get_electricity_reading(
     }
 }
 
+#[get("/latest")]
+pub async fn handler_get_latest_electricity_reading_millis(
+    pool: web::Data<Pool<Sqlite>>,
+    vai: VerifiedAuthInfo,
+) -> HandlerResult {
+    if !vai.has_any_of_these_permissions(&HashSet::from([
+        ElectricityReadingPerms::Create.to_string(),
+        ElectricityReadingPerms::Read.to_string(),
+    ])) {
+        return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
+    }
+
+    let result = get_latest_electricity_reading_millis(&pool)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    match result {
+        Some(millis) => Ok(HttpResponse::Ok().json(millis)),
+        None => Ok(HttpResponse::NotFound().finish()),
+    }
+}
+
 #[put("/{reading_id}")]
 pub async fn handler_update_electricity_reading(
     pool: web::Data<Pool<Sqlite>>,
@@ -212,9 +232,7 @@ pub async fn handler_update_electricity_reading(
     form: MultipartForm<ElectricityReadingUpdateMultipartForm>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
-    if !vai.has_permissions(&HashSet::from(
-        [ElectricityReadingPerms::Update.to_string()],
-    )) {
+    if !vai.has_this_permission(&ElectricityReadingPerms::Update.to_string()) {
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
@@ -252,9 +270,7 @@ pub async fn handler_delete_electricity_reading(
     path: web::Path<i64>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
-    if !vai.has_permissions(&HashSet::from(
-        [ElectricityReadingPerms::Delete.to_string()],
-    )) {
+    if !vai.has_this_permission(&ElectricityReadingPerms::Delete.to_string()) {
         return Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT));
     }
 
