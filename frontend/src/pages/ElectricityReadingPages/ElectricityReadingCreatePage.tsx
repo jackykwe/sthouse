@@ -12,10 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { axiosCreateElectricityReading } from "services/electricity_readings";
 import { isRequestError } from "types";
+import { SubmitButton } from "../../components/SubmitButton";
 import { ImageInput } from "./components/ImageInput";
 import { LowKwhInput } from "./components/LowKwhInput";
 import { NormalKwhInput } from "./components/NormalKwhInput";
-import { SubmitButton } from "./components/SubmitButton";
 
 interface ElectricityReadingCreatePageFormValues {
   low_kwh: string;
@@ -210,7 +210,7 @@ export const ElectricityReadingCreatePage = () => {
             <IconButton
               size="small"
               color="inherit"
-              onClick={() => setErrorSnackbarOpen(false)}
+              onClick={() => setUploadCompleteSnackbarOpen(false)}
             >
               <CloseIcon fontSize="small" />
             </IconButton>

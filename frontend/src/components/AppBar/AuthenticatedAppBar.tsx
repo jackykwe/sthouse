@@ -198,6 +198,14 @@ export const AuthenticatedAppBar = () => {
               sx={{ display: "block" }}
             >
               <MenuItem disabled>Logged in as {getAvatarTooltip()}</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAvatarAnchorEl(null);
+                  navigate(routeEnum.Profile.path);
+                }}
+              >
+                Edit Profile
+              </MenuItem>
               <Divider />
               <LogoutMenuItem />
             </Menu>

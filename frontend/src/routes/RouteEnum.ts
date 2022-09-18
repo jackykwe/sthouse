@@ -6,6 +6,7 @@ import {
 } from "pages";
 import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
+import { ProfilePageLazy } from "pages/ProfilePage/ProfilePageLazy";
 import { LazyExoticComponent } from "react";
 import { generatePath } from "react-router-dom";
 
@@ -22,7 +23,7 @@ interface AppBarRouteEnumItem {
 }
 
 export const routeEnum = {
-  HomePage: {
+  Home: {
     path: "/",
     element: HomePageLazy,
   },
@@ -43,6 +44,10 @@ export const routeEnum = {
   ElectricityDetailEdit: {
     path: "/electricity-readings/:id/edit",
     element: ElectricityReadingDetailEditPageLazy,
+  },
+  Profile: {
+    path: "/profile",
+    element: ProfilePageLazy,
   },
   Default: {
     path: "*",

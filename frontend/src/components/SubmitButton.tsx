@@ -1,4 +1,5 @@
 import LoadingButton from "@mui/lab/LoadingButton";
+import { SxProps, Theme } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 
 interface SubmitButtonProps {
@@ -6,10 +7,11 @@ interface SubmitButtonProps {
   loading: boolean;
   progress: number;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
+  sx?: SxProps<Theme>;
 }
 
 export const SubmitButton = (props: SubmitButtonProps) => {
-  const { fullWidth, loading, progress, onClick } = props;
+  const { fullWidth, loading, progress, onClick, sx } = props;
   return (
     <LoadingButton
       fullWidth={fullWidth}
@@ -25,7 +27,7 @@ export const SubmitButton = (props: SubmitButtonProps) => {
       onClick={onClick}
       variant="contained"
       color="primary"
-      sx={{ height: 56 }}
+      sx={{ height: 56, ...sx }}
     >
       Submit
     </LoadingButton>

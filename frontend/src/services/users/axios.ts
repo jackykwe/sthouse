@@ -19,12 +19,12 @@ export const axiosGetUser = async (accessToken: string) => {
 };
 
 export const axiosUpdateUser = async (
-  accessToken: string,
-  new_display_name: string
+  new_display_name: string,
+  accessToken: string
 ) => {
   try {
     const request = BASE_URL;
-    let response = await appAxios.put<UserReadDTO>(
+    await appAxios.put<void>(
       request,
       { new_display_name },
       {
@@ -33,7 +33,7 @@ export const axiosUpdateUser = async (
         },
       }
     );
-    return response.data;
+    return 0;
   } catch (error) {
     return commonAxiosErrorHandler(error);
   }

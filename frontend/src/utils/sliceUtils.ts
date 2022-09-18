@@ -9,8 +9,8 @@ import { AsyncState, OperationType, RequestError, RootState } from "types";
 
 export const asyncInitialState: AsyncState<unknown> = {
   isLoading: false,
-  error: null,
   data: null,
+  error: null,
 };
 
 export interface Payload<T> {
@@ -58,13 +58,13 @@ export const createAsyncSelectorUtil =
       [selectState],
       (asyncState) => asyncState.isLoading
     );
-    const selectError = createSelector(
-      [selectState],
-      (asyncState) => asyncState.error
-    );
     const selectData = createSelector(
       [selectState],
       (asyncState) => asyncState.data
+    );
+    const selectError = createSelector(
+      [selectState],
+      (asyncState) => asyncState.error
     );
     return { selectState, selectLoading, selectError, selectData };
   };
@@ -131,15 +131,15 @@ export const createAsyncReducerBuilderUtil =
     if (successAction !== undefined) {
       extraReducersBuilder.addCase(successAction, (state, action) => {
         (state[operationType][stateName] as AsyncDataT).isLoading = false;
-        (state[operationType][stateName] as AsyncDataT).error = null;
         (state[operationType][stateName] as AsyncDataT).data = action.payload;
+        (state[operationType][stateName] as AsyncDataT).error = null;
       });
     }
     if (failureAction !== undefined) {
       extraReducersBuilder.addCase(failureAction, (state, action) => {
         (state[operationType][stateName] as AsyncDataT).isLoading = false;
-        (state[operationType][stateName] as AsyncDataT).error = action.payload;
         (state[operationType][stateName] as AsyncDataT).data = null;
+        (state[operationType][stateName] as AsyncDataT).error = action.payload;
       });
     }
     return extraReducersBuilder;

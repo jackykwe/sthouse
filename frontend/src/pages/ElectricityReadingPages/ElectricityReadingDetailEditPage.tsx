@@ -32,11 +32,11 @@ import {
 } from "services/electricity_readings";
 import { isRequestError } from "types";
 import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
+import { SubmitButton } from "../../components/SubmitButton";
 import { DeleteButton } from "./components/DeleteButton";
 import { ImageInput } from "./components/ImageInput";
 import { LowKwhInput } from "./components/LowKwhInput";
 import { NormalKwhInput } from "./components/NormalKwhInput";
-import { SubmitButton } from "./components/SubmitButton";
 import { isValidParam, responseIs404 } from "./utils";
 
 // Most of this page's skeleton is from ElectricityReadingCreatePage.
@@ -387,7 +387,7 @@ export const ElectricityReadingDetailEditPage = () => {
             <IconButton
               size="small"
               color="inherit"
-              onClick={() => setErrorSnackbarOpen(false)}
+              onClick={() => setUploadCompleteSnackbarOpen(false)}
             >
               <CloseIcon fontSize="small" />
             </IconButton>
