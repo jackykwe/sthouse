@@ -8,14 +8,16 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { PageError } from "pages/PageError/PageError";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch, useStore } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { generateElectricityDetailPath } from "routes/RouteEnum";
 import { axiosCreateElectricityReading } from "services/electricity_readings";
-import { isRequestError } from "types";
+import { isRequestError, RootState } from "types";
 import { SubmitButton } from "../../components/SubmitButton";
 import { ImageInput } from "./components/ImageInput";
 import { LowKwhInput } from "./components/LowKwhInput";
 import { NormalKwhInput } from "./components/NormalKwhInput";
+import { useElectricityReadingClientSlice } from "./store";
 
 interface ElectricityReadingCreatePageFormValues {
   low_kwh: string;
@@ -33,7 +35,21 @@ interface ElectricityReadingCreatePageFormValues {
 export const ElectricityReadingCreatePage = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+
+  // Client redux state selectors
+  const {
+    actions: { setIsOnCreatePage },
+  } = useElectricityReadingClientSlice();
+  const store = useStore<RootState>();
+  useEffect(() => {
+    dispatch(setIsOnCreatePage(true));
+    return () => {
+      dispatch(setIsOnCreatePage(false));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // HOOKS FOR UPLOADING
   const [readingUploading, setReadingUploading] = useState(false);
@@ -82,7 +98,11 @@ export const ElectricityReadingCreatePage = () => {
       setErrorSnackbarOpen(true);
     } else {
       // responseData is the new ID of the newly created entry
-      navigate(generateElectricityDetailPath(responseData));
+      if (
+        store.getState().electricityReadingClient?.noSelector_isOnCreatePage
+      ) {
+        navigate(generateElectricityDetailPath(responseData));
+      }
     }
     setReadingUploading(false);
   };

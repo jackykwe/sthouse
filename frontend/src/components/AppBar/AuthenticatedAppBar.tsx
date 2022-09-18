@@ -176,7 +176,7 @@ export const AuthenticatedAppBar = () => {
               disableRipple
               onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
             >
-              <Tooltip title={getAvatarTooltip()} arrow>
+              <Tooltip arrow title={getAvatarTooltip()}>
                 <Avatar
                   alt={user?.given_name ?? user?.name}
                   src={user?.picture}

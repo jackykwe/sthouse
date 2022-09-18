@@ -46,7 +46,7 @@ export const HomePage = () => {
   const feedbackWelcomeText =
     "Any user experience feedback is welcomed and appreciated!";
   const bugsText =
-    "If you encounter any bugs, please report them to me, and I'll squish them.";
+    "If you encounter any bugs, please tell me where they are, and I'll go squish them.";
 
   return (
     <Box

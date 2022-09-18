@@ -7,6 +7,7 @@ import { grey } from "@mui/material/colors";
 import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
@@ -219,15 +220,17 @@ export const ElectricityReadingDetailPage = () => {
         >
           Submitted by{" "}
         </Typography>
-        <Typography
-          fontWeight={700}
-          color={(theme) =>
-            theme.palette.mode === "light" ? grey[300] : grey[800]
-          }
-          fontStyle="italic"
-        >
-          {readingData.creator_name}
-        </Typography>
+        <Tooltip arrow placement="top" title={readingData.creator_email}>
+          <Typography
+            fontWeight={700}
+            color={(theme) =>
+              theme.palette.mode === "light" ? grey[300] : grey[800]
+            }
+            fontStyle="italic"
+          >
+            {readingData.creator_name}
+          </Typography>
+        </Tooltip>
         <Typography
           color={(theme) =>
             theme.palette.mode === "light" ? grey[300] : grey[800]
@@ -281,15 +284,21 @@ export const ElectricityReadingDetailPage = () => {
         >
           Last modified by{" "}
         </Typography>
-        <Typography
-          fontWeight={700}
-          color={(theme) =>
-            theme.palette.mode === "light" ? grey[300] : grey[800]
-          }
-          fontStyle="italic"
+        <Tooltip
+          arrow
+          placement="top"
+          title={readingData.latest_modifier_email}
         >
-          {readingData.latest_modifier_name}
-        </Typography>
+          <Typography
+            fontWeight={700}
+            color={(theme) =>
+              theme.palette.mode === "light" ? grey[300] : grey[800]
+            }
+            fontStyle="italic"
+          >
+            {readingData.latest_modifier_name}
+          </Typography>
+        </Tooltip>
         <Typography
           color={(theme) =>
             theme.palette.mode === "light" ? grey[300] : grey[800]

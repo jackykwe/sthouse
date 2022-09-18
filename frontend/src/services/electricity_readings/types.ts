@@ -11,6 +11,8 @@ export interface ElectricityReadingReadFullDTO {
   normal_kwh: number;
   creation_unix_ts_millis: number;
   creator_name: string;
+  creator_email: string;
   latest_modification_unix_ts_millis: number;
   latest_modifier_name: string;
+  latest_modifier_email: string;
 }

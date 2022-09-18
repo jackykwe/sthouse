@@ -3,6 +3,8 @@ export interface ElectricityReadingClientState {
   graphEndMillisActInc: number;
   graphAbsorbCount: number;
   graphShowBestFit: boolean;
+  noSelector_isOnCreatePage: boolean;
+  noSelector_isOnDetailEditPage: boolean;
 }
 
 export type SetGraphStartActionArg = Date;

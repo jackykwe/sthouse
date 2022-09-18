@@ -9,6 +9,8 @@ export const initialState: ElectricityReadingClientState = {
   graphEndMillisActInc: endOfMonthMillisAsOfNowInTzUtil(),
   graphAbsorbCount: 2,
   graphShowBestFit: true,
+  noSelector_isOnCreatePage: false,
+  noSelector_isOnDetailEditPage: false,
 };
 
 const clientSlice = createSliceUtil({
@@ -35,6 +37,15 @@ const clientSlice = createSliceUtil({
       action: { payload: boolean; type: string }
     ) => {
       state.graphShowBestFit = action.payload;
+    },
+    setIsOnCreatePage: (state, action: { payload: boolean; type: string }) => {
+      state.noSelector_isOnCreatePage = action.payload;
+    },
+    setIsOnDetailEditPage: (
+      state,
+      action: { payload: boolean; type: string }
+    ) => {
+      state.noSelector_isOnDetailEditPage = action.payload;
     },
   },
 });

@@ -1,4 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Alert from "@mui/material/Alert";
@@ -21,6 +22,7 @@ import { PageError } from "pages/PageError/PageError";
 import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch, useStore } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailPath, routeEnum } from "routes/RouteEnum";
 import {
@@ -30,13 +32,14 @@ import {
   axiosUpdateElectricityReading,
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
-import { isRequestError } from "types";
+import { isRequestError, RootState } from "types";
 import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
 import { SubmitButton } from "../../components/SubmitButton";
 import { DeleteButton } from "./components/DeleteButton";
 import { ImageInput } from "./components/ImageInput";
 import { LowKwhInput } from "./components/LowKwhInput";
 import { NormalKwhInput } from "./components/NormalKwhInput";
+import { useElectricityReadingClientSlice } from "./store";
 import { isValidParam, responseIs404 } from "./utils";
 
 // Most of this page's skeleton is from ElectricityReadingCreatePage.
@@ -50,8 +53,16 @@ interface ElectricityReadingDetailEditPageFormValues {
 export const ElectricityReadingDetailEditPage = () => {
   // GENERAL HOOKS (verbatim from DetailPage.tsx)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const { id } = useParams();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+
+  // Client redux state selectors
+  const {
+    actions: { setIsOnDetailEditPage },
+  } = useElectricityReadingClientSlice();
+  const store = useStore<RootState>();
 
   // HOOKS FOR FETCHING DATA (verbatim from DetailPage.tsx)
   const [readingData, setReadingData] =
@@ -90,9 +101,13 @@ export const ElectricityReadingDetailEditPage = () => {
   };
   const debouncedGetReading = _.debounce(getReading, 300);
   useEffect(() => {
+    dispatch(setIsOnDetailEditPage(true));
     if (id !== undefined && isValidParam(id)) {
       debouncedGetReading(parseInt(id));
     }
+    return () => {
+      dispatch(setIsOnDetailEditPage(false));
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -163,7 +178,11 @@ export const ElectricityReadingDetailEditPage = () => {
       setReadingUploadError(responseData.requestErrorDescription);
       setErrorSnackbarOpen(true);
     } else {
-      navigate(generateElectricityDetailPath(parseInt(id)));
+      if (
+        store.getState().electricityReadingClient?.noSelector_isOnDetailEditPage
+      ) {
+        navigate(generateElectricityDetailPath(parseInt(id)));
+      }
     }
     setReadingUploading(false);
   };
@@ -188,6 +207,32 @@ export const ElectricityReadingDetailEditPage = () => {
 
   return (
     <>
+      <Box>
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            position: "absolute",
+          }}
+          onClick={() => navigate(generateElectricityDetailPath(parseInt(id)))}
+        >
+          Abort changes
+        </Button>
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            display: { xs: "flex", md: "none" },
+            marginBottom: (theme) => theme.spacing(1),
+            padding: 0,
+          }}
+          onClick={() => navigate(generateElectricityDetailPath(parseInt(id)))}
+        >
+          Abort changes
+        </Button>
+      </Box>
+
       <Box
         sx={{
           display: "flex",

@@ -130,7 +130,9 @@ export const ProfilePage = () => {
           alignItems: "center",
         }}
       >
-        <Typography>Current Preview: </Typography>
+        <Typography sx={{ marginRight: (theme) => theme.spacing(1) }}>
+          Current Preview:
+        </Typography>
         <Box
           sx={{
             maxWidth: "100%",
@@ -175,7 +177,9 @@ export const ProfilePage = () => {
             alignItems: "center",
           }}
         >
-          <Typography>New Preview: </Typography>
+          <Typography sx={{ marginRight: (theme) => theme.spacing(1) }}>
+            New Preview:
+          </Typography>
           <Box
             sx={{
               maxWidth: "100%",
