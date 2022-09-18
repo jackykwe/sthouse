@@ -31,7 +31,7 @@ export const ProfilePage = () => {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   // HOOKS FOR FETCHING DATA (verbatim from AuthenticatedAppBar.tsx)
-  // Client redux state selectors
+  // Server redux state selectors
   const {
     actions: { updateUserSuccessHandled, getUserRequest, updateUserRequest },
     selectors: {

@@ -33,7 +33,7 @@ export const AuthenticatedAppBar = () => {
 
   // HOOKS FOR FETCHING DATA
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  // Client redux state selectors
+  // Server redux state selectors
   const {
     actions: { getUserRequest },
     selectors: { selectGetUserData, selectGetUserError },

@@ -107,6 +107,22 @@ export const axiosGetElectricityReadingImage = async (
   }
 };
 
+export const axiosGetLatestElectricityReadingMillis = async (
+  accessToken: string
+) => {
+  try {
+    const request = `${BASE_URLS}/latest`;
+    const response = await appAxios.get<number>(request, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return commonAxiosErrorHandler(error);
+  }
+};
+
 export const axiosUpdateElectricityReading = async (
   id: number,
   low_kwh: number,
