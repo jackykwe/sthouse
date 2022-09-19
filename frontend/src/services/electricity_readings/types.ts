@@ -15,4 +15,5 @@ export interface ElectricityReadingReadFullDTO {
   latest_modification_unix_ts_millis: number;
   latest_modifier_name: string;
   latest_modifier_email: string;
+  image_token: string;
 }

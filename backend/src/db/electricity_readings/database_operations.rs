@@ -1,10 +1,10 @@
 use chrono::Utc;
 use sqlx::{Pool, Sqlite};
 
-use crate::api::electricity_readings::{
-    ElectricityReadingReadFullDTO, ElectricityReadingReadGraphDTO,
-};
+use crate::api::electricity_readings::ElectricityReadingReadGraphDTO;
 use crate::types::CEResult;
+
+use super::ElectricityReadingReadFullDAO;
 
 pub async fn create_electricity_reading(
     pool: &Pool<Sqlite>,
@@ -144,7 +144,7 @@ pub async fn get_electricity_readings_between(
 pub async fn get_electricity_reading(
     pool: &Pool<Sqlite>,
     id: i64,
-) -> CEResult<Option<ElectricityReadingReadFullDTO>> {
+) -> CEResult<Option<ElectricityReadingReadFullDAO>> {
     let mut transaction = pool.begin().await?;
 
     let reading = sqlx::query!(
@@ -186,7 +186,7 @@ pub async fn get_electricity_reading(
 
     #[allow(clippy::unwrap_used)]
     Ok(Some(match latest_modification {
-        Some(record) => ElectricityReadingReadFullDTO {
+        Some(record) => ElectricityReadingReadFullDAO {
             id: reading.id,
             low_kwh: reading.low_kwh,
             normal_kwh: reading.normal_kwh,
@@ -197,7 +197,7 @@ pub async fn get_electricity_reading(
             latest_modifier_name: record.display_name.unwrap(),                 // never fails (?)
             latest_modifier_email: record.email.unwrap(),                       // never fails (?)
         },
-        None => ElectricityReadingReadFullDTO {
+        None => ElectricityReadingReadFullDAO {
             id: reading.id,
             low_kwh: reading.low_kwh,
             normal_kwh: reading.normal_kwh,

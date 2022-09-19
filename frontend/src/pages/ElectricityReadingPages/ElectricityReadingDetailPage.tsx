@@ -16,9 +16,9 @@ import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailEditPath } from "routes/RouteEnum";
+import { BACKEND_API_URL } from "services";
 import {
   axiosGetElectricityReading,
-  axiosGetElectricityReadingImage,
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
 import { isRequestError } from "types";
@@ -41,34 +41,20 @@ export const ElectricityReadingDetailPage = () => {
     useState<ElectricityReadingReadFullDTO | null>(null);
   const [readingError, setReadingError] = useState<string | null>(null);
   // For image
-  const [imageBase64, setImageBase64] = useState("");
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [imageErrorSnackbarOpen, setImageErrorSnackbarOpen] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
     if (!isAuthenticated) return;
 
-    setImageErrorSnackbarOpen(false);
-    setImageError(null);
     const accessToken = await getAccessTokenSilently();
-    // Fetch data
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
       return;
     } else {
       setReadingData(responseData);
-    }
-    // Fetch image
-    const newImageBase64 = await axiosGetElectricityReadingImage(
-      id,
-      accessToken
-    );
-    if (isRequestError(newImageBase64)) {
-      setImageError(newImageBase64.requestErrorDescription);
-      setImageErrorSnackbarOpen(true);
-    } else {
-      setImageBase64(newImageBase64);
     }
   };
   const debouncedGetReading = _.debounce(getReading, 300);
@@ -181,27 +167,34 @@ export const ElectricityReadingDetailPage = () => {
       <Box
         sx={{
           display: "flex",
-          flexGrow: imageBase64 === "" ? 1 : 0,
+          flexGrow: imageLoaded ? 0 : 1,
           justifyContent: "center",
           alignItems: "normal",
           minHeight: 0,
           marginY: (theme) => theme.spacing(1),
         }}
       >
-        {imageBase64 === "" ? (
+        <img
+          src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg?image_token=${readingData.image_token}`}
+          alt={`${id}.jpg`}
+          style={{
+            display: imageLoaded ? "flex" : "none",
+            objectFit: "scale-down",
+            maxWidth: "100%",
+          }}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => {
+            setImageError(true);
+            setImageErrorSnackbarOpen(true);
+          }}
+        />
+        {!imageLoaded ? (
           <Skeleton
-            animation={imageError !== null ? false : "wave"}
+            animation={imageError ? false : "wave"}
             variant="rectangular"
             sx={{ width: "100%", height: "100%" }}
           />
-        ) : (
-          <img
-            // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
-            src={`data:image/jpeg;base64,${imageBase64}`}
-            alt={`Failed to fetch ${id}.jpg`}
-            style={{ objectFit: "scale-down", maxWidth: "100%" }}
-          />
-        )}
+        ) : null}
       </Box>
 
       <Box
@@ -353,7 +346,7 @@ export const ElectricityReadingDetailPage = () => {
             </IconButton>
           }
         >
-          Failed to fetch image: {imageError}
+          Failed to fetch image. Please report this bug!
         </Alert>
       </Snackbar>
     </>

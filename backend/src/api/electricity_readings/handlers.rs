@@ -4,13 +4,16 @@ use std::io::{Read, Write};
 use actix_easy_multipart::extractor::MultipartForm;
 use actix_web::{delete, get, post, put};
 use actix_web::{web, HttpResponse};
+use chrono::{Duration, Utc};
 use serde::Deserialize;
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
 use crate::api::electricity_readings::{
-    ElectricityReadingCreateMultipartForm, ElectricityReadingUpdateMultipartForm,
+    ElectricityReadingCreateMultipartForm, ElectricityReadingReadFullDTO,
+    ElectricityReadingUpdateMultipartForm,
 };
+use crate::api::image_token::ImageClaims;
 use crate::api::FORBIDDEN_ERROR_TEXT;
 use crate::db::electricity_readings::{
     create_electricity_reading, delete_electricity_reading, get_all_electricity_readings,
@@ -183,6 +186,7 @@ pub async fn handler_get_electricity_readings(
     }
 }
 
+#[allow(clippy::expect_used)]
 #[get("/{reading_id}")]
 pub async fn handler_get_electricity_reading(
     pool: web::Data<Pool<Sqlite>>,
@@ -199,7 +203,29 @@ pub async fn handler_get_electricity_reading(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     match result {
-        Some(dto) => Ok(HttpResponse::Ok().json(dto)),
+        Some(dao) => {
+            let now = Utc::now();
+            let image_token = ImageClaims {
+                iat: now.timestamp(),
+                exp: now
+                    .checked_add_signed(Duration::minutes(1))
+                    .expect("Impossible error: Time overflowed when generating image_token")
+                    .timestamp(),
+            }
+            .get_token();
+            Ok(HttpResponse::Ok().json(ElectricityReadingReadFullDTO {
+                id: dao.id,
+                low_kwh: dao.low_kwh,
+                normal_kwh: dao.normal_kwh,
+                creation_unix_ts_millis: dao.creation_unix_ts_millis,
+                creator_name: dao.creator_name,
+                creator_email: dao.creator_email,
+                latest_modification_unix_ts_millis: dao.latest_modification_unix_ts_millis,
+                latest_modifier_name: dao.latest_modifier_name,
+                latest_modifier_email: dao.latest_modifier_email,
+                image_token,
+            }))
+        }
         None => Ok(HttpResponse::NotFound().finish()),
     }
 }

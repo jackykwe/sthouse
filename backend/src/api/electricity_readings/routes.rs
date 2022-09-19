@@ -4,17 +4,20 @@ use actix_web::{
     dev::{Payload, Service},
     web, FromRequest, Scope,
 };
+use serde::Deserialize;
 
-use crate::{
-    api::FORBIDDEN_ERROR_TEXT,
-    extractors::{ElectricityReadingPerms, VerifiedAuthInfo},
-};
+use crate::api::image_token::ImageClaims;
 
 use super::handlers::{
     handler_create_electricity_reading, handler_delete_electricity_reading,
     handler_get_electricity_reading, handler_get_electricity_readings,
     handler_get_latest_electricity_reading_millis, handler_update_electricity_reading,
 };
+
+#[derive(Deserialize)]
+struct ImageQuery {
+    image_token: String,
+}
 
 pub fn routes() -> Scope {
     web::scope("/electricity_readings")
@@ -46,13 +49,16 @@ pub fn routes() -> Scope {
                     let fut = srv.call(req);
                     async {
                         let response = fut.await?;
-                        let vai =
-                            VerifiedAuthInfo::from_request(response.request(), &mut Payload::None)
-                                .await?;
-                        if vai.has_this_permission(&ElectricityReadingPerms::Read.to_string()) {
-                            Ok(response)
-                        } else {
-                            Err(actix_web::error::ErrorForbidden(FORBIDDEN_ERROR_TEXT))
+
+                        // Validate timestamp
+                        let url_params = web::Query::<ImageQuery>::from_request(
+                            response.request(),
+                            &mut Payload::None,
+                        )
+                        .await?;
+                        match ImageClaims::validate_token(&url_params.image_token) {
+                            Ok(_) => Ok(response),
+                            Err(error_msg) => Err(actix_web::error::ErrorBadRequest(error_msg)),
                         }
                     }
                 }),

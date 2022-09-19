@@ -25,10 +25,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch, useStore } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailPath, routeEnum } from "routes/RouteEnum";
+import { BACKEND_API_URL } from "services";
 import {
   axiosDeleteElectricityReading,
   axiosGetElectricityReading,
-  axiosGetElectricityReadingImage,
   axiosUpdateElectricityReading,
   ElectricityReadingReadFullDTO,
 } from "services/electricity_readings";
@@ -69,34 +69,20 @@ export const ElectricityReadingDetailEditPage = () => {
     useState<ElectricityReadingReadFullDTO | null>(null);
   const [readingError, setReadingError] = useState<string | null>(null);
   // For image
-  const [imageBase64, setImageBase64] = useState("");
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [imageErrorSnackbarOpen, setImageErrorSnackbarOpen] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
 
   const getReading = async (id: number) => {
     if (!isAuthenticated) return;
 
-    setImageErrorSnackbarOpen(false);
-    setImageError(null);
     const accessToken = await getAccessTokenSilently();
-    // Fetch data
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
       return;
     } else {
       setReadingData(responseData);
-    }
-    // Fetch image
-    const newImageBase64 = await axiosGetElectricityReadingImage(
-      id,
-      accessToken
-    );
-    if (isRequestError(newImageBase64)) {
-      setImageError(newImageBase64.requestErrorDescription);
-      setImageErrorSnackbarOpen(true);
-    } else {
-      setImageBase64(newImageBase64);
     }
   };
   const debouncedGetReading = _.debounce(getReading, 300);
@@ -161,6 +147,7 @@ export const ElectricityReadingDetailEditPage = () => {
     ElectricityReadingDetailEditPageFormValues
   > = async (data) => {
     setReadingUploading(true);
+    setImageErrorSnackbarOpen(false);
     setUploadProgress(0);
     setUploadCompleteSnackbarOpen(false);
     setErrorSnackbarOpen(false);
@@ -189,6 +176,7 @@ export const ElectricityReadingDetailEditPage = () => {
 
   const onDelete = async () => {
     setReadingDeleting(true);
+    setImageErrorSnackbarOpen(false);
     setErrorSnackbarOpen(false);
     setReadingError(null);
     const accessToken = await getAccessTokenSilently();
@@ -350,7 +338,7 @@ export const ElectricityReadingDetailEditPage = () => {
       <Box
         sx={{
           display: "flex",
-          flexGrow: imageFile === null && imageBase64 === "" ? 1 : 0,
+          flexGrow: imageFile !== null || imageLoaded ? 0 : 1,
           justifyContent: "center",
           alignItems: "normal",
           minHeight: 0,
@@ -363,20 +351,28 @@ export const ElectricityReadingDetailEditPage = () => {
             alt="Preview of electricty reading"
             style={{ maxWidth: "100%", objectFit: "scale-down" }}
           />
-        ) : imageBase64 === "" ? (
+        ) : null}
+        <img
+          src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg?image_token=${readingData.image_token}`}
+          alt={`${id}.jpg`}
+          style={{
+            display: imageFile === null && imageLoaded ? "flex" : "none",
+            objectFit: "scale-down",
+            maxWidth: "100%",
+          }}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => {
+            setImageError(true);
+            setImageErrorSnackbarOpen(true);
+          }}
+        />
+        {!imageLoaded ? (
           <Skeleton
-            animation={imageError !== null ? false : "wave"}
+            animation={imageError ? false : "wave"}
             variant="rectangular"
             sx={{ width: "100%", height: "100%" }}
           />
-        ) : (
-          <img
-            // src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg`}
-            src={`data:image/jpeg;base64,${imageBase64}`}
-            alt={`Failed to fetch ${id}.jpg`}
-            style={{ objectFit: "scale-down", maxWidth: "100%" }}
-          />
-        )}
+        ) : null}
       </Box>
       <Dialog
         open={deleteDialogOpen}
@@ -418,7 +414,7 @@ export const ElectricityReadingDetailEditPage = () => {
             </IconButton>
           }
         >
-          Failed to fetch image: {imageError}
+          Failed to fetch image. Please report this bug!
         </Alert>
       </Snackbar>
       <Snackbar

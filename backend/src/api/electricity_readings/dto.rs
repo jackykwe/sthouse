@@ -19,6 +19,7 @@ pub struct ElectricityReadingReadFullDTO {
     pub latest_modification_unix_ts_millis: i64,
     pub latest_modifier_name: String,
     pub latest_modifier_email: String,
+    pub image_token: String,
 }
 
 #[derive(Serialize)]
