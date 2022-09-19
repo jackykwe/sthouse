@@ -206,11 +206,13 @@ pub async fn handler_get_electricity_reading(
         Some(dao) => {
             let now = Utc::now();
             let image_token = ImageClaims {
-                iat: now.timestamp(),
+                sub: vai.jwt_claims.auth0_id,
+                aud: format!("{}.jpg", path),
                 exp: now
                     .checked_add_signed(Duration::minutes(1))
                     .expect("Impossible error: Time overflowed when generating image_token")
                     .timestamp(),
+                iat: now.timestamp(),
             }
             .get_token();
             Ok(HttpResponse::Ok().json(ElectricityReadingReadFullDTO {

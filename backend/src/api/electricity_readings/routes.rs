@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use actix_easy_multipart::extractor::MultipartFormConfig;
 use actix_files::Files;
 use actix_web::{
@@ -32,7 +34,7 @@ pub fn routes() -> Scope {
         .service(handler_create_electricity_reading)
         .service(handler_update_electricity_reading)
         .service(handler_delete_electricity_reading)
-        // ./images is relative to root of crate, i.e. the "backend" folder
+        // serve_from is relative to root of crate, i.e. the "backend" folder
         .service(
             web::scope("/images/compressed")
                 .service(Files::new("", "./images/compressed").path_filter(
@@ -46,19 +48,32 @@ pub fn routes() -> Scope {
                 .wrap_fn(|req, srv| {
                     // Pointed to by https://stackoverflow.com/q/73455239/7254995
                     // Reference here https://docs.rs/actix-web/latest/actix_web/struct.App.html#method.wrap_fn
+                    let intended_audience = Path::new(req.path()).file_name().map(|path| {
+                        path.to_owned()
+                            .into_string()
+                            .unwrap_or_else(|_err_osstring| String::from(""))
+                    });
                     let fut = srv.call(req);
                     async {
-                        let response = fut.await?;
+                        match intended_audience {
+                            // intended audience can't be verified, won't happen for actual resources
+                            None => Err(actix_web::error::ErrorNotFound("")),
+                            Some(aud) => {
+                                let response = fut.await?;
 
-                        // Validate timestamp
-                        let url_params = web::Query::<ImageQuery>::from_request(
-                            response.request(),
-                            &mut Payload::None,
-                        )
-                        .await?;
-                        match ImageClaims::validate_token(&url_params.image_token) {
-                            Ok(_) => Ok(response),
-                            Err(error_msg) => Err(actix_web::error::ErrorBadRequest(error_msg)),
+                                // Validate timestamp
+                                let url_params = web::Query::<ImageQuery>::from_request(
+                                    response.request(),
+                                    &mut Payload::None,
+                                )
+                                .await?;
+                                match ImageClaims::validate_token(&url_params.image_token, &aud) {
+                                    Ok(_) => Ok(response),
+                                    Err(error_msg) => {
+                                        Err(actix_web::error::ErrorBadRequest(error_msg))
+                                    }
+                                }
+                            }
                         }
                     }
                 }),
