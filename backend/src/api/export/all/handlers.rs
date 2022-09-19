@@ -2,7 +2,7 @@ use actix_web::{get, web, HttpResponse};
 use chrono::{Duration, Utc};
 use sqlx::{Pool, Sqlite};
 
-use crate::api::export::all::ExportTokenDTO;
+use crate::api::export::all::ExportRequestReadDTO;
 use crate::api::export::handlers::ExportQuery;
 use crate::api::resource_access_token::ResourceAccessClaims;
 use crate::api::FORBIDDEN_ERROR_TEXT;
@@ -11,8 +11,8 @@ use crate::extractors::{ExportPerms, VerifiedAuthInfo};
 use crate::types::HandlerResult;
 
 #[allow(clippy::expect_used)]
-#[get("/token")]
-pub async fn handler_get_token(
+#[get("/request")]
+pub async fn handler_get_export_request(
     pool: web::Data<Pool<Sqlite>>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
@@ -41,7 +41,7 @@ pub async fn handler_get_token(
     }
     .get_token();
 
-    Ok(HttpResponse::Ok().json(ExportTokenDTO {
+    Ok(HttpResponse::Ok().json(ExportRequestReadDTO {
         export_token,
         image_ids: dao.image_ids,
     }))

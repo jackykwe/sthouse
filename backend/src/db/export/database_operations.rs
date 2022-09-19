@@ -4,17 +4,17 @@ use sqlx::{Pool, Sqlite};
 use crate::{
     api::export::{
         all::{
-            ElectricityReadingExportDTO, ElectricityReadingModificationExportDTO, ExportReadDTO,
-            UserExportDTO,
+            ElectricityReadingExportReadDTO, ElectricityReadingModificationExportReadDTO,
+            ExportReadDTO, UserExportReadDTO,
         },
-        historical::{ElectricityReadingHistoricalExportDTO, ExportReadHistoricalDTO},
+        historical::{HistoricalElectricityReadingExportReadDTO, HistoricalExportReadDTO},
     },
     types::CEResult,
 };
 
-use super::{ExportTokenDAO, ExportTokenHistoricalDAO};
+use super::{ExportRequestDAO, HistoricalExportRequestDAO};
 
-pub async fn get_exportable_reading_ids(pool: &Pool<Sqlite>) -> CEResult<ExportTokenDAO> {
+pub async fn get_exportable_reading_ids(pool: &Pool<Sqlite>) -> CEResult<ExportRequestDAO> {
     let reading_ids = sqlx::query!(
         "\
         SELECT id \
@@ -28,7 +28,7 @@ pub async fn get_exportable_reading_ids(pool: &Pool<Sqlite>) -> CEResult<ExportT
     .map(|record| record.id)
     .collect::<Vec<_>>();
 
-    Ok(ExportTokenDAO {
+    Ok(ExportRequestDAO {
         image_ids: reading_ids,
     })
 }
@@ -37,7 +37,7 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
     let unix_ts_millis = Utc::now().timestamp_millis();
 
     let users = sqlx::query_as!(
-        UserExportDTO,
+        UserExportReadDTO,
         "\
         SELECT id, display_name, email \
         FROM users;\
@@ -47,7 +47,7 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
     .await?;
 
     let electricity_readings = sqlx::query_as!(
-        ElectricityReadingExportDTO,
+        ElectricityReadingExportReadDTO,
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis, creator_id \
         FROM electricity_readings \
@@ -58,7 +58,7 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
     .await?;
 
     let electricity_reading_modifications = sqlx::query_as!(
-        ElectricityReadingModificationExportDTO,
+        ElectricityReadingModificationExportReadDTO,
         "\
         SELECT reading_id, modifier_id, unix_ts_millis \
         FROM electricity_reading_modifications;\
@@ -77,7 +77,7 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
 
 pub async fn get_exportable_historical_reading_ids(
     pool: &Pool<Sqlite>,
-) -> CEResult<ExportTokenHistoricalDAO> {
+) -> CEResult<HistoricalExportRequestDAO> {
     let reading_ids = sqlx::query!(
         "\
         SELECT id \
@@ -104,17 +104,17 @@ pub async fn get_exportable_historical_reading_ids(
     .map(|record| record.id)
     .collect::<Vec<_>>();
 
-    Ok(ExportTokenHistoricalDAO {
+    Ok(HistoricalExportRequestDAO {
         image_ids: reading_ids,
         tombstone_image_ids: tombstone_reading_ids,
     })
 }
 
-pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<ExportReadHistoricalDTO> {
+pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<HistoricalExportReadDTO> {
     let unix_ts_millis = Utc::now().timestamp_millis();
 
     let users = sqlx::query_as!(
-        UserExportDTO,
+        UserExportReadDTO,
         "\
         SELECT id, display_name, email \
         FROM users;\
@@ -124,7 +124,7 @@ pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<ExportRe
     .await?;
 
     let electricity_readings = sqlx::query_as!(
-        ElectricityReadingHistoricalExportDTO,
+        HistoricalElectricityReadingExportReadDTO,
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis, creator_id, tombstone \
         FROM electricity_readings;\
@@ -134,7 +134,7 @@ pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<ExportRe
     .await?;
 
     let electricity_reading_modifications = sqlx::query_as!(
-        ElectricityReadingModificationExportDTO,
+        ElectricityReadingModificationExportReadDTO,
         "\
         SELECT reading_id, modifier_id, unix_ts_millis \
         FROM electricity_reading_modifications;\
@@ -143,7 +143,7 @@ pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<ExportRe
     .fetch_all(pool)
     .await?;
 
-    Ok(ExportReadHistoricalDTO {
+    Ok(HistoricalExportReadDTO {
         unix_ts_millis,
         users,
         electricity_readings,

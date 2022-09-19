@@ -8,7 +8,9 @@ use serde::Deserialize;
 
 use crate::api::resource_access_token::ResourceAccessClaims;
 
-use super::handlers::{handler_get_exportable_historical_json, handler_get_historical_token};
+use super::handlers::{
+    handler_get_historical_export_request, handler_get_historical_exportable_json,
+};
 
 #[derive(Deserialize)]
 struct ImageQuery {
@@ -17,11 +19,11 @@ struct ImageQuery {
 
 pub fn routes() -> Scope {
     web::scope("/historical")
-        .service(handler_get_historical_token)
-        .service(handler_get_exportable_historical_json)
+        .service(handler_get_historical_export_request)
+        .service(handler_get_historical_exportable_json)
         // serve_from is relative to root of crate, i.e. the "backend" folder
         .service(
-            web::scope("/images/original/")
+            web::scope("/images/original")
                 .service(Files::new("", "./images/original").path_filter(
                     // prevents accessing sub-directory.
                     // path.components().count() is for everything after mount_path (first arg)

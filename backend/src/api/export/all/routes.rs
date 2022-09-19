@@ -7,7 +7,7 @@ use actix_web::{
 };
 use serde::Deserialize;
 
-use super::handlers::{handler_get_exportable_json, handler_get_token};
+use super::handlers::{handler_get_export_request, handler_get_exportable_json};
 
 #[derive(Deserialize)]
 struct ImageQuery {
@@ -16,11 +16,11 @@ struct ImageQuery {
 
 pub fn routes() -> Scope {
     web::scope("")
-        .service(handler_get_token)
+        .service(handler_get_export_request)
         .service(handler_get_exportable_json)
         // serve_from is relative to root of crate, i.e. the "backend" folder
         .service(
-            web::scope("/images/original/")
+            web::scope("/images/original")
                 .service(Files::new("", "./images/original").path_filter(
                     // prevents accessing sub-directory.
                     // path.components().count() is for everything after mount_path (first arg)

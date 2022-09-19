@@ -1,16 +1,16 @@
 use serde::Serialize;
 
-use crate::api::export::all::{ElectricityReadingModificationExportDTO, UserExportDTO};
+use crate::api::export::all::{ElectricityReadingModificationExportReadDTO, UserExportReadDTO};
 
 #[derive(Serialize)]
-pub struct ExportTokenHistoricalDTO {
+pub struct HistoricalExportRequestReadDTO {
     pub export_token: String,
     pub image_ids: Vec<i64>,
     pub tombstone_image_ids: Vec<i64>,
 }
 
 #[derive(Serialize)]
-pub struct ElectricityReadingHistoricalExportDTO {
+pub struct HistoricalElectricityReadingExportReadDTO {
     pub id: i64,
     pub low_kwh: f64,
     pub normal_kwh: f64,
@@ -20,9 +20,9 @@ pub struct ElectricityReadingHistoricalExportDTO {
 }
 
 #[derive(Serialize)]
-pub struct ExportReadHistoricalDTO {
+pub struct HistoricalExportReadDTO {
     pub unix_ts_millis: i64,
-    pub users: Vec<UserExportDTO>,
-    pub electricity_readings: Vec<ElectricityReadingHistoricalExportDTO>,
-    pub electricity_reading_modifications: Vec<ElectricityReadingModificationExportDTO>,
+    pub users: Vec<UserExportReadDTO>,
+    pub electricity_readings: Vec<HistoricalElectricityReadingExportReadDTO>,
+    pub electricity_reading_modifications: Vec<ElectricityReadingModificationExportReadDTO>,
 }

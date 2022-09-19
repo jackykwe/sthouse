@@ -3,7 +3,7 @@ use chrono::{Duration, Utc};
 use sqlx::{Pool, Sqlite};
 
 use crate::api::export::handlers::ExportQuery;
-use crate::api::export::historical::ExportTokenHistoricalDTO;
+use crate::api::export::historical::HistoricalExportRequestReadDTO;
 use crate::api::resource_access_token::ResourceAccessClaims;
 use crate::api::FORBIDDEN_ERROR_TEXT;
 use crate::db::export::{get_exportable_historical, get_exportable_historical_reading_ids};
@@ -11,8 +11,8 @@ use crate::extractors::{ExportPerms, VerifiedAuthInfo};
 use crate::types::HandlerResult;
 
 #[allow(clippy::expect_used)]
-#[get("/token")]
-pub async fn handler_get_historical_token(
+#[get("/request")]
+pub async fn handler_get_historical_export_request(
     pool: web::Data<Pool<Sqlite>>,
     vai: VerifiedAuthInfo,
 ) -> HandlerResult {
@@ -39,7 +39,7 @@ pub async fn handler_get_historical_token(
     }
     .get_token();
 
-    Ok(HttpResponse::Ok().json(ExportTokenHistoricalDTO {
+    Ok(HttpResponse::Ok().json(HistoricalExportRequestReadDTO {
         export_token,
         image_ids: dao.image_ids,
         tombstone_image_ids: dao.tombstone_image_ids,
@@ -47,7 +47,7 @@ pub async fn handler_get_historical_token(
 }
 
 #[get("/json")]
-pub async fn handler_get_exportable_historical_json(
+pub async fn handler_get_historical_exportable_json(
     pool: web::Data<Pool<Sqlite>>,
     url_params: web::Query<ExportQuery>,
 ) -> HandlerResult {
