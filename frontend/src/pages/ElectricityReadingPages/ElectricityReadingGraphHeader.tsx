@@ -3,6 +3,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
+import Grid2 from "@mui/material/Unstable_Grid2";
 import { DatePicker } from "@mui/x-date-pickers";
 import { addMilliseconds, endOfMonth, isValid, startOfMonth } from "date-fns";
 import { useEffect, useState } from "react";
@@ -37,17 +38,17 @@ export const ElectricityReadingGraphHeader = (
     actions: {
       setGraphStartMillisActInc,
       setGraphEndMillisActInc,
-      setGraphShowBestFit,
+      setGraphShowInterpolation,
     },
     selectors: {
       selectGraphStartMillisActInc,
       selectGraphEndMillisActInc,
-      selectGraphShowBestFit,
+      selectGraphShowInterpolation,
     },
   } = useElectricityReadingClientSlice();
   const graphStartMillisActInc = useSelector(selectGraphStartMillisActInc);
   const graphEndMillisActInc = useSelector(selectGraphEndMillisActInc);
-  const graphShowBestFit = useSelector(selectGraphShowBestFit);
+  const graphShowInterpolation = useSelector(selectGraphShowInterpolation);
 
   // Client redux state derived
   const [fromPickerDate, setFromPickerDate] = useState<Date | null>(
@@ -84,106 +85,137 @@ export const ElectricityReadingGraphHeader = (
     return <></>;
   }
 
-  return (
-    <Box
-      sx={{
-        paddingTop: (theme) => theme.spacing(1),
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: (theme) => theme.spacing(2),
+  const fromPicker = (fullWidth: boolean) => (
+    <DatePicker
+      label="From (inclusive)"
+      views={["year", "month"]}
+      minDate={DATE_PICKER_MIN_DATE}
+      maxDate={DATE_PICKER_MAX_DATE}
+      onChange={(newDateSys) => {
+        if (newDateSys !== null && isValid(newDateSys)) {
+          const coercedDate = startOfMonth(newDateSys);
+          if (isWithinAllowedIntervalUtil(coercedDate)) {
+            // Hack: add milliseconds to force auto-correction of text input
+            setFromPickerDate(addMilliseconds(coercedDate, 1));
+            dispatch(
+              setGraphStartMillisActInc(
+                getUnixTimeMillisUtil(
+                  systemReprToTsActualUtil(
+                    coercedDate,
+                    DEFAULT_TARGET_TIME_ZONE
+                  )
+                )
+              )
+            );
+            return;
+          }
+        }
+        setFromPickerDate(newDateSys); // UI turns red if invalid and non-empty
       }}
-    >
-      <DatePicker
-        label="From (inclusive)"
-        views={["year", "month"]}
-        minDate={DATE_PICKER_MIN_DATE}
-        maxDate={DATE_PICKER_MAX_DATE}
-        onChange={(newDateSys) => {
-          if (newDateSys !== null && isValid(newDateSys)) {
-            const coercedDate = startOfMonth(newDateSys);
-            if (isWithinAllowedIntervalUtil(coercedDate)) {
-              // Hack: add milliseconds to force auto-correction of text input
-              setFromPickerDate(addMilliseconds(coercedDate, 1));
-              dispatch(
-                setGraphStartMillisActInc(
-                  getUnixTimeMillisUtil(
-                    systemReprToTsActualUtil(
-                      coercedDate,
-                      DEFAULT_TARGET_TIME_ZONE
-                    )
-                  )
-                )
-              );
-              return;
-            }
-          }
-          setFromPickerDate(newDateSys); // UI turns red if invalid and non-empty
-        }}
-        value={fromPickerDate}
-        renderInput={(params) => (
-          <TextField
-            helperText={generateDatePickerHelperTextUtil(fromPickerDate)}
-            // helperText={generateDatePickerHelperTextUtilDebug(
-            //   fromPickerDate,
-            //   graphStartMillisActInc,
-            //   DEFAULT_TARGET_TIME_ZONE
-            // )}
-            {...params}
-          />
-        )}
-      />
-      <DatePicker
-        label="To (inclusive)"
-        views={["year", "month"]}
-        minDate={DATE_PICKER_MIN_DATE}
-        maxDate={DATE_PICKER_MAX_DATE}
-        onChange={(newDateSys) => {
-          if (newDateSys !== null && isValid(newDateSys)) {
-            const coercedDate = endOfMonth(newDateSys);
-            if (isWithinAllowedIntervalUtil(coercedDate)) {
-              setToPickerDate(coercedDate);
-              dispatch(
-                setGraphEndMillisActInc(
-                  getUnixTimeMillisUtil(
-                    systemReprToTsActualUtil(
-                      coercedDate,
-                      DEFAULT_TARGET_TIME_ZONE
-                    )
-                  )
-                )
-              );
-              return;
-            }
-          }
-          setToPickerDate(newDateSys); // UI turns red if invalid and non-empty
-        }}
-        value={toPickerDate}
-        renderInput={(params) => (
-          <TextField
-            helperText={generateDatePickerHelperTextUtil(toPickerDate)}
-            // helperText={generateDatePickerHelperTextUtilDebug(
-            //   toPickerDate,
-            //   graphEndMillisActInc,
-            //   DEFAULT_TARGET_TIME_ZONE
-            // )}
-            {...params}
-          />
-        )}
-      />
-      <FormGroup sx={{ marginBottom: (theme) => theme.spacing(3) }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={graphShowBestFit}
-              onChange={(event) =>
-                dispatch(setGraphShowBestFit(event.target.checked))
-              }
-            />
-          }
-          label="Show interpolation"
+      value={fromPickerDate}
+      renderInput={(params) => (
+        <TextField
+          fullWidth={fullWidth}
+          helperText={generateDatePickerHelperTextUtil(fromPickerDate)}
+          // helperText={generateDatePickerHelperTextUtilDebug(
+          //   fromPickerDate,
+          //   graphStartMillisActInc,
+          //   DEFAULT_TARGET_TIME_ZONE
+          // )}
+          {...params}
         />
-      </FormGroup>
-    </Box>
+      )}
+    />
+  );
+  const toPicker = (fullWidth: boolean) => (
+    <DatePicker
+      label="To (inclusive)"
+      views={["year", "month"]}
+      minDate={DATE_PICKER_MIN_DATE}
+      maxDate={DATE_PICKER_MAX_DATE}
+      onChange={(newDateSys) => {
+        if (newDateSys !== null && isValid(newDateSys)) {
+          const coercedDate = endOfMonth(newDateSys);
+          if (isWithinAllowedIntervalUtil(coercedDate)) {
+            setToPickerDate(coercedDate);
+            dispatch(
+              setGraphEndMillisActInc(
+                getUnixTimeMillisUtil(
+                  systemReprToTsActualUtil(
+                    coercedDate,
+                    DEFAULT_TARGET_TIME_ZONE
+                  )
+                )
+              )
+            );
+            return;
+          }
+        }
+        setToPickerDate(newDateSys); // UI turns red if invalid and non-empty
+      }}
+      value={toPickerDate}
+      renderInput={(params) => (
+        <TextField
+          fullWidth={fullWidth}
+          helperText={generateDatePickerHelperTextUtil(toPickerDate)}
+          // helperText={generateDatePickerHelperTextUtilDebug(
+          //   toPickerDate,
+          //   graphEndMillisActInc,
+          //   DEFAULT_TARGET_TIME_ZONE
+          // )}
+          {...params}
+        />
+      )}
+    />
+  );
+  const radioGroup = (
+    <FormGroup sx={{ marginTop: (theme) => theme.spacing(1) }}>
+      <FormControlLabel
+        sx={{ alignSelf: "center" }}
+        control={
+          <Switch
+            checked={graphShowInterpolation}
+            onChange={(event) =>
+              dispatch(setGraphShowInterpolation(event.target.checked))
+            }
+          />
+        }
+        label="Show interpolation"
+      />
+    </FormGroup>
+  );
+
+  return (
+    <>
+      <Box
+        sx={{
+          paddingTop: (theme) => theme.spacing(1),
+          display: { xs: "none", md: "flex" },
+          justifyContent: "center",
+          alignItems: "start",
+          gap: (theme) => theme.spacing(2),
+        }}
+      >
+        {fromPicker(false)}
+        {toPicker(false)}
+        {radioGroup}
+      </Box>
+      <Box
+        sx={{
+          paddingTop: (theme) => theme.spacing(1),
+          display: { xs: "flex", md: "none" },
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          // gap: (theme) => theme.spacing(2),
+        }}
+      >
+        <Grid2 container columnSpacing={1}>
+          <Grid2 xs={6}>{fromPicker(true)}</Grid2>
+          <Grid2 xs={6}>{toPicker(true)}</Grid2>
+          <Grid2 xs={12}>{radioGroup}</Grid2>
+        </Grid2>
+      </Box>
+    </>
   );
 };

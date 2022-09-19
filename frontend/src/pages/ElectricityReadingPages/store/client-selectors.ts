@@ -20,7 +20,7 @@ export const selectGraphAbsorbCount = createSelector(
   (electricityReadingClient) => electricityReadingClient.graphAbsorbCount
 );
 
-export const selectGraphShowBestFit = createSelector(
+export const selectGraphShowInterpolation = createSelector(
   [selectElectricityReadingClient],
-  (electricityReadingClient) => electricityReadingClient.graphShowBestFit
+  (electricityReadingClient) => electricityReadingClient.graphShowInterpolation
 );

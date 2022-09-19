@@ -8,7 +8,7 @@ export const initialState: ElectricityReadingClientState = {
   graphStartMillisActInc: null, // Act for actual (compared to Sys for system)
   graphEndMillisActInc: endOfMonthMillisAsOfNowInTzUtil(),
   graphAbsorbCount: 2,
-  graphShowBestFit: true,
+  graphShowInterpolation: true,
   noSelector_isOnCreatePage: false,
   noSelector_isOnDetailEditPage: false,
 };
@@ -32,11 +32,11 @@ const clientSlice = createSliceUtil({
     setGraphAbsorbCount: (state, action: { payload: number; type: string }) => {
       state.graphAbsorbCount = action.payload;
     },
-    setGraphShowBestFit: (
+    setGraphShowInterpolation: (
       state,
       action: { payload: boolean; type: string }
     ) => {
-      state.graphShowBestFit = action.payload;
+      state.graphShowInterpolation = action.payload;
     },
     setIsOnCreatePage: (state, action: { payload: boolean; type: string }) => {
       state.noSelector_isOnCreatePage = action.payload;

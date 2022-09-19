@@ -90,12 +90,12 @@ export const isWithinAllowedIntervalUtil = (date: Date) =>
 
 export const generateDatePickerHelperTextUtil = (date: Date | null) =>
   date === null
-    ? " "
+    ? ""
     : !isValid(date)
     ? 'Date is not of form "month yyyy"'
     : !isWithinAllowedIntervalUtil(date)
     ? "Date is outside of allowed range"
-    : " ";
+    : "";
 
 export const generateDatePickerHelperTextUtilDebug = (
   date: Date | null,

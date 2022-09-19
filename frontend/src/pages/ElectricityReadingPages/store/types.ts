@@ -2,7 +2,7 @@ export interface ElectricityReadingClientState {
   graphStartMillisActInc: number | null;
   graphEndMillisActInc: number;
   graphAbsorbCount: number;
-  graphShowBestFit: boolean;
+  graphShowInterpolation: boolean;
   noSelector_isOnCreatePage: boolean;
   noSelector_isOnDetailEditPage: boolean;
 }

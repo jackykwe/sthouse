@@ -44,7 +44,7 @@ export const HomePage = () => {
   const userData = useSelector(selectGetUserData);
 
   const feedbackWelcomeText =
-    "Any user experience feedback is welcomed and appreciated!";
+    "All user experience feedback is welcomed and appreciated!";
   const bugsText =
     "If you encounter any bugs, please tell me where they are, and I'll go squish them.";
 
