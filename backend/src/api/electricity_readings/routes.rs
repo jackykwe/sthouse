@@ -8,7 +8,7 @@ use actix_web::{
 };
 use serde::Deserialize;
 
-use crate::api::image_token::ImageClaims;
+use crate::api::resource_access_token::ResourceAccessClaims;
 
 use super::handlers::{
     handler_create_electricity_reading, handler_delete_electricity_reading,
@@ -67,7 +67,10 @@ pub fn routes() -> Scope {
                                     &mut Payload::None,
                                 )
                                 .await?;
-                                match ImageClaims::validate_token(&url_params.image_token, &aud) {
+                                match ResourceAccessClaims::validate_token(
+                                    &url_params.image_token,
+                                    &aud,
+                                ) {
                                     Ok(_) => Ok(response),
                                     Err(error_msg) => {
                                         Err(actix_web::error::ErrorBadRequest(error_msg))

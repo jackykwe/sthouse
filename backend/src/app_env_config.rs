@@ -6,7 +6,7 @@ pub struct AppEnvConfig {
     pub port: u16,
     pub database_url: String,
     pub client_origin_url: String,
-    pub image_token_secret_512b: String,
+    pub resource_access_token_secret_512b: String,
 }
 
 impl AppEnvConfig {
@@ -15,9 +15,9 @@ impl AppEnvConfig {
         let result: Self =
             envy::from_env().expect("Supply missing environment variables via .env file");
         assert!(
-            result.image_token_secret_512b.len() == 64,
+            result.resource_access_token_secret_512b.len() == 64,
             "image_token_secret_512b: expected 512b, got {}",
-            result.image_token_secret_512b.len() * 8
+            result.resource_access_token_secret_512b.len() * 8
         );
         result
     }

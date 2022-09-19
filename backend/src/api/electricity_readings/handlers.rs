@@ -13,7 +13,7 @@ use crate::api::electricity_readings::{
     ElectricityReadingCreateMultipartForm, ElectricityReadingReadFullDTO,
     ElectricityReadingUpdateMultipartForm,
 };
-use crate::api::image_token::ImageClaims;
+use crate::api::resource_access_token::ResourceAccessClaims;
 use crate::api::FORBIDDEN_ERROR_TEXT;
 use crate::db::electricity_readings::{
     create_electricity_reading, delete_electricity_reading, get_all_electricity_readings,
@@ -205,7 +205,7 @@ pub async fn handler_get_electricity_reading(
     match result {
         Some(dao) => {
             let now = Utc::now();
-            let image_token = ImageClaims {
+            let image_token = ResourceAccessClaims {
                 sub: vai.jwt_claims.auth0_id,
                 aud: format!("{}.jpg", path),
                 exp: now

@@ -4,21 +4,23 @@ use serde::{Deserialize, Serialize};
 use crate::app_env_config::AppEnvConfig;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ImageClaims {
+pub struct ResourceAccessClaims {
     pub aud: String,
     pub sub: String,
     pub exp: i64, // UTC timestamp (seconds)
     pub iat: i64, // UTC timestamp (seconds)
 }
 
-impl ImageClaims {
+impl ResourceAccessClaims {
     #[allow(clippy::unwrap_used)]
     pub fn get_token(&self) -> String {
         let aec = AppEnvConfig::read_from_dot_env();
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             self,
-            &jsonwebtoken::EncodingKey::from_secret(aec.image_token_secret_512b.as_bytes()),
+            &jsonwebtoken::EncodingKey::from_secret(
+                aec.resource_access_token_secret_512b.as_bytes(),
+            ),
         )
         .unwrap() // no reason this should fail. docs for encode() also uses unwrap().
     }
@@ -33,7 +35,9 @@ impl ImageClaims {
 
         let decode_result = jsonwebtoken::decode::<Self>(
             token,
-            &jsonwebtoken::DecodingKey::from_secret(aec.image_token_secret_512b.as_bytes()),
+            &jsonwebtoken::DecodingKey::from_secret(
+                aec.resource_access_token_secret_512b.as_bytes(),
+            ),
             &validation,
         );
         match decode_result {
@@ -48,7 +52,7 @@ impl ImageClaims {
                     let decode_result_forced = jsonwebtoken::decode::<Self>(
                         token,
                         &jsonwebtoken::DecodingKey::from_secret(
-                            aec.image_token_secret_512b.as_bytes(),
+                            aec.resource_access_token_secret_512b.as_bytes(),
                         ),
                         &no_validation,
                     ); // results in a error only if token or signature is valid

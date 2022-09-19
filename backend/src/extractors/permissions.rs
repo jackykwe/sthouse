@@ -15,3 +15,17 @@ impl ToString for ElectricityReadingPerms {
         }
     }
 }
+
+pub enum ExportPerms {
+    All,
+    Historical,
+}
+
+impl ToString for ExportPerms {
+    fn to_string(&self) -> String {
+        match self {
+            Self::All => String::from("export:all"),
+            Self::Historical => String::from("export:historical"),
+        }
+    }
+}
