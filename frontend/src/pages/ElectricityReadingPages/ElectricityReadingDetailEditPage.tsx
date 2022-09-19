@@ -80,7 +80,6 @@ export const ElectricityReadingDetailEditPage = () => {
     const responseData = await axiosGetElectricityReading(id, accessToken);
     if (isRequestError(responseData)) {
       setReadingError(responseData.requestErrorDescription);
-      return;
     } else {
       setReadingData(responseData);
     }

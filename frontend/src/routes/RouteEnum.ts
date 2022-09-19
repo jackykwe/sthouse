@@ -2,6 +2,8 @@ import {
   ElectricityReadingCreatePageLazy,
   ElectricityReadingDetailPageLazy,
   ElectricityReadingGraphPageLazy,
+  ExportHistoricalPageLazy,
+  ExportPageLazy,
   HomePageLazy,
 } from "pages";
 import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
@@ -48,6 +50,15 @@ export const routeEnum = {
   Profile: {
     path: "/profile",
     element: ProfilePageLazy,
+  },
+  Export: {
+    appBarName: "Export Data",
+    path: "/export",
+    element: ExportPageLazy,
+  },
+  ExportHistorical: {
+    path: "/export/historical",
+    element: ExportHistoricalPageLazy,
   },
   Default: {
     path: "*",
