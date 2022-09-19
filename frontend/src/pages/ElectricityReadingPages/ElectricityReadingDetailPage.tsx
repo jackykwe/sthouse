@@ -212,7 +212,7 @@ export const ElectricityReadingDetailPage = () => {
         >
           Submitted by{" "}
         </Typography>
-        <Tooltip arrow placement="top" title={readingData.creator_email}>
+        <Tooltip placement="top" title={readingData.creator_email}>
           <Typography
             fontWeight={700}
             color={(theme) =>

@@ -10,20 +10,24 @@ import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPa
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
 import { ProfilePageLazy } from "pages/ProfilePage/ProfilePageLazy";
 import { LazyExoticComponent } from "react";
-import { generatePath } from "react-router-dom";
+import { generatePath, matchPath } from "react-router-dom";
 
 interface RouteEnumItem {
   appBarName?: string;
   path: string;
   element: LazyExoticComponent<() => JSX.Element>;
+  highlightAppBarName?: string; // the name of the appBarName to highlight when on this page
 }
 
 interface AppBarRouteEnumItem {
   appBarName: string;
   path: string;
   element: LazyExoticComponent<() => JSX.Element>;
+  highlightAppBarName?: string; // the name of the appBarName to highlight when on this page
 }
 
+// Order doesn't matter for react-router-v6 (it's smarter than v5),
+// but matters for my findFirstMatch() function below.
 export const routeEnum = {
   Home: {
     path: "/",
@@ -33,19 +37,23 @@ export const routeEnum = {
     appBarName: "Submit Reading",
     path: "/electricity-readings/upload",
     element: ElectricityReadingCreatePageLazy,
+    highlightAppBarName: "Submit Reading",
   },
   ElectricityGraph: {
     appBarName: "Electricity Readings",
     path: "/electricity-readings",
     element: ElectricityReadingGraphPageLazy,
+    highlightAppBarName: "Electricity Readings",
   },
   ElectricityDetail: {
     path: "/electricity-readings/:id",
     element: ElectricityReadingDetailPageLazy,
+    highlightAppBarName: "Electricity Readings",
   },
   ElectricityDetailEdit: {
     path: "/electricity-readings/:id/edit",
     element: ElectricityReadingDetailEditPageLazy,
+    highlightAppBarName: "Electricity Readings",
   },
   Profile: {
     path: "/profile",
@@ -55,10 +63,12 @@ export const routeEnum = {
     appBarName: "Export Data",
     path: "/export",
     element: ExportPageLazy,
+    highlightAppBarName: "Export Data",
   },
   ExportHistorical: {
     path: "/export/historical",
     element: ExportHistoricalPageLazy,
+    highlightAppBarName: "Export Data",
   },
   Default: {
     path: "*",
@@ -81,3 +91,9 @@ export const generateElectricityDetailPath = (id: number) =>
 
 export const generateElectricityDetailEditPath = (id: number) =>
   generatePath(routeEnum.ElectricityDetailEdit.path, { id: id.toString() });
+
+export const findFirstMatch = (currentPathname: string) => {
+  return Object.entries<RouteEnumItem>(routeEnum).find(
+    ([, item]) => matchPath(item.path, currentPathname) !== null
+  );
+};

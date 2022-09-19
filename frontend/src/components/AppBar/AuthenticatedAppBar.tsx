@@ -8,6 +8,7 @@ import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { grey } from "@mui/material/colors";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -19,8 +20,8 @@ import Typography from "@mui/material/Typography";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { appBarRouteEnum, routeEnum } from "routes/RouteEnum";
+import { useLocation, useNavigate } from "react-router-dom";
+import { appBarRouteEnum, findFirstMatch, routeEnum } from "routes/RouteEnum";
 import { LightDarkToggle } from "./LightDarkToggle";
 import LogoutMenuItem from "./LogoutMenuItem";
 import { useUserServerSlice } from "./store";
@@ -29,6 +30,7 @@ export const AuthenticatedAppBar = () => {
   // GENERAL HOOKS
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { getAccessTokenSilently, user } = useAuth0();
 
   // HOOKS FOR FETCHING DATA
@@ -118,16 +120,40 @@ export const AuthenticatedAppBar = () => {
                 justifyContent: "flex-start",
               }}
             >
-              {Object.values(appBarRouteEnum).map((item) => (
-                <Button
-                  disableRipple
-                  key={item.path}
-                  onClick={handleNavigateToPath(item.path)}
-                  sx={{ textTransform: "none" }}
-                >
-                  <Typography variant="subtitle1">{item.appBarName}</Typography>
-                </Button>
-              ))}
+              {Object.values(appBarRouteEnum).map((item) => {
+                const shouldHighlight =
+                  findFirstMatch(location.pathname)?.[1]
+                    ?.highlightAppBarName === item.appBarName;
+                return (
+                  <Button
+                    disableRipple
+                    key={item.path}
+                    onClick={handleNavigateToPath(item.path)}
+                    sx={{
+                      textTransform: "none",
+                      backgroundColor: (theme) =>
+                        !shouldHighlight
+                          ? "default"
+                          : theme.palette.mode === "light"
+                          ? theme.palette.primary.light
+                          : grey[700],
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "light"
+                            ? theme.palette.primary.light
+                            : grey[700],
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={shouldHighlight ? 700 : "auto"}
+                    >
+                      {item.appBarName}
+                    </Typography>
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
 
@@ -151,14 +177,27 @@ export const AuthenticatedAppBar = () => {
               onClose={() => setNavAnchorEl(null)}
               sx={{ display: "block" }}
             >
-              {Object.values(appBarRouteEnum).map((item) => (
-                <MenuItem
-                  key={item.path}
-                  onClick={handleNavigateToPath(item.path)}
-                >
-                  {item.appBarName}
-                </MenuItem>
-              ))}
+              {Object.values(appBarRouteEnum).map((item) => {
+                const shouldHighlight =
+                  findFirstMatch(location.pathname)?.[1]
+                    ?.highlightAppBarName === item.appBarName;
+                return (
+                  <MenuItem
+                    key={item.path}
+                    onClick={handleNavigateToPath(item.path)}
+                    sx={{
+                      backgroundColor: (theme) =>
+                        !shouldHighlight
+                          ? "default"
+                          : theme.palette.mode === "light"
+                          ? theme.palette.primary.light
+                          : grey[700],
+                    }}
+                  >
+                    {item.appBarName}
+                  </MenuItem>
+                );
+              })}
             </Menu>
           </Box>
 
@@ -176,7 +215,7 @@ export const AuthenticatedAppBar = () => {
               disableRipple
               onClick={(event) => setAvatarAnchorEl(event.currentTarget)}
             >
-              <Tooltip arrow title={getAvatarTooltip()}>
+              <Tooltip title={getAvatarTooltip()}>
                 <Avatar
                   alt={user?.given_name ?? user?.name}
                   src={user?.picture}
