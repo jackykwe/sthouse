@@ -104,7 +104,8 @@ pub async fn create_electricity_reading_raw_init(
 pub async fn get_all_electricity_readings(
     pool: &Pool<Sqlite>,
 ) -> CEResult<Vec<ElectricityReadingReadGraphDTO>> {
-    let result = sqlx::query!(
+    let result = sqlx::query_as!(
+        ElectricityReadingReadGraphDTO,
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis \
         FROM electricity_readings \
@@ -113,15 +114,7 @@ pub async fn get_all_electricity_readings(
         ",
     )
     .fetch_all(pool)
-    .await?
-    .into_iter()
-    .map(|record| ElectricityReadingReadGraphDTO {
-        id: record.id,
-        low_kwh: record.low_kwh,
-        normal_kwh: record.normal_kwh,
-        unix_ts_millis: record.unix_ts_millis,
-    })
-    .collect::<Vec<_>>();
+    .await?;
 
     Ok(result)
 }
@@ -131,7 +124,8 @@ pub async fn get_electricity_readings_between(
     start_unix_ts_millis_inc: i64,
     end_unix_ts_millis_inc: i64,
 ) -> CEResult<Vec<ElectricityReadingReadGraphDTO>> {
-    let result = sqlx::query!(
+    let result = sqlx::query_as!(
+        ElectricityReadingReadGraphDTO,
         "\
         SELECT id, low_kwh, normal_kwh, unix_ts_millis \
         FROM electricity_readings \
@@ -142,15 +136,7 @@ pub async fn get_electricity_readings_between(
         end_unix_ts_millis_inc
     )
     .fetch_all(pool)
-    .await?
-    .into_iter()
-    .map(|record| ElectricityReadingReadGraphDTO {
-        id: record.id,
-        low_kwh: record.low_kwh,
-        normal_kwh: record.normal_kwh,
-        unix_ts_millis: record.unix_ts_millis,
-    })
-    .collect::<Vec<_>>();
+    .await?;
 
     Ok(result)
 }

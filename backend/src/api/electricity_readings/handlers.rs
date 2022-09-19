@@ -289,9 +289,12 @@ pub async fn handler_delete_electricity_reading(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     // Delete image (from compressed folder only)
-    // Ignore errors
     // std::fs::remove_file(format!("./images/original/{}.png", path))?;
     std::fs::remove_file(format!("./images/compressed/{}.jpg", path))?;
+    std::fs::rename(
+        format!("./images/original/{}.png", path),
+        format!("./images/original/{}_tombstone.png", path),
+    )?;
 
     Ok(HttpResponse::NoContent().finish())
 }
