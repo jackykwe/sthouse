@@ -48,6 +48,23 @@ export const HomePage = () => {
   const bugsText =
     "If you encounter any bugs, please tell me where they are, and I'll go squish them.";
 
+  if (!isAuthenticated) {
+    return (
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h5">
+          Please login to access the app's functionality.
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{

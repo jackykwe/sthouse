@@ -19,6 +19,15 @@ export const commonAxiosErrorHandler = (error: unknown) => {
               ? ` (${error.response!.data})`
               : ""),
         } as RequestError;
+      case 403:
+        return {
+          requestErrorCode: 403,
+          requestErrorDescription:
+            `[403 Forbidden]` +
+            (error.response!.data !== undefined
+              ? ` (${error.response!.data})`
+              : ""),
+        } as RequestError;
       case 404:
         return {
           requestErrorCode: 404,
@@ -34,7 +43,9 @@ export const commonAxiosErrorHandler = (error: unknown) => {
           requestErrorCode: error.response!.status,
           requestErrorDescription:
             error.response!.status !== 0
-              ? `[${error.response!.status} ${error.response!.statusText}]` +
+              ? (error.response!.statusText.length > 0
+                  ? `[${error.response!.status} ${error.response!.statusText}]`
+                  : `[${error.response!.status}]`) +
                 (error.response!.data !== undefined
                   ? ` (${error.response!.data})`
                   : "")

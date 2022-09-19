@@ -19,10 +19,10 @@ export const NotFoundPage = () => {
         justifyContent: "center",
       }}
     >
-      <HelpOutlineIcon
-        sx={{ fontSize: 72, paddingBottom: (theme) => theme.spacing(1) }}
-      />
-      <Typography variant="h4">Page not found</Typography>
+      <HelpOutlineIcon sx={{ fontSize: 60 }} />
+      <Typography variant="h5" sx={{ margin: (theme) => theme.spacing(1) }}>
+        Page not found
+      </Typography>
     </Box>
   );
 };
