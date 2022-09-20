@@ -23,6 +23,7 @@ export const PageError = (props: PageErrorProps) => {
         variant="h5"
         color="error"
         sx={{ margin: (theme) => theme.spacing(1) }}
+        align="center"
       >
         {errorMessage}
       </Typography>

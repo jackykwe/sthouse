@@ -20,7 +20,11 @@ export const NotFoundPage = () => {
       }}
     >
       <HelpOutlineIcon sx={{ fontSize: 60 }} />
-      <Typography variant="h5" sx={{ margin: (theme) => theme.spacing(1) }}>
+      <Typography
+        variant="h5"
+        sx={{ margin: (theme) => theme.spacing(1) }}
+        align="center"
+      >
         Page not found
       </Typography>
     </Box>

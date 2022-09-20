@@ -7,6 +7,7 @@ import { grey } from "@mui/material/colors";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useUserServerSlice } from "components/AppBar/store";
+import jwt_decode from "jwt-decode";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -17,6 +18,8 @@ import { DATE_FMTSTR_HMSDDMY_TZ, formatMillisInTzUtil } from "utils/dateUtils";
 export const HomePage = () => {
   // GENERAL HOOKS
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [hasNoElecPerms, setHasNoElecPerms] = useState(false);
 
   // HOOKS FOR FETCHING DATA
   const [latestMillis, setLatestMillis] = useState<number | null>(null);
@@ -24,6 +27,7 @@ export const HomePage = () => {
     if (!isAuthenticated) return;
 
     const accessToken = await getAccessTokenSilently();
+    setAccessToken(accessToken);
     const responseData = await axiosGetLatestElectricityReadingMillis(
       accessToken
     );
@@ -37,12 +41,24 @@ export const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (accessToken === null) return;
+
+    // Bodge job, quick and dirty
+    const decodedToken: any = jwt_decode(accessToken);
+    const permsLength: number | undefined = decodedToken?.permissions?.length;
+    setHasNoElecPerms(permsLength !== undefined && permsLength === 0);
+  }, [accessToken]);
+
   // Server redux state selectors
   const {
     selectors: { selectGetUserData },
   } = useUserServerSlice();
   const userData = useSelector(selectGetUserData);
 
+  const noPermsText1 =
+    "It seems like you havent been assigned permissions to access the rest of the app.";
+  const noPermsText2 = "If I'm not yet aware of this, please let me know!";
   const feedbackWelcomeText =
     "All user experience feedback is welcomed and appreciated!";
   const bugsText =
@@ -104,48 +120,55 @@ export const HomePage = () => {
           <Box
             sx={{
               display: "flex",
-              marginBottom: (theme) => theme.spacing(1),
-              justifyContent: "center",
+              flexDirection: "column",
+              gap: (theme) => theme.spacing(1),
             }}
           >
-            <Typography>Hello</Typography>
-            <Collapse orientation="horizontal" in={userData !== null}>
-              <Typography
-                sx={{ marginLeft: (theme) => theme.spacing(0.5) }}
-                noWrap
-              >
-                {userData?.display_name}
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Typography>Hello</Typography>
+              <Collapse orientation="horizontal" in={userData !== null}>
+                <Typography
+                  sx={{ marginLeft: (theme) => theme.spacing(0.5) }}
+                  noWrap
+                >
+                  {userData?.display_name}
+                </Typography>
+              </Collapse>
+              <Typography>!</Typography>
+            </Box>
+
+            <Collapse in={hasNoElecPerms}>
+              <Typography align="center" lineHeight={1}>
+                {noPermsText1}
+              </Typography>
+              <Typography align="center" lineHeight={1}>
+                {noPermsText2}
               </Typography>
             </Collapse>
-            <Typography>!</Typography>
-          </Box>
 
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              flexDirection: "column",
-            }}
-          >
-            <Typography align="center" lineHeight={1}>
-              {feedbackWelcomeText}
-            </Typography>
-            <Typography align="center" lineHeight={1}>
-              {bugsText}
-            </Typography>
-          </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <Typography align="center" lineHeight={1}>
-              {feedbackWelcomeText} {bugsText}
-            </Typography>
-          </Box>
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                flexDirection: "column",
+              }}
+            >
+              <Typography align="center" lineHeight={1}>
+                {feedbackWelcomeText}
+              </Typography>
+              <Typography align="center" lineHeight={1}>
+                {bugsText}
+              </Typography>
+            </Box>
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+              <Typography align="center" lineHeight={1}>
+                {feedbackWelcomeText} {bugsText}
+              </Typography>
+            </Box>
 
-          <Typography
-            variant="body2"
-            align="center"
-            sx={{ marginTop: (theme) => theme.spacing(1) }}
-          >
-            Cheers ~ Jacky
-          </Typography>
+            <Typography variant="body2" align="center">
+              Cheers ~ Jacky
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
       <Typography
