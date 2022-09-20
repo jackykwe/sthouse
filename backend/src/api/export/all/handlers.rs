@@ -34,7 +34,7 @@ pub async fn handler_get_export_request(
         sub: vai.jwt_claims.auth0_id,
         aud: String::from("all.png"),
         exp: now
-            .checked_add_signed(Duration::seconds(30 * count))
+            .checked_add_signed(Duration::seconds(30 + 30 * count)) // initial 30 if count == 0
             .expect("Impossible error: Time overflowed when generating export_token")
             .timestamp(),
         iat: now.timestamp(),
@@ -61,6 +61,7 @@ pub async fn handler_get_exportable_json(
     let result = get_exportable(&pool)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+    let result = serde_json::to_string_pretty(&result)?;
 
-    Ok(HttpResponse::Ok().json(result))
+    Ok(HttpResponse::Ok().body(result))
 }

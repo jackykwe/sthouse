@@ -7,6 +7,7 @@ mod https_config;
 mod middlewares;
 mod types;
 
+use std::path::Path;
 use std::str::FromStr;
 
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
@@ -31,6 +32,14 @@ async fn main() -> CEResult<()> {
     let a0ec = A0EC::read_from_dot_env();
 
     let https_config = load_rustls_config();
+
+    let ensure_exists = vec!["./images/original", "./images/compressed"];
+    for dir_path in ensure_exists {
+        if !Path::new(dir_path).exists() {
+            info!("Creating directory {}", dir_path);
+            std::fs::create_dir_all(dir_path)?;
+        }
+    }
 
     let pool = SqlitePoolOptions::new()
         .max_connections(4)
