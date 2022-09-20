@@ -12,7 +12,7 @@ sqlx migrate run
 pub async fn initialise_database(pool: &Pool<Sqlite>) -> CEResult<()> {
     debug!("initialise_database() called");
     run_pending_migrations(pool).await?;
-    add_dummy_data(pool).await?; // TODO: DEV ONLY
+    // add_dummy_data(pool).await?; // TODO: DEV ONLY
     Ok(())
 }
 
