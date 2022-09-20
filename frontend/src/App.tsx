@@ -19,15 +19,6 @@ import { BrowserRouter } from "react-router-dom";
 import { appThemeOptions } from "theme/theme";
 import { AppRoutes } from "./routes/AppRoutes";
 
-// axios.interceptors.request.use((config) => {
-//   config.headers = {
-//     "content-type": "application/json",
-//     ...config.headers,
-//     Authorization: `Bearer hahahaha`,
-//   };
-//   return config;
-// });
-
 export const ColourModeContext = createContext({ toggleColourMode: () => {} });
 
 const authLoadingTexts = [

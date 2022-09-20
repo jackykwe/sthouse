@@ -1,4 +1,5 @@
 import {
+  ChangelogPageLazy,
   ElectricityReadingCreatePageLazy,
   ElectricityReadingDetailPageLazy,
   ElectricityReadingGraphPageLazy,
@@ -32,6 +33,10 @@ export const routeEnum = {
   Home: {
     path: "/",
     element: HomePageLazy,
+  },
+  Changelog: {
+    path: "/changelog",
+    element: ChangelogPageLazy,
   },
   ElectricityUpload: {
     appBarName: "Submit Reading",

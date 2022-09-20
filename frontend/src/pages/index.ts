@@ -1,3 +1,4 @@
+export { ChangelogPageLazy } from "./ChangelogPage/ChangelogPageLazy";
 export { ElectricityReadingCreatePageLazy } from "./ElectricityReadingPages/ElectricityReadingCreatePageLazy";
 export { ElectricityReadingDetailPageLazy } from "./ElectricityReadingPages/ElectricityReadingDetailPageLazy";
 export { ElectricityReadingGraphPageLazy } from "./ElectricityReadingPages/ElectricityReadingGraphPageLazy";

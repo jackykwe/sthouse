@@ -18,6 +18,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
+import { CURRENT_APP_VERSION } from "pages/ChangelogPage/ChangelogPage";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -68,12 +69,10 @@ export const AuthenticatedAppBar = () => {
     navigate(path);
   };
 
-  const handleNavigateToHome = () => navigate(routeEnum["Home"].path);
-
   const brandText = (
     <Button
       disableRipple
-      onClick={handleNavigateToHome}
+      onClick={() => navigate(routeEnum["Home"].path)}
       sx={{
         textTransform: "none",
         "&:hover": { backgroundColor: "transparent" },
@@ -82,6 +81,20 @@ export const AuthenticatedAppBar = () => {
       <Typography noWrap variant="h5" fontWeight="bold">
         St House Utilities
       </Typography>
+    </Button>
+  );
+  const versionText = (
+    <Button
+      disableRipple
+      onClick={() => navigate(routeEnum["Changelog"].path)}
+      sx={{
+        textTransform: "none",
+        "&:hover": { backgroundColor: "transparent" },
+        minWidth: 0,
+        paddingX: 0,
+      }}
+    >
+      <Typography>v{CURRENT_APP_VERSION.number}</Typography>
     </Button>
   );
 
@@ -103,7 +116,7 @@ export const AuthenticatedAppBar = () => {
             <IconButton
               disableRipple
               size="large"
-              onClick={handleNavigateToHome}
+              onClick={() => navigate(routeEnum["Home"].path)}
               color="inherit"
               sx={{ padding: 0 }}
             >
@@ -113,6 +126,7 @@ export const AuthenticatedAppBar = () => {
               <OutletIcon sx={{ marginRight: 1 }} />
             </IconButton>
             {brandText}
+            {versionText}
             <Box
               sx={{
                 flexGrow: 1,
@@ -168,6 +182,7 @@ export const AuthenticatedAppBar = () => {
               <MenuIcon />
             </IconButton>
             {brandText}
+            {versionText}
             <Menu
               keepMounted
               anchorEl={navAnchorEl}

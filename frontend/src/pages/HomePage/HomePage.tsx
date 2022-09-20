@@ -1,10 +1,10 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Collapse } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import { grey } from "@mui/material/colors";
-import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useUserServerSlice } from "components/AppBar/store";
 import jwt_decode from "jwt-decode";
@@ -57,7 +57,7 @@ export const HomePage = () => {
   const userData = useSelector(selectGetUserData);
 
   const noPermsText1 =
-    "It seems like you havent been assigned permissions to access the rest of the app.";
+    "It seems like you haven't been assigned permissions to access the rest of the app.";
   const noPermsText2 = "If I'm not yet aware of this, please let me know!";
   const feedbackWelcomeText =
     "All user experience feedback is welcomed and appreciated!";
@@ -115,7 +115,50 @@ export const HomePage = () => {
 
       <Typography variant="h5">Use the app bar above to navigate.</Typography>
 
-      <Card elevation={2} sx={{ margin: (theme) => theme.spacing(2) }}>
+      <Collapse in={hasNoElecPerms}>
+        <Alert
+          severity="info"
+          sx={{
+            marginTop: (theme) => theme.spacing(2),
+            width: { xs: "100%", md: "auto" },
+          }}
+        >
+          <AlertTitle>
+            <strong>No permissions assigned</strong>
+          </AlertTitle>
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              flexDirection: "column",
+            }}
+          >
+            <Typography align="center" lineHeight={1}>
+              {noPermsText1}
+            </Typography>{" "}
+            <Typography align="center" lineHeight={1}>
+              {noPermsText2}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: { xs: "flex", md: "none" },
+              flexDirection: "column",
+            }}
+          >
+            <Typography align="center" lineHeight={1}>
+              {noPermsText1} {noPermsText2}
+            </Typography>
+          </Box>
+        </Alert>
+      </Collapse>
+
+      <Card
+        elevation={2}
+        sx={{
+          marginTop: (theme) => theme.spacing(2),
+          width: { xs: "100%", md: "auto" },
+        }}
+      >
         <CardContent>
           <Box
             sx={{
@@ -136,15 +179,6 @@ export const HomePage = () => {
               </Collapse>
               <Typography>!</Typography>
             </Box>
-
-            <Collapse in={hasNoElecPerms}>
-              <Typography align="center" lineHeight={1}>
-                {noPermsText1}
-              </Typography>
-              <Typography align="center" lineHeight={1}>
-                {noPermsText2}
-              </Typography>
-            </Collapse>
 
             <Box
               sx={{
@@ -171,15 +205,6 @@ export const HomePage = () => {
           </Box>
         </CardContent>
       </Card>
-      <Typography
-        variant="body2"
-        fontStyle="italic"
-        sx={{ marginTop: "auto" }}
-        color={grey[500]}
-      >
-        Source code available{" "}
-        <Link href="https://github.com/jackykwe/sthouse">here</Link>.
-      </Typography>
     </Box>
   );
 };
