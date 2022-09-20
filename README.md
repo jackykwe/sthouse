@@ -1,1 +1,2 @@
-# sthouse-dev
+# St House Utilities
+Repository made public for transparency.
