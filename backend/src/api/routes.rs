@@ -1,12 +1,7 @@
 use actix_web::{web, Scope};
 
-use crate::api::electricity_readings;
-use crate::api::export;
-use crate::api::users;
+use super::v1;
 
 pub fn routes() -> Scope {
-    web::scope("/api")
-        .service(users::routes())
-        .service(electricity_readings::routes())
-        .service(export::routes())
+    web::scope("/api").service(v1::routes::routes())
 }

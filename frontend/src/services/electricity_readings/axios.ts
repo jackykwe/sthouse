@@ -5,7 +5,7 @@ import {
   ElectricityReadingReadGraphDTO,
 } from "./types";
 
-const BASE_URLS = `${BACKEND_API_URL}/api/electricity_readings`;
+const BASE_URLS = `${BACKEND_API_URL}/electricity_readings`;
 
 export const axiosCreateElectricityReading = async (
   low_kwh: number,

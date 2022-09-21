@@ -73,7 +73,7 @@ export const ExportHistoricalPage = () => {
         <Typography variant="h5">Click</Typography>
         <Typography fontFamily="Jetbrains Mono" fontWeight={700}>
           <Link
-            href={`${BACKEND_API_URL}/api/export/historical/json?export_token=${exportRequestData.export_token}`}
+            href={`${BACKEND_API_URL}/export/historical/json?export_token=${exportRequestData.export_token}`}
             target="_blank" // new tab
             rel="noreferrer"
           >
@@ -88,7 +88,7 @@ export const ExportHistoricalPage = () => {
         {exportRequestData.image_ids.map((id) => (
           <Typography key={id} fontFamily="Jetbrains Mono" fontWeight={700}>
             <Link
-              href={`${BACKEND_API_URL}/api/export/historical/images/original/${id}.png?image_token=${exportRequestData.export_token}`}
+              href={`${BACKEND_API_URL}/export/historical/images/original/${id}.png?image_token=${exportRequestData.export_token}`}
               target="_blank" // new tab
               rel="noreferrer"
             >
@@ -103,7 +103,7 @@ export const ExportHistoricalPage = () => {
         {exportRequestData.tombstone_image_ids.map((id) => (
           <Typography key={id} fontFamily="Jetbrains Mono" fontWeight={700}>
             <Link
-              href={`${BACKEND_API_URL}/api/export/historical/images/original/${id}_tombstone.png?image_token=${exportRequestData.export_token}`}
+              href={`${BACKEND_API_URL}/export/historical/images/original/${id}_tombstone.png?image_token=${exportRequestData.export_token}`}
               target="_blank" // new tab
               rel="noreferrer"
             >

@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::api::export::all::{ElectricityReadingModificationExportReadDTO, UserExportReadDTO};
+use crate::api::v1::export::all::{ElectricityReadingModificationExportReadDTO, UserExportReadDTO};
 
 #[derive(Serialize)]
 pub struct HistoricalExportRequestReadDTO {

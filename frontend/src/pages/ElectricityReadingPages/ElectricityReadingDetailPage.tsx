@@ -174,7 +174,7 @@ export const ElectricityReadingDetailPage = () => {
         }}
       >
         <img
-          src={`${BACKEND_API_URL}/api/electricity_readings/images/compressed/${id}.jpg?image_token=${readingData.image_token}`}
+          src={`${BACKEND_API_URL}/electricity_readings/images/compressed/${id}.jpg?image_token=${readingData.image_token}`}
           alt={`${id}.jpg`}
           style={{
             display: imageLoaded ? "flex" : "none",

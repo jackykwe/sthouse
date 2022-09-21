@@ -1,7 +1,7 @@
 use chrono::Utc;
 use sqlx::{Pool, Sqlite};
 
-use crate::api::electricity_readings::ElectricityReadingReadGraphDTO;
+use crate::api::v1::electricity_readings::ElectricityReadingReadGraphDTO;
 use crate::types::CEResult;
 
 use super::ElectricityReadingReadFullDAO;

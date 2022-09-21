@@ -2,7 +2,7 @@ use chrono::Utc;
 use sqlx::{Pool, Sqlite};
 
 use crate::{
-    api::export::{
+    api::v1::export::{
         all::{
             ElectricityReadingExportReadDTO, ElectricityReadingModificationExportReadDTO,
             ExportReadDTO, UserExportReadDTO,

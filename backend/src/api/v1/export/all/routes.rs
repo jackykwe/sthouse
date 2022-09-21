@@ -1,3 +1,4 @@
+use crate::api::v1::resource_access_token::ResourceAccessClaims;
 use actix_files::Files;
 use actix_web::{
     dev::{Payload, Service},
@@ -6,11 +7,7 @@ use actix_web::{
 };
 use serde::Deserialize;
 
-use crate::api::resource_access_token::ResourceAccessClaims;
-
-use super::handlers::{
-    handler_get_historical_export_request, handler_get_historical_exportable_json,
-};
+use super::handlers::{handler_get_export_request, handler_get_exportable_json};
 
 #[derive(Deserialize)]
 struct ImageQuery {
@@ -18,9 +15,9 @@ struct ImageQuery {
 }
 
 pub fn routes() -> Scope {
-    web::scope("/historical")
-        .service(handler_get_historical_export_request)
-        .service(handler_get_historical_exportable_json)
+    web::scope("")
+        .service(handler_get_export_request)
+        .service(handler_get_exportable_json)
         // serve_from is relative to root of crate, i.e. the "backend" folder
         .service(
             web::scope("/images/original")
@@ -30,6 +27,7 @@ pub fn routes() -> Scope {
                     |path, _| {
                         path.components().count() == 1
                             && path.extension().map(|ext| ext.eq("png")).is_some()
+                            && !path.ends_with("_tombstone.png")
                     },
                 ))
                 .wrap_fn(|req, srv| {
@@ -45,10 +43,9 @@ pub fn routes() -> Scope {
                             &mut Payload::None,
                         )
                         .await?;
-                        if let Err(error_msg) = ResourceAccessClaims::validate_token(
-                            &url_params.image_token,
-                            "historical.png",
-                        ) {
+                        if let Err(error_msg) =
+                            ResourceAccessClaims::validate_token(&url_params.image_token, "all.png")
+                        {
                             return Err(actix_web::error::ErrorBadRequest(error_msg));
                         }
 

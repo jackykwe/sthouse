@@ -1,6 +1,6 @@
 use sqlx::{Pool, Sqlite};
 
-use crate::api::users::UserReadDTO;
+use crate::api::v1::users::UserReadDTO;
 use crate::types::{CEReport, CEResult};
 
 pub async fn create_user(

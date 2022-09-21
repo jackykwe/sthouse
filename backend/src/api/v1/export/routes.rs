@@ -1,7 +1,7 @@
 use actix_web::{web, Scope};
 
-use crate::api::export::all;
-use crate::api::export::historical;
+use crate::api::v1::export::all;
+use crate::api::v1::export::historical;
 
 pub fn routes() -> Scope {
     web::scope("/export")

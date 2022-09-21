@@ -9,12 +9,12 @@ use serde::Deserialize;
 use sqlx::{Pool, Sqlite};
 use uuid::Uuid;
 
-use crate::api::electricity_readings::{
+use crate::api::v1::electricity_readings::{
     ElectricityReadingCreateMultipartForm, ElectricityReadingReadFullDTO,
     ElectricityReadingUpdateMultipartForm,
 };
-use crate::api::resource_access_token::ResourceAccessClaims;
-use crate::api::FORBIDDEN_ERROR_TEXT;
+use crate::api::v1::resource_access_token::ResourceAccessClaims;
+use crate::api::v1::FORBIDDEN_ERROR_TEXT;
 use crate::db::electricity_readings::{
     create_electricity_reading, delete_electricity_reading, get_all_electricity_readings,
     get_electricity_reading, get_electricity_readings_between,

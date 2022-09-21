@@ -2,7 +2,7 @@ import { commonAxiosErrorHandler } from "services/common-error-handler";
 import { appAxios, BACKEND_API_URL } from "..";
 import { UserReadDTO } from "./types";
 
-const BASE_URL = `${BACKEND_API_URL}/api/user`;
+const BASE_URL = `${BACKEND_API_URL}/user`;
 
 export const axiosGetUser = async (accessToken: string) => {
   try {

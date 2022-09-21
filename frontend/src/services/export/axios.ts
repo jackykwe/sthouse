@@ -2,7 +2,7 @@ import { commonAxiosErrorHandler } from "services/common-error-handler";
 import { appAxios, BACKEND_API_URL } from "..";
 import { ExportRequestReadDTO, HistoricalExportRequestReadDTO } from "./types";
 
-const BASE_URL = `${BACKEND_API_URL}/api/export`;
+const BASE_URL = `${BACKEND_API_URL}/export`;
 
 export const axiosGetExportRequest = async (accessToken: string) => {
   try {

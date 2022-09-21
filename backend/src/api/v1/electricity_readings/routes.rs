@@ -8,7 +8,7 @@ use actix_web::{
 };
 use serde::Deserialize;
 
-use crate::api::resource_access_token::ResourceAccessClaims;
+use crate::api::v1::resource_access_token::ResourceAccessClaims;
 
 use super::handlers::{
     handler_create_electricity_reading, handler_delete_electricity_reading,
