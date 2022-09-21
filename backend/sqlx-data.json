@@ -1,0 +1,501 @@
+{
+  "db": "SQLite",
+  "1575b6be18750fa1192f99de4d7c73a6d0de694fe27b8ddda9c0a480f68310dd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "low_kwh",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "normal_kwh",
+          "ordinal": 2,
+          "type_info": "Float"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "creator_id",
+          "ordinal": 4,
+          "type_info": "Int64"
+        },
+        {
+          "name": "tombstone",
+          "ordinal": 5,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis, creator_id, tombstone FROM electricity_readings;"
+  },
+  "17470c0daca04b5131c247e7ff8e07be3c7706b2ab44b9863207c9721f0373fa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "low_kwh",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "normal_kwh",
+          "ordinal": 2,
+          "type_info": "Float"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT e.id, e.low_kwh, e.normal_kwh, e.unix_ts_millis, u.display_name, u.email FROM electricity_readings AS e INNER JOIN users AS u ON e.creator_id = u.id WHERE e.tombstone = 0 AND e.id = ?;"
+  },
+  "1c332c9d3690055b403e0b76ef9b6b75481de443fc4e4676fa4015f35c77eea5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 4
+      }
+    },
+    "query": "INSERT INTO users (auth0_id, display_name, email) VALUES (?, ?, ?); SELECT display_name, email FROM users WHERE auth0_id = ?;"
+  },
+  "223df4b8a5748d9b56aca34ddf7acb915e599f51ed83d485d60a0c05fff772e9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "low_kwh",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "normal_kwh",
+          "ordinal": 2,
+          "type_info": "Float"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 3,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis FROM electricity_readings WHERE tombstone = 0 AND unix_ts_millis >= ? AND unix_ts_millis <= ? ORDER BY unix_ts_millis ASC;"
+  },
+  "3686079bb1dcf3a91bdb3e7e41a7222362abfbcd98d8d31785b0f383eb81e17a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "INSERT INTO electricity_reading_modifications (reading_id, modifier_id, unix_ts_millis) VALUES (?, ?, ?);"
+  },
+  "3b958190e8694ff9e4a8927bccd702e0f41a8120fa92772d24c1545d4442fa3d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id FROM electricity_readings WHERE tombstone = 0;"
+  },
+  "3ed2ba3880b0d3ced6b6e761c0872dc747faff1bff78649e735245a3de9222fa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "low_kwh",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "normal_kwh",
+          "ordinal": 2,
+          "type_info": "Float"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 3,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis FROM electricity_readings WHERE tombstone = 0 ORDER BY unix_ts_millis ASC;"
+  },
+  "4bec3bffa58d5e86fdb9f4ea156b41664cb8fd91ec188c4ae8fbff47181d9933": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "UPDATE electricity_readings\n        SET tombstone = 1 WHERE id = ?;"
+  },
+  "63e4f6633e24165de5f64c96c108928abc991407f25c744a536cf4a0866f1a16": {
+    "describe": {
+      "columns": [
+        {
+          "name": "reading_id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "modifier_id",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 2,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT reading_id, modifier_id, unix_ts_millis FROM electricity_reading_modifications;"
+  },
+  "90bd00057adf37fd9ae8486816cee94405c665c9ee1e21362571af5601d2f17b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id FROM electricity_readings WHERE tombstone = 1;"
+  },
+  "93ed4f871f4bcb44a0f6a8aa23ee91eb6e227ec11cf11aaae572f4a658f6607c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 4
+      }
+    },
+    "query": "INSERT OR IGNORE INTO electricity_readings (low_kwh, normal_kwh, unix_ts_millis, creator_id) VALUES (?, ?, ?, ?);"
+  },
+  "9cc2adc9c43df582c3f4317915b0d0bb9eceedca6ca1d77b0812126fc5506828": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id, display_name, email FROM users;"
+  },
+  "a175ea62deead1f0e6b895ef68e2c99ed6f3930aa95e759f8d96dfa2278cde8a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "UPDATE users SET display_name = ? WHERE auth0_id = ?;"
+  },
+  "a5408bb7ca76ef672ad6c2e2a63a8e8547a078a265d54c0ab77a000bfa30310a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT unix_ts_millis FROM electricity_readings WHERE tombstone = 0 ORDER BY unix_ts_millis DESC LIMIT 1;\n        "
+  },
+  "a7ccf0acdc92ac21b21737b8534a3c0ab15d03dab52ab5e23bfc999b0527a483": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "low_kwh",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "normal_kwh",
+          "ordinal": 2,
+          "type_info": "Float"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "creator_id",
+          "ordinal": 4,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis, creator_id FROM electricity_readings WHERE tombstone = 0;"
+  },
+  "b2b2eb71d8805b497b3ab1f435fefc45b99c9d936315ab55eefe654b5e9dc6e0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 7
+      }
+    },
+    "query": "INSERT INTO users (auth0_id, display_name, email) VALUES (?, ?, ?) ON CONFLICT (auth0_id) DO UPDATE SET (display_name, email) = (?, ?) WHERE auth0_id = ?; SELECT id FROM users WHERE auth0_id = ?;"
+  },
+  "c035f24582a06cd1788f61d44674dd7158e8af665dd9a205b9ea46fd28f55ebd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT display_name, email FROM users WHERE auth0_id = ?;"
+  },
+  "c31164d49deb526c330d3dd0071e220598499d2e671a52ca52d895076f97bc38": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 4
+      }
+    },
+    "query": "INSERT INTO electricity_readings (low_kwh, normal_kwh, unix_ts_millis, creator_id) VALUES (?, ?, ?, ?);"
+  },
+  "e91e6fed0b8abcf066f3447d59d62838966b7152a9baa47388e98d83578ca9e2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "UPDATE electricity_readings\n        SET (low_kwh, normal_kwh) = (?, ?) WHERE tombstone = 0 AND id = ?;"
+  },
+  "f86d6daf4ef09556ba5bbf6ef6f4269f93f169d9e023d67a9001d240bb51e0f5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT m.unix_ts_millis, u.display_name, u.email FROM electricity_readings AS e INNER JOIN electricity_reading_modifications AS m ON e.id = m.reading_id INNER JOIN users AS u ON m.modifier_id = u.id WHERE e.tombstone = 0 AND e.id = ? ORDER BY m.unix_ts_millis DESC LIMIT 1;"
+  },
+  "fde0d59d4a2d6c6285c9f81b70cd36c1a0f678ebce41f5342b6ac5491ae787cb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT id FROM users WHERE auth0_id = ?;"
+  }
+}
