@@ -7,6 +7,8 @@ pub struct AppEnvConfig {
     pub database_url: String,
     pub client_origin_url: String,
     pub resource_access_token_secret_512b: String,
+    pub tls_cert_path: String, // relative to backend directory
+    pub tls_key_path: String,  // relative to backend directory
 }
 
 impl AppEnvConfig {

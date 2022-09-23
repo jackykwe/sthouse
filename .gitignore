@@ -19,6 +19,7 @@ backend/**/images
 # TLS
 backend/**/jwks.json
 **/*.pem
+**/*.key
 
 backend/**/.env
 
