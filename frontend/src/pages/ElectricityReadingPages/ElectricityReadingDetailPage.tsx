@@ -11,8 +11,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
+import { FetchingData } from "pages/FetchingData/FetchingData";
 import { PageError } from "pages/PageError/PageError";
-import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateElectricityDetailEditPath } from "routes/RouteEnum";
@@ -78,7 +78,7 @@ export const ElectricityReadingDetailPage = () => {
   }
 
   if (readingData === null) {
-    return <PageLoading />;
+    return <FetchingData />;
   }
 
   return (

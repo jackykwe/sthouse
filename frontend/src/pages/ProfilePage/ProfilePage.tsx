@@ -10,8 +10,8 @@ import Typography from "@mui/material/Typography";
 import { useUserServerSlice } from "components/AppBar/store";
 import { SubmitButton } from "components/SubmitButton";
 import _ from "lodash";
+import { FetchingData } from "pages/FetchingData/FetchingData";
 import { PageError } from "pages/PageError/PageError";
-import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -102,7 +102,7 @@ export const ProfilePage = () => {
   }
 
   if (getUserData === null) {
-    return <PageLoading />;
+    return <FetchingData />;
   }
 
   const onSubmit: SubmitHandler<ProfilePageFormValues> = async (data) => {

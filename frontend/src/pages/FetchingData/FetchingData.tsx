@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import { TakingTooLongCollapse } from "components/TakingTooLongCollapse";
 import { useState } from "react";
 
-export const PageLoading = () => {
+export const FetchingData = () => {
   const [pageLoadingTooSlow, setPageLoadingTooSlow] = useState(false);
   setTimeout(() => {
     setPageLoadingTooSlow(true);
@@ -22,7 +22,7 @@ export const PageLoading = () => {
     >
       <CircularProgress />
       <Typography variant="h5" sx={{ margin: (theme) => theme.spacing(1) }}>
-        Piecing this page together...
+        Fetching data, just one moment...
       </Typography>
       <TakingTooLongCollapse show={pageLoadingTooSlow} />
     </Box>

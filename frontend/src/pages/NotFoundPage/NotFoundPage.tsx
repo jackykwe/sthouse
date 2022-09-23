@@ -8,7 +8,7 @@ export const NotFoundPage = () => {
   //   navigate(routeEnum.HomePage.path);
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
-  // return <PageLoading />;
+  // return <FetchingData />;
   return (
     <Box
       sx={{

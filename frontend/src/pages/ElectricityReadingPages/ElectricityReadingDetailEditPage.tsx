@@ -18,8 +18,8 @@ import Typography from "@mui/material/Typography";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import _ from "lodash";
 import { NotFoundPageLazy } from "pages";
+import { FetchingData } from "pages/FetchingData/FetchingData";
 import { PageError } from "pages/PageError/PageError";
-import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch, useStore } from "react-redux";
@@ -139,7 +139,7 @@ export const ElectricityReadingDetailEditPage = () => {
   }
 
   if (readingData === null) {
-    return <PageLoading />;
+    return <FetchingData />;
   }
 
   const onSubmit: SubmitHandler<

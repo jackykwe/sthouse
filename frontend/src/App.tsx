@@ -9,11 +9,11 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MyAppBar } from "components/AppBar/AppBar";
+import { TakingTooLongCollapse } from "components/TakingTooLongCollapse";
 import { createContext, useEffect, useMemo, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { appThemeOptions } from "theme/theme";
@@ -37,9 +37,6 @@ const authLoadingTexts = [
   "Adjusting the heater...",
   "Resetting the tripped circuit breaker...",
 ];
-
-const takingTooLongText = "Whoa, that's taking a while.";
-const takingTooLongText2 = "You may want to try refreshing the page.";
 
 const SELECTED_PALETTE_MODE_KEY = "selectedPaletteMode";
 function selectedPaletteModeIsValid(
@@ -123,31 +120,9 @@ export const App = () => {
                   ]
                 }
               </Typography>
-              <Collapse in={appLoadingTooSlowArmed && appLoadingTooSlow}>
-                <>
-                  <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                    <Typography variant="body2" align="center" lineHeight={1}>
-                      {takingTooLongText} {takingTooLongText2}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: {
-                        xs: "flex",
-                        md: "none",
-                        flexDirection: "column",
-                      },
-                    }}
-                  >
-                    <Typography variant="body2" align="center" lineHeight={1}>
-                      {takingTooLongText}
-                    </Typography>
-                    <Typography variant="body2" align="center" lineHeight={1}>
-                      {takingTooLongText2}
-                    </Typography>
-                  </Box>
-                </>
-              </Collapse>
+              <TakingTooLongCollapse
+                show={appLoadingTooSlowArmed && appLoadingTooSlow}
+              />
             </Box>
           ) : (
             <BrowserRouter>

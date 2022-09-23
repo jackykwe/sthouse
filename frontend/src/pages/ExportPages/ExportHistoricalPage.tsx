@@ -3,8 +3,8 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import _ from "lodash";
+import { FetchingData } from "pages/FetchingData/FetchingData";
 import { PageError } from "pages/PageError/PageError";
-import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useEffect, useState } from "react";
 import { BACKEND_API_URL } from "services";
 import {
@@ -50,7 +50,7 @@ export const ExportHistoricalPage = () => {
   }
 
   if (exportRequestData === null) {
-    return <PageLoading />;
+    return <FetchingData />;
   }
 
   return (

@@ -6,8 +6,8 @@ import grey from "@mui/material/colors/grey";
 import red from "@mui/material/colors/red";
 import Typography from "@mui/material/Typography";
 import { Theme } from "@mui/system";
+import { FetchingData } from "pages/FetchingData/FetchingData";
 import { PageError } from "pages/PageError/PageError";
-import { PageLoading } from "pages/PageLoading/PageLoading";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -177,7 +177,7 @@ export const ElectricityReadingGraph = (
   }
 
   if (readingsLoading || readingsData === null) {
-    return <PageLoading />;
+    return <FetchingData />;
   }
 
   if (readingsData.length === 0) {
