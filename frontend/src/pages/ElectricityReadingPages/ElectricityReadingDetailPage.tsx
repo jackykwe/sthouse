@@ -128,7 +128,7 @@ export const ElectricityReadingDetailPage = () => {
               fontFamily="Jetbrains Mono"
               align="right"
             >
-              {readingData.normal_kwh.toFixed(1)}
+              {readingData.low_kwh.toFixed(1)}
             </Typography>
             <Typography
               variant="h5"
@@ -136,7 +136,7 @@ export const ElectricityReadingDetailPage = () => {
               fontFamily="Jetbrains Mono"
               align="right"
             >
-              {readingData.low_kwh.toFixed(1)}
+              {readingData.normal_kwh.toFixed(1)}
             </Typography>
           </Box>
         </Box>
