@@ -27,6 +27,7 @@ pub struct ElectricityReadingModificationExportReadDTO {
     pub reading_id: i64,
     pub modifier_id: i64,
     pub unix_ts_millis: i64,
+    pub image_modified: i64,
 }
 
 #[derive(Serialize)]

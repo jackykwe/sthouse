@@ -23,9 +23,10 @@ pub async fn handler_get_historical_export_request(
     let dao = get_exportable_historical_reading_ids(&pool)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let count: i64 = (dao.image_ids.len() + dao.tombstone_image_ids.len())
-        .try_into()
-        .expect("Impossible error: Unable to convert usize to i64");
+    let count: i64 = (dao.image_ids_and_modification_counts.len()
+        + dao.tombstone_image_ids_and_modification_counts.len())
+    .try_into()
+    .expect("Impossible error: Unable to convert usize to i64");
 
     let now = Utc::now();
     let export_token = ResourceAccessClaims {
@@ -41,8 +42,9 @@ pub async fn handler_get_historical_export_request(
 
     Ok(HttpResponse::Ok().json(HistoricalExportRequestReadDTO {
         export_token,
-        image_ids: dao.image_ids,
-        tombstone_image_ids: dao.tombstone_image_ids,
+        image_ids_and_modification_counts: dao.image_ids_and_modification_counts,
+        tombstone_image_ids_and_modification_counts: dao
+            .tombstone_image_ids_and_modification_counts,
     }))
 }
 

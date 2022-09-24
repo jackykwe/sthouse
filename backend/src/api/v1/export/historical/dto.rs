@@ -3,10 +3,15 @@ use serde::Serialize;
 use crate::api::v1::export::all::{ElectricityReadingModificationExportReadDTO, UserExportReadDTO};
 
 #[derive(Serialize)]
+pub struct ImageIdAndModificationCount {
+    pub image_id: i64,
+    pub modification_count: i64,
+}
+#[derive(Serialize)]
 pub struct HistoricalExportRequestReadDTO {
     pub export_token: String,
-    pub image_ids: Vec<i64>,
-    pub tombstone_image_ids: Vec<i64>,
+    pub image_ids_and_modification_counts: Vec<ImageIdAndModificationCount>,
+    pub tombstone_image_ids_and_modification_counts: Vec<ImageIdAndModificationCount>,
 }
 
 #[derive(Serialize)]

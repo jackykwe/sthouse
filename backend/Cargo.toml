@@ -28,7 +28,7 @@ envy = "0.4.2"  # for handling environment variables
 chrono = "0.4.19"  # library for working with date & time
 eyre = "0.6.8"
 color-eyre = "0.6.2"
-sqlx = { version = "0.6.1", features = ["runtime-actix-rustls", "sqlite", "offline", "chrono"] }
+sqlx = { version = "0.6.2", features = ["runtime-actix-rustls", "sqlite", "offline", "chrono"] }
 
 [profile.dev.package.backtrace]
 opt-level = 3

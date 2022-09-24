@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use chrono::Utc;
 use sqlx::{Pool, Sqlite};
 
@@ -7,7 +9,10 @@ use crate::{
             ElectricityReadingExportReadDTO, ElectricityReadingModificationExportReadDTO,
             ExportReadDTO, UserExportReadDTO,
         },
-        historical::{HistoricalElectricityReadingExportReadDTO, HistoricalExportReadDTO},
+        historical::{
+            HistoricalElectricityReadingExportReadDTO, HistoricalExportReadDTO,
+            ImageIdAndModificationCount,
+        },
     },
     types::CEResult,
 };
@@ -60,7 +65,7 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
     let electricity_reading_modifications = sqlx::query_as!(
         ElectricityReadingModificationExportReadDTO,
         "\
-        SELECT reading_id, modifier_id, unix_ts_millis \
+        SELECT reading_id, modifier_id, unix_ts_millis, image_modified \
         FROM electricity_reading_modifications;\
         "
     )
@@ -78,7 +83,22 @@ pub async fn get_exportable(pool: &Pool<Sqlite>) -> CEResult<ExportReadDTO> {
 pub async fn get_exportable_historical_reading_ids(
     pool: &Pool<Sqlite>,
 ) -> CEResult<HistoricalExportRequestDAO> {
-    let reading_ids = sqlx::query!(
+    #[allow(clippy::unwrap_used)]
+    let reading_modification_counts = sqlx::query!(
+        "\
+        SELECT reading_id, count(image_modified) as count \
+        FROM electricity_reading_modifications \
+        WHERE image_modified = 1 \
+        GROUP BY reading_id;\
+        "
+    )
+    .fetch_all(pool)
+    .await?
+    .into_iter()
+    .map(|record| (record.reading_id, record.count.unwrap())) // unwrap should not fail
+    .collect::<HashMap<_, _>>();
+
+    let reading_ids_and_modification_counts = sqlx::query!(
         "\
         SELECT id \
         FROM electricity_readings \
@@ -88,10 +108,16 @@ pub async fn get_exportable_historical_reading_ids(
     .fetch_all(pool)
     .await?
     .into_iter()
-    .map(|record| record.id)
+    .map(|record| ImageIdAndModificationCount {
+        image_id: record.id,
+        modification_count: match reading_modification_counts.get(&record.id) {
+            None => 0,
+            Some(&count) => count.into(),
+        },
+    })
     .collect::<Vec<_>>();
 
-    let tombstone_reading_ids = sqlx::query!(
+    let tombstone_reading_ids_and_modification_counts = sqlx::query!(
         "\
         SELECT id \
         FROM electricity_readings \
@@ -101,12 +127,18 @@ pub async fn get_exportable_historical_reading_ids(
     .fetch_all(pool)
     .await?
     .into_iter()
-    .map(|record| record.id)
+    .map(|record| ImageIdAndModificationCount {
+        image_id: record.id,
+        modification_count: match reading_modification_counts.get(&record.id) {
+            None => 0,
+            Some(&count) => count.into(),
+        },
+    })
     .collect::<Vec<_>>();
 
     Ok(HistoricalExportRequestDAO {
-        image_ids: reading_ids,
-        tombstone_image_ids: tombstone_reading_ids,
+        image_ids_and_modification_counts: reading_ids_and_modification_counts,
+        tombstone_image_ids_and_modification_counts: tombstone_reading_ids_and_modification_counts,
     })
 }
 
@@ -136,7 +168,7 @@ pub async fn get_exportable_historical(pool: &Pool<Sqlite>) -> CEResult<Historic
     let electricity_reading_modifications = sqlx::query_as!(
         ElectricityReadingModificationExportReadDTO,
         "\
-        SELECT reading_id, modifier_id, unix_ts_millis \
+        SELECT reading_id, modifier_id, unix_ts_millis, image_modified \
         FROM electricity_reading_modifications;\
         "
     )

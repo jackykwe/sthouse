@@ -28,6 +28,9 @@ pub fn routes() -> Scope {
                         path.components().count() == 1
                             && path.extension().map(|ext| ext.eq("png")).is_some()
                             && !path.ends_with("_tombstone.png")
+                            && !path
+                                .file_stem()
+                                .map_or(true, |name| name.to_string_lossy().contains("history"))
                     },
                 ))
                 .wrap_fn(|req, srv| {

@@ -16,7 +16,7 @@ pub async fn create_electricity_reading(
     let mut transaction = pool.begin().await?;
 
     // This method runs after a vai guard in the handler, so the user is already authenticated,
-    // authorised, and guaranteed to exist in users database
+    // authorised, and guaranteed to exist in users table
     let creator_id = sqlx::query!(
         "\
         SELECT id FROM users \
@@ -218,7 +218,7 @@ pub async fn get_latest_electricity_reading_millis(pool: &Pool<Sqlite>) -> CERes
         FROM electricity_readings \
         WHERE tombstone = 0 \
         ORDER BY unix_ts_millis DESC \
-        LIMIT 1;
+        LIMIT 1;\
         ",
     )
     .fetch_optional(pool)
@@ -228,18 +228,35 @@ pub async fn get_latest_electricity_reading_millis(pool: &Pool<Sqlite>) -> CERes
     Ok(result)
 }
 
+pub async fn get_modified_count(pool: &Pool<Sqlite>, reading_id: i64) -> CEResult<i64> {
+    let modified_count = sqlx::query!(
+        "\
+        SELECT count(image_modified) AS modified_count \
+        FROM electricity_reading_modifications \
+        WHERE reading_id = ? AND image_modified = 1;\
+        ",
+        reading_id
+    )
+    .fetch_one(pool)
+    .await?
+    .modified_count;
+
+    Ok(modified_count.into())
+}
+
 pub async fn update_electricity_reading(
     pool: &Pool<Sqlite>,
     reading_id: i64,
     new_low_kwh: f64,
     new_normal_kwh: f64,
+    image_modified: bool,
     modifier_auth0_id: String,
 ) -> CEResult<()> {
     let unix_ts_millis = Utc::now().timestamp_millis();
     let mut transaction = pool.begin().await?;
 
     // This method runs after a vai guard in the handler, so the user is already authenticated,
-    // authorised, and guaranteed to exist in users database
+    // authorised, and guaranteed to exist in users table
     let modifier_id = sqlx::query!(
         "\
         SELECT id FROM users \
@@ -264,14 +281,16 @@ pub async fn update_electricity_reading(
     .execute(&mut transaction)
     .await?;
 
+    let image_modified = if image_modified { 1 } else { 0 };
     sqlx::query!(
         "\
-        INSERT INTO electricity_reading_modifications (reading_id, modifier_id, unix_ts_millis) \
-        VALUES (?, ?, ?);\
+        INSERT INTO electricity_reading_modifications (reading_id, modifier_id, unix_ts_millis, image_modified) \
+        VALUES (?, ?, ?, ?);\
         ",
         reading_id,
         modifier_id,
-        unix_ts_millis
+        unix_ts_millis,
+        image_modified,
     )
     .execute(&mut transaction)
     .await?;
@@ -290,7 +309,7 @@ pub async fn delete_electricity_reading(
     let mut transaction = pool.begin().await?;
 
     // This method runs after a vai guard in the handler, so the user is already authenticated,
-    // authorised, and guaranteed to exist in users database
+    // authorised, and guaranteed to exist in users table
     let modifier_id = sqlx::query!(
         "\
         SELECT id FROM users \

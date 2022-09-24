@@ -18,7 +18,7 @@ use crate::api::v1::FORBIDDEN_ERROR_TEXT;
 use crate::db::electricity_readings::{
     create_electricity_reading, delete_electricity_reading, get_all_electricity_readings,
     get_electricity_reading, get_electricity_readings_between,
-    get_latest_electricity_reading_millis, update_electricity_reading,
+    get_latest_electricity_reading_millis, get_modified_count, update_electricity_reading,
 };
 use crate::extractors::{ElectricityReadingPerms, VerifiedAuthInfo};
 use crate::types::HandlerResult;
@@ -272,15 +272,34 @@ pub async fn handler_update_electricity_reading(
         .map_err(actix_web::error::ErrorBadRequest)?;
 
     // Save image to ./images/original if present
+    let image_modified = form.0.image.is_some();
     let img_path_in_original_temp: Option<String> = match form.0.image {
-        Some(image) => Some(web::block(|| save_image(image)).await??),
+        Some(image) => {
+            // No need to remove from compressed folder: will be overwritten later
+            // std::fs::remove_file(format!("./images/compressed/{}.jpg", path))?;
+            let modified_count = get_modified_count(&pool, path)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            std::fs::rename(
+                format!("./images/original/{}.png", path),
+                format!("./images/original/{}_history{}.png", path, modified_count),
+            )?;
+            Some(web::block(|| save_image(image)).await??)
+        }
         None => None,
     };
 
     // Database access
-    update_electricity_reading(&pool, path, low_kwh, normal_kwh, vai.jwt_claims.auth0_id)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    update_electricity_reading(
+        &pool,
+        path,
+        low_kwh,
+        normal_kwh,
+        image_modified,
+        vai.jwt_claims.auth0_id,
+    )
+    .await
+    .map_err(actix_web::error::ErrorInternalServerError)?;
 
     if let Some(img_path_in_original_temp) = img_path_in_original_temp {
         // Save into ./images/original

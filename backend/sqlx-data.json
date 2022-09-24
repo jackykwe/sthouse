@@ -156,6 +156,42 @@
     },
     "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis FROM electricity_readings WHERE tombstone = 0 AND unix_ts_millis >= ? AND unix_ts_millis <= ? ORDER BY unix_ts_millis ASC;"
   },
+  "32101227cf37fc49c41b29bb84e728470753fe8af3fcedec13ade6992bc7de25": {
+    "describe": {
+      "columns": [
+        {
+          "name": "reading_id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "modifier_id",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "unix_ts_millis",
+          "ordinal": 2,
+          "type_info": "Int64"
+        },
+        {
+          "name": "image_modified",
+          "ordinal": 3,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT reading_id, modifier_id, unix_ts_millis, image_modified FROM electricity_reading_modifications;"
+  },
   "3686079bb1dcf3a91bdb3e7e41a7222362abfbcd98d8d31785b0f383eb81e17a": {
     "describe": {
       "columns": [],
@@ -230,35 +266,15 @@
     },
     "query": "UPDATE electricity_readings\n        SET tombstone = 1 WHERE id = ?;"
   },
-  "63e4f6633e24165de5f64c96c108928abc991407f25c744a536cf4a0866f1a16": {
+  "78f8012bee42db9824d737d1d9123d4e88ceef367e35c96baac5b8cab0663454": {
     "describe": {
-      "columns": [
-        {
-          "name": "reading_id",
-          "ordinal": 0,
-          "type_info": "Int64"
-        },
-        {
-          "name": "modifier_id",
-          "ordinal": 1,
-          "type_info": "Int64"
-        },
-        {
-          "name": "unix_ts_millis",
-          "ordinal": 2,
-          "type_info": "Int64"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
-        "Right": 0
+        "Right": 4
       }
     },
-    "query": "SELECT reading_id, modifier_id, unix_ts_millis FROM electricity_reading_modifications;"
+    "query": "INSERT INTO electricity_reading_modifications (reading_id, modifier_id, unix_ts_millis, image_modified) VALUES (?, ?, ?, ?);"
   },
   "90bd00057adf37fd9ae8486816cee94405c665c9ee1e21362571af5601d2f17b": {
     "describe": {
@@ -328,7 +344,7 @@
     },
     "query": "UPDATE users SET display_name = ? WHERE auth0_id = ?;"
   },
-  "a5408bb7ca76ef672ad6c2e2a63a8e8547a078a265d54c0ab77a000bfa30310a": {
+  "a2ac07f47bf6489d1366c1ae1f77da6a5dfd3f28b42edf15912c10c0fc54eaad": {
     "describe": {
       "columns": [
         {
@@ -344,7 +360,7 @@
         "Right": 0
       }
     },
-    "query": "SELECT unix_ts_millis FROM electricity_readings WHERE tombstone = 0 ORDER BY unix_ts_millis DESC LIMIT 1;\n        "
+    "query": "SELECT unix_ts_millis FROM electricity_readings WHERE tombstone = 0 ORDER BY unix_ts_millis DESC LIMIT 1;"
   },
   "a7ccf0acdc92ac21b21737b8534a3c0ab15d03dab52ab5e23bfc999b0527a483": {
     "describe": {
@@ -387,6 +403,24 @@
       }
     },
     "query": "SELECT id, low_kwh, normal_kwh, unix_ts_millis, creator_id FROM electricity_readings WHERE tombstone = 0;"
+  },
+  "affac7546e7102a9e53f061362c10c932540eeb5b7a49e586c5e405a50b8ebe0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "modified_count",
+          "ordinal": 0,
+          "type_info": "Int"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT count(image_modified) AS modified_count FROM electricity_reading_modifications WHERE reading_id = ? AND image_modified = 1;"
   },
   "b2b2eb71d8805b497b3ab1f435fefc45b99c9d936315ab55eefe654b5e9dc6e0": {
     "describe": {
@@ -497,5 +531,29 @@
       }
     },
     "query": "SELECT id FROM users WHERE auth0_id = ?;"
+  },
+  "ffb1fd7b5a419e826a2585d717fcac0d0192fb835ff09005a8e33b3cae4d4080": {
+    "describe": {
+      "columns": [
+        {
+          "name": "reading_id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "count",
+          "ordinal": 1,
+          "type_info": "Int"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT reading_id, count(image_modified) as count FROM electricity_reading_modifications WHERE image_modified = 1 GROUP BY reading_id;"
   }
 }
