@@ -99,8 +99,10 @@ These instructions are for a production machine that runs Ubuntu.
    2. `_@dev:~/sthouse/frontend$ npm run build`.
    3. `_@dev:~/sthouse/frontend$ tar cvzf build.tar.gz build`
    4. `_@dev:~/sthouse/frontend$ scp build.tar.gz _@prod:~/sthouse/frontend`
-   5. `_@prod:~/sthouse/frontend$ tar xvzf build.tar.gz`
-   6. `_@prod:~/sthouse/frontend$ serve -s build -l <port> --ssl-cert=<path to cert file> --ssl-key=<path to key file>` to serve the frontend. **(Remember to fill in the gaps)**
+   5. `_@prod:~/sthouse/frontend$ rm -r build`
+   6. `_@prod:~/sthouse/frontend$ tar xvzf build.tar.gz`\
+      After this step, changes are deployed automatically. There's no need to restart the production machine.
+   7. `_@prod:~/sthouse/frontend$ serve -s build -l <port> --ssl-cert=<path to cert file> --ssl-key=<path to key file>` to serve the frontend. **(Remember to fill in the gaps)**
 
 7. To automate the above during startup, we use `systemd`:
    1. ```
