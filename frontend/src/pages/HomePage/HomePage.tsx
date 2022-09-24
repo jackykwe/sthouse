@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import { useUserServerSlice } from "components/AppBar/store";
 import jwt_decode from "jwt-decode";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { axiosGetLatestElectricityReadingMillis } from "services/electricity_readings";
 import { isRequestError } from "types";
@@ -64,6 +64,8 @@ export const HomePage = () => {
   const bugsText =
     "If you encounter any bugs, please tell me where they are, and I'll go squish them.";
 
+  const nowMillis = useMemo(() => Date.now(), []);
+
   if (!isAuthenticated) {
     return (
       <Box
@@ -81,6 +83,18 @@ export const HomePage = () => {
     );
   }
 
+  const intlFormatter = new Intl.RelativeTimeFormat("en");
+  const getRelativeText = (latestMillis: number) => {
+    const daysAgo = Math.ceil((latestMillis! - nowMillis) / 86_400_000);
+    if (Math.abs(daysAgo) === 0) {
+      return "today";
+    }
+    return intlFormatter.format(
+      Math.ceil((latestMillis! - nowMillis) / 86_400_000), // ceil for negative numbers rounds towards 0
+      "days"
+    );
+  };
+
   return (
     <Box
       sx={{
@@ -94,7 +108,7 @@ export const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: "column",
             alignItems: "center",
             marginBottom: (theme) => theme.spacing(2),
           }}
@@ -103,9 +117,18 @@ export const HomePage = () => {
             variant="h5"
             sx={{ marginX: (theme) => theme.spacing(1) }}
           >
-            Last reading was submitted on:
+            Last reading was submitted
           </Typography>
           <Typography variant="h4" fontWeight={700}>
+            {getRelativeText(latestMillis!)}
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{ marginX: (theme) => theme.spacing(1) }}
+          >
+            at
+          </Typography>
+          <Typography variant="h4" fontWeight={700} noWrap>
             {latestMillis !== null
               ? formatMillisInTzUtil(latestMillis, DATE_FMTSTR_HMSDDMY_TZ)
               : ""}
