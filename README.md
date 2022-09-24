@@ -95,11 +95,12 @@ These instructions are for a production machine that runs Ubuntu.
    5. `_@prod~/sthouse/backend$ ./backend` to serve the backend.
 
 6. For frontend:
-   1. `_@dev:~/sthouse/frontend$ npm run build`
-   2. `_@dev:~/sthouse/frontend$ tar cvzf build.tar.gz build`
-   3. `_@dev:~/sthouse/frontend$ scp build.tar.gz _@prod:~/sthouse/frontend`
-   4. `_@prod:~/sthouse/frontend$ tar xvzf build.tar.gz`
-   5. `_@prod:~/sthouse/frontend$ serve -s build -l <port> --ssl-cert=<path to cert file> --ssl-key=<path to key file>` to serve the frontend. **(Remember to fill in the gaps)**
+   1. Change the frontend `.env` values to the production values. Important; explained [above](#environment-variables).
+   2. `_@dev:~/sthouse/frontend$ npm run build`.
+   3. `_@dev:~/sthouse/frontend$ tar cvzf build.tar.gz build`
+   4. `_@dev:~/sthouse/frontend$ scp build.tar.gz _@prod:~/sthouse/frontend`
+   5. `_@prod:~/sthouse/frontend$ tar xvzf build.tar.gz`
+   6. `_@prod:~/sthouse/frontend$ serve -s build -l <port> --ssl-cert=<path to cert file> --ssl-key=<path to key file>` to serve the frontend. **(Remember to fill in the gaps)**
 
 7. To automate the above during startup, we use `systemd`:
    1. ```
