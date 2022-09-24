@@ -85,32 +85,90 @@ export const ExportHistoricalPage = () => {
       <Box
         sx={{ display: "flex", flexDirection: "column", alignItems: "start" }}
       >
-        {exportRequestData.image_ids.map((id) => (
-          <Typography key={id} fontFamily="Jetbrains Mono" fontWeight={700}>
-            <Link
-              href={`${BACKEND_API_URL}/export/historical/images/original/${id}.png?image_token=${exportRequestData.export_token}`}
-              target="_blank" // new tab
-              rel="noreferrer"
-            >
-              {id}.png
-            </Link>
-          </Typography>
-        ))}
+        {exportRequestData.image_ids_and_modification_counts.map(
+          ({ image_id, modification_count }) => {
+            const historicalLinks =
+              modification_count === 0
+                ? null
+                : Array.from(Array(modification_count).keys()).map((i) => (
+                    <Typography
+                      key={`${image_id}-${i}`}
+                      fontFamily="Jetbrains Mono"
+                      fontWeight={700}
+                    >
+                      <Link
+                        href={`${BACKEND_API_URL}/export/historical/images/original/${image_id}_history${i}.png?image_token=${exportRequestData.export_token}`}
+                        target="_blank" // new tab
+                        rel="noreferrer"
+                      >
+                        {image_id}_history{i}.png
+                      </Link>
+                    </Typography>
+                  ));
+            return (
+              <>
+                <Typography
+                  key={image_id}
+                  fontFamily="Jetbrains Mono"
+                  fontWeight={700}
+                >
+                  <Link
+                    href={`${BACKEND_API_URL}/export/historical/images/original/${image_id}.png?image_token=${exportRequestData.export_token}`}
+                    target="_blank" // new tab
+                    rel="noreferrer"
+                  >
+                    {image_id}.png
+                  </Link>
+                </Typography>
+                {historicalLinks}
+              </>
+            );
+          }
+        )}
       </Box>
       <Box
         sx={{ display: "flex", flexDirection: "column", alignItems: "start" }}
       >
-        {exportRequestData.tombstone_image_ids.map((id) => (
-          <Typography key={id} fontFamily="Jetbrains Mono" fontWeight={700}>
-            <Link
-              href={`${BACKEND_API_URL}/export/historical/images/original/${id}_tombstone.png?image_token=${exportRequestData.export_token}`}
-              target="_blank" // new tab
-              rel="noreferrer"
-            >
-              {id}_tombstone.png
-            </Link>
-          </Typography>
-        ))}
+        {exportRequestData.tombstone_image_ids_and_modification_counts.map(
+          ({ image_id, modification_count }) => {
+            const historicalLinks =
+              modification_count === 0
+                ? null
+                : Array.from(Array(modification_count).keys()).map((i) => (
+                    <Typography
+                      key={`${image_id}-${i}`}
+                      fontFamily="Jetbrains Mono"
+                      fontWeight={700}
+                    >
+                      <Link
+                        href={`${BACKEND_API_URL}/export/historical/images/original/${image_id}_history${i}.png?image_token=${exportRequestData.export_token}`}
+                        target="_blank" // new tab
+                        rel="noreferrer"
+                      >
+                        {image_id}_history{i}.png
+                      </Link>
+                    </Typography>
+                  ));
+            return (
+              <>
+                <Typography
+                  key={image_id}
+                  fontFamily="Jetbrains Mono"
+                  fontWeight={700}
+                >
+                  <Link
+                    href={`${BACKEND_API_URL}/export/historical/images/original/${image_id}_tombstone.png?image_token=${exportRequestData.export_token}`}
+                    target="_blank" // new tab
+                    rel="noreferrer"
+                  >
+                    {image_id}_tombstone.png
+                  </Link>
+                </Typography>
+                {historicalLinks}
+              </>
+            );
+          }
+        )}
       </Box>
     </Box>
   );
