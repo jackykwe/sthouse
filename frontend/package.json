@@ -44,7 +44,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "echo Have you checked your .env file and ensured production values? Rerun with buildCFM to proceed",
+    "buildCFM": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

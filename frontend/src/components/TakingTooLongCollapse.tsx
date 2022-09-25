@@ -3,7 +3,8 @@ import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
 
 const takingTooLongText = "Whoa, that's taking a while.";
-const takingTooLongText2 = "You may want to try refreshing the page.";
+const takingTooLongText2 = "You may want to try refreshing the page,";
+const takingTooLongText3 = "or clearing this site's cookies.";
 
 interface TakingTooLongCollapseProps {
   show: boolean;
@@ -16,7 +17,7 @@ export const TakingTooLongCollapse = (props: TakingTooLongCollapseProps) => {
       <>
         <Box sx={{ display: { xs: "none", md: "flex" } }}>
           <Typography variant="body2" align="center" lineHeight={1}>
-            {takingTooLongText} {takingTooLongText2}
+            {takingTooLongText} {takingTooLongText2} {takingTooLongText3}
           </Typography>
         </Box>
         <Box
@@ -33,6 +34,9 @@ export const TakingTooLongCollapse = (props: TakingTooLongCollapseProps) => {
           </Typography>
           <Typography variant="body2" align="center" lineHeight={1}>
             {takingTooLongText2}
+          </Typography>
+          <Typography variant="body2" align="center" lineHeight={1}>
+            {takingTooLongText3}
           </Typography>
         </Box>
       </>

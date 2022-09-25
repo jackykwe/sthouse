@@ -16,7 +16,7 @@ const APP_VERSION_HISTORY: AppVersion[] = [
   // Latest in front
   {
     number: "1.0.0",
-    date_repr: "21 Sep 2022",
+    date_repr: "25 Sep 2022",
     changes: ["Initial launch!"],
   },
 ];
