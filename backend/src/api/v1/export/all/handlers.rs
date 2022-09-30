@@ -29,6 +29,8 @@ pub async fn handler_get_export_request(
         .try_into()
         .expect("Impossible error: Unable to convert usize to i64");
 
+    let eligible_for_historical = vai.has_this_permission(&ExportPerms::Historical.to_string());
+
     let now = Utc::now();
     let export_token = ResourceAccessClaims {
         sub: vai.jwt_claims.auth0_id,
@@ -44,6 +46,7 @@ pub async fn handler_get_export_request(
     Ok(HttpResponse::Ok().json(ExportRequestReadDTO {
         export_token,
         image_ids: dao.image_ids,
+        eligible_for_historical,
     }))
 }
 

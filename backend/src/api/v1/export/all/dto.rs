@@ -4,6 +4,7 @@ use serde::Serialize;
 pub struct ExportRequestReadDTO {
     pub export_token: String,
     pub image_ids: Vec<i64>,
+    pub eligible_for_historical: bool,
 }
 
 #[derive(Serialize)]

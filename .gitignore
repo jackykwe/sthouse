@@ -1,3 +1,15 @@
+#################
+# DOCUMENTATION #
+#################
+documentation/**/_minted*
+documentation/**/*.aux
+documentation/**/*.log
+documentation/**/*.out
+documentation/**/*.pdf
+documentation/**/*.synctex.gz
+documentation/**/*.toc
+
+
 ###########
 # BACKEND #
 ###########
@@ -22,8 +34,6 @@ backend/**/jwks.json
 **/*.key
 
 backend/**/.env
-
-
 
 
 ############

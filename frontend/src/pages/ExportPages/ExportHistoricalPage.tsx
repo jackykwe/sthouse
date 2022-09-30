@@ -13,6 +13,8 @@ import {
 } from "services/export";
 import { isRequestError } from "types";
 
+// TODO Fix unique key error. Seems that I can't fix it... (1 Oct)
+
 export const ExportHistoricalPage = () => {
   // GENERAL HOOKS
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();

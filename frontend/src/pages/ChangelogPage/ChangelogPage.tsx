@@ -15,6 +15,16 @@ interface AppVersion {
 const APP_VERSION_HISTORY: AppVersion[] = [
   // Latest in front
   {
+    number: "1.1.0",
+    date_repr: "1 Oct 2022",
+    changes: [
+      '- Added export (historical) feature on "Export Data" page',
+      '- Added "How It Works" page',
+      "- Added semantic versioning explanation on this page",
+      "- Slightly improved loading efficiency of this page",
+    ],
+  },
+  {
     number: "1.0.0",
     date_repr: "25 Sep 2022",
     changes: ["Initial launch!"],
@@ -39,11 +49,21 @@ export const ChangelogPage = () => {
         gap: (theme) => theme.spacing(1.5),
       }}
     >
+      <Typography variant="body1">Semantic versioning:</Typography>
+      <Typography variant="body2" lineHeight={0.5}>
+        First number increment means major changes to internal code;
+      </Typography>
+      <Typography variant="body2" lineHeight={0.5}>
+        Second number increment means new feature;
+      </Typography>
+      <Typography variant="body2" lineHeight={0.5}>
+        Third number increment means bug fix.
+      </Typography>
       {APP_VERSION_HISTORY.map((appVersion) => (
         <Card
-          elevation={2}
           variant="outlined"
           sx={{ width: { xs: "100%", md: "auto" } }}
+          {...{ key: appVersion.number }}
         >
           <CardContent>
             <Box
@@ -57,7 +77,7 @@ export const ChangelogPage = () => {
                 Changelog (v{appVersion.number} on {appVersion.date_repr})
               </Typography>
               {appVersion.changes.map((line) => (
-                <Typography lineHeight={1} align="justify">
+                <Typography lineHeight={1} align="justify" key={line}>
                   {line}
                 </Typography>
               ))}
@@ -65,7 +85,6 @@ export const ChangelogPage = () => {
           </CardContent>
         </Card>
       ))}
-
       <Typography
         variant="body2"
         fontStyle="italic"

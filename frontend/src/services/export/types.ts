@@ -1,6 +1,7 @@
 export interface ExportRequestReadDTO {
   export_token: string;
   image_ids: number[];
+  eligible_for_historical: boolean;
 }
 
 export interface ImageIdAndModificationCount {
