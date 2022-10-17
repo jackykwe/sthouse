@@ -427,6 +427,7 @@ This is encrypted using \emph{Auth0}'s private key $PVK_{Auth0}$. This encryptio
 The presence of the signature guards against malicious modifications to the JWT, and so this method of authorisation is secure.
 
 \subsection{Importance of keeping secrets secret}
+
 Of course, this security property of "only letting those with permissions see our data" breaks down if you share your JWT with third parties. Should they send your JWT along with their request for data, they will be able to gain access to our data, because to Jacky's device, it looks like \emph{you}, a legitimate user with sufficient permissions, are trying to access data.
 
 Thus, it is crucial that you do not share your JWT with others. Same goes for the access tokens that you may see in the URLs of images and "Export Data" sections: the underlying concept is the same.

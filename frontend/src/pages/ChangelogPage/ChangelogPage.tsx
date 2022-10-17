@@ -15,6 +15,11 @@ interface AppVersion {
 const APP_VERSION_HISTORY: AppVersion[] = [
   // Latest in front
   {
+    number: "1.1.1",
+    date_repr: "17 Oct 2022",
+    changes: ["- Updated website description from default"],
+  },
+  {
     number: "1.1.0",
     date_repr: "1 Oct 2022",
     changes: [
