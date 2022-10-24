@@ -5,5 +5,4 @@ export { ElectricityReadingGraphPageLazy } from "./ElectricityReadingPages/Elect
 export { ExportHistoricalPageLazy } from "./ExportPages/ExportHistoricalPageLazy";
 export { ExportPageLazy } from "./ExportPages/ExportPageLazy";
 export { HomePageLazy } from "./HomePage/HomePageLazy";
-export { HowItWorksPageLazy } from "./HowItWorksPage/HowItWorksPageLazy";
 export { NotFoundPageLazy } from "./NotFoundPage/NotFoundPageLazy";

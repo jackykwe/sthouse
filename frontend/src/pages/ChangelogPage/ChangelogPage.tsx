@@ -15,6 +15,15 @@ interface AppVersion {
 const APP_VERSION_HISTORY: AppVersion[] = [
   // Latest in front
   {
+    number: "1.2.0",
+    date_repr: "24 Oct 2022",
+    changes: [
+      '- Added direct link to privacy policy under "Legal" in app bar',
+      '- Changed how "How It Works" works from a page to a direct link to the PDF',
+      '- Removed "How It Works" page',
+    ],
+  },
+  {
     number: "1.1.1",
     date_repr: "17 Oct 2022",
     changes: ["- Updated website description from default"],

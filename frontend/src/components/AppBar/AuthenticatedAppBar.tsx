@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import { grey } from "@mui/material/colors";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import Link from "@mui/material/Link";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
@@ -23,6 +24,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { appBarRouteEnum, findFirstMatch, routeEnum } from "routes/RouteEnum";
+import { BACKEND_API_URL } from "services";
 import { LightDarkToggle } from "./LightDarkToggle";
 import LogoutMenuItem from "./LogoutMenuItem";
 import { useUserServerSlice } from "./store";
@@ -168,6 +170,42 @@ export const AuthenticatedAppBar = () => {
                   </Button>
                 );
               })}
+              <Button
+                disableRipple
+                key={`${BACKEND_API_URL}/static/pdf/How-It-Works.pdf`}
+                sx={{
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "light"
+                        ? theme.palette.primary.light
+                        : grey[700],
+                  },
+                }}
+                href={`${BACKEND_API_URL}/static/pdf/How-It-Works.pdf`}
+                target="_blank" // new tab
+                rel="noreferrer"
+              >
+                <Typography variant="subtitle1">How It Works</Typography>
+              </Button>
+              <Button
+                disableRipple
+                key={`${BACKEND_API_URL}/static/html/privacy-policy.html`}
+                sx={{
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "light"
+                        ? theme.palette.primary.light
+                        : grey[700],
+                  },
+                }}
+                href={`${BACKEND_API_URL}/static/html/privacy-policy.html`}
+                target="_blank" // new tab
+                rel="noreferrer"
+              >
+                <Typography variant="subtitle1">Legal</Typography>
+              </Button>
             </Box>
           </Box>
 
@@ -213,6 +251,26 @@ export const AuthenticatedAppBar = () => {
                   </MenuItem>
                 );
               })}
+              <Link
+                key={`${BACKEND_API_URL}/static/pdf/How-It-Works.pdf`}
+                href={`${BACKEND_API_URL}/static/pdf/How-It-Works.pdf`}
+                target="_blank" // new tab
+                rel="noreferrer"
+                style={{ textDecoration: "none" }}
+                sx={{ color: (theme) => theme.palette.text.primary }}
+              >
+                <MenuItem>How It Works</MenuItem>
+              </Link>
+              <Link
+                key="/privacy-policy.html"
+                href="/privacy-policy.html"
+                target="_blank" // new tab
+                rel="noreferrer"
+                style={{ textDecoration: "none" }}
+                sx={{ color: (theme) => theme.palette.text.primary }}
+              >
+                <MenuItem>Legal</MenuItem>
+              </Link>
             </Menu>
           </Box>
 

@@ -6,7 +6,6 @@ import {
   ExportHistoricalPageLazy,
   ExportPageLazy,
   HomePageLazy,
-  HowItWorksPageLazy,
 } from "pages";
 import { ElectricityReadingDetailEditPageLazy } from "pages/ElectricityReadingPages/ElectricityReadingDetailEditPageLazy";
 import { NotFoundPageLazy } from "pages/NotFoundPage/NotFoundPageLazy";
@@ -75,12 +74,6 @@ export const routeEnum = {
     path: "/export/historical",
     element: ExportHistoricalPageLazy,
     highlightAppBarName: "Export Data",
-  },
-  HowItWorks: {
-    appBarName: "How It Works",
-    path: "/how-it-works",
-    element: HowItWorksPageLazy,
-    highlightAppBarName: "How It Works",
   },
   Default: {
     path: "*",
